@@ -101,8 +101,10 @@ def health_check():
         "version": settings.VERSION
     }
 
+from app.database.init_db import init_db
+
 @app.on_event("startup")
 def on_startup():
-    Base.metadata.create_all(bind=engine)
+    init_db()
     predictor.load_models()
     print("SQMS Backend initialized successfully.")
