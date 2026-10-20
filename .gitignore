@@ -1,0 +1,29 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Databases & local storage
+*.db
+*.sqlite3
+sqms.db
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

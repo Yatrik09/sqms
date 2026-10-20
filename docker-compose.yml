@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sqms_postgres
+    environment:
+      POSTGRES_USER: sqms_user
+      POSTGRES_PASSWORD: sqms_password
+      POSTGRES_DB: sqms_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sqms_user -d sqms_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sqms_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://sqms_user:sqms_password@postgres:5432/sqms_db
+      SECRET_KEY: sqms-super-secure-dev-secret-key-automotive-ai-2026
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - ./ml/artifacts:/app/ml/artifacts
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sqms_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

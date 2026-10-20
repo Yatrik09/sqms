@@ -1,0 +1,1379 @@
+{
+  "training_timestamp": "2026-10-19T10:25:32Z",
+  "dataset_records": 12000,
+  "dataset_version": "synthetic_v1.0",
+  "waiting_time": {
+    "active_model": "Gradient Boosting",
+    "model_version": "1.0.0",
+    "comparison": {
+      "Baseline (Median)": {
+        "mae": 31.86,
+        "rmse": 43.57,
+        "r2": -0.071,
+        "training_time_sec": 0.23
+      },
+      "Linear Regression": {
+        "mae": 11.82,
+        "rmse": 16.04,
+        "r2": 0.8549,
+        "training_time_sec": 0.11
+      },
+      "Decision Tree": {
+        "mae": 4.47,
+        "rmse": 6.16,
+        "r2": 0.9786,
+        "training_time_sec": 0.12
+      },
+      "Random Forest": {
+        "mae": 3.82,
+        "rmse": 4.86,
+        "r2": 0.9867,
+        "training_time_sec": 0.5
+      },
+      "Gradient Boosting": {
+        "mae": 3.68,
+        "rmse": 4.63,
+        "r2": 0.9879,
+        "training_time_sec": 4.1
+      }
+    },
+    "best_metrics": {
+      "mae": 3.68,
+      "rmse": 4.63,
+      "r2": 0.9879,
+      "training_time_sec": 4.1
+    },
+    "feature_importance": {
+      "queue_position": 65.31,
+      "current_workload": 16.46,
+      "available_mechanics": 9.54,
+      "available_bays": 7.64,
+      "peak_hour": 0.84,
+      "queue_length": 0.1,
+      "total_bays": 0.05,
+      "active_mechanics": 0.03,
+      "hour": 0.01,
+      "ongoing_services": 0.01
+    },
+    "actual_vs_pred": [
+      {
+        "index": 154,
+        "actual": 166.9,
+        "predicted": 174.5,
+        "error": 7.6
+      },
+      {
+        "index": 1424,
+        "actual": 21.4,
+        "predicted": 23.2,
+        "error": 1.8
+      },
+      {
+        "index": 440,
+        "actual": 37.0,
+        "predicted": 38.5,
+        "error": 1.5
+      },
+      {
+        "index": 705,
+        "actual": 63.5,
+        "predicted": 63.4,
+        "error": 0.1
+      },
+      {
+        "index": 1940,
+        "actual": 134.6,
+        "predicted": 134.8,
+        "error": 0.2
+      },
+      {
+        "index": 1839,
+        "actual": 26.1,
+        "predicted": 16.9,
+        "error": 9.2
+      },
+      {
+        "index": 434,
+        "actual": 36.2,
+        "predicted": 34.1,
+        "error": 2.1
+      },
+      {
+        "index": 215,
+        "actual": 43.8,
+        "predicted": 44.7,
+        "error": 0.9
+      },
+      {
+        "index": 1174,
+        "actual": 76.8,
+        "predicted": 76.1,
+        "error": 0.7
+      },
+      {
+        "index": 2179,
+        "actual": 22.7,
+        "predicted": 24.4,
+        "error": 1.7
+      },
+      {
+        "index": 874,
+        "actual": 2.0,
+        "predicted": 6.7,
+        "error": 4.7
+      },
+      {
+        "index": 779,
+        "actual": 13.5,
+        "predicted": 6.4,
+        "error": 7.1
+      },
+      {
+        "index": 1561,
+        "actual": 47.8,
+        "predicted": 44.6,
+        "error": 3.2
+      },
+      {
+        "index": 1601,
+        "actual": 30.5,
+        "predicted": 27.1,
+        "error": 3.4
+      },
+      {
+        "index": 1776,
+        "actual": 43.9,
+        "predicted": 45.6,
+        "error": 1.7
+      },
+      {
+        "index": 438,
+        "actual": 54.2,
+        "predicted": 53.1,
+        "error": 1.1
+      },
+      {
+        "index": 1238,
+        "actual": 53.5,
+        "predicted": 57.7,
+        "error": 4.2
+      },
+      {
+        "index": 679,
+        "actual": 214.8,
+        "predicted": 206.9,
+        "error": 7.9
+      },
+      {
+        "index": 660,
+        "actual": 99.8,
+        "predicted": 99.6,
+        "error": 0.2
+      },
+      {
+        "index": 1455,
+        "actual": 90.3,
+        "predicted": 85.0,
+        "error": 5.3
+      },
+      {
+        "index": 2297,
+        "actual": 123.6,
+        "predicted": 115.6,
+        "error": 8.0
+      },
+      {
+        "index": 488,
+        "actual": 22.0,
+        "predicted": 27.2,
+        "error": 5.2
+      },
+      {
+        "index": 1827,
+        "actual": 44.0,
+        "predicted": 43.1,
+        "error": 0.9
+      },
+      {
+        "index": 1844,
+        "actual": 34.9,
+        "predicted": 30.1,
+        "error": 4.8
+      },
+      {
+        "index": 1143,
+        "actual": 14.7,
+        "predicted": 16.7,
+        "error": 2.0
+      },
+      {
+        "index": 647,
+        "actual": 30.0,
+        "predicted": 33.8,
+        "error": 3.8
+      },
+      {
+        "index": 229,
+        "actual": 40.9,
+        "predicted": 42.7,
+        "error": 1.8
+      },
+      {
+        "index": 2030,
+        "actual": 58.7,
+        "predicted": 58.1,
+        "error": 0.6
+      },
+      {
+        "index": 672,
+        "actual": 54.3,
+        "predicted": 53.4,
+        "error": 0.9
+      },
+      {
+        "index": 474,
+        "actual": 20.7,
+        "predicted": 20.7,
+        "error": 0.0
+      },
+      {
+        "index": 1330,
+        "actual": 22.8,
+        "predicted": 24.1,
+        "error": 1.3
+      },
+      {
+        "index": 864,
+        "actual": 4.8,
+        "predicted": 6.2,
+        "error": 1.4
+      },
+      {
+        "index": 349,
+        "actual": 25.8,
+        "predicted": 27.9,
+        "error": 2.1
+      },
+      {
+        "index": 192,
+        "actual": 52.3,
+        "predicted": 54.1,
+        "error": 1.8
+      },
+      {
+        "index": 2335,
+        "actual": 62.3,
+        "predicted": 63.9,
+        "error": 1.6
+      },
+      {
+        "index": 669,
+        "actual": 59.5,
+        "predicted": 62.4,
+        "error": 2.9
+      },
+      {
+        "index": 1362,
+        "actual": 65.1,
+        "predicted": 60.9,
+        "error": 4.2
+      },
+      {
+        "index": 72,
+        "actual": 75.1,
+        "predicted": 71.5,
+        "error": 3.6
+      },
+      {
+        "index": 2143,
+        "actual": 70.6,
+        "predicted": 73.3,
+        "error": 2.7
+      },
+      {
+        "index": 433,
+        "actual": 2.0,
+        "predicted": 7.1,
+        "error": 5.1
+      },
+      {
+        "index": 901,
+        "actual": 6.8,
+        "predicted": 6.0,
+        "error": 0.8
+      },
+      {
+        "index": 656,
+        "actual": 56.8,
+        "predicted": 50.8,
+        "error": 6.0
+      },
+      {
+        "index": 1625,
+        "actual": 55.1,
+        "predicted": 45.7,
+        "error": 9.4
+      },
+      {
+        "index": 2219,
+        "actual": 91.6,
+        "predicted": 86.8,
+        "error": 4.8
+      },
+      {
+        "index": 1683,
+        "actual": 50.9,
+        "predicted": 47.6,
+        "error": 3.3
+      },
+      {
+        "index": 1995,
+        "actual": 43.4,
+        "predicted": 52.3,
+        "error": 8.9
+      },
+      {
+        "index": 1614,
+        "actual": 77.4,
+        "predicted": 74.8,
+        "error": 2.6
+      },
+      {
+        "index": 1352,
+        "actual": 128.1,
+        "predicted": 132.6,
+        "error": 4.5
+      },
+      {
+        "index": 1190,
+        "actual": 10.2,
+        "predicted": 15.9,
+        "error": 5.7
+      },
+      {
+        "index": 846,
+        "actual": 25.5,
+        "predicted": 27.9,
+        "error": 2.4
+      },
+      {
+        "index": 1862,
+        "actual": 36.8,
+        "predicted": 29.8,
+        "error": 7.0
+      },
+      {
+        "index": 680,
+        "actual": 45.7,
+        "predicted": 52.0,
+        "error": 6.3
+      },
+      {
+        "index": 1801,
+        "actual": 51.8,
+        "predicted": 44.7,
+        "error": 7.1
+      },
+      {
+        "index": 2056,
+        "actual": 131.7,
+        "predicted": 132.9,
+        "error": 1.2
+      },
+      {
+        "index": 1142,
+        "actual": 76.1,
+        "predicted": 79.3,
+        "error": 3.2
+      },
+      {
+        "index": 169,
+        "actual": 16.7,
+        "predicted": 21.7,
+        "error": 5.0
+      },
+      {
+        "index": 420,
+        "actual": 9.3,
+        "predicted": 6.9,
+        "error": 2.4
+      },
+      {
+        "index": 2077,
+        "actual": 28.8,
+        "predicted": 27.3,
+        "error": 1.5
+      },
+      {
+        "index": 2286,
+        "actual": 63.8,
+        "predicted": 65.8,
+        "error": 2.0
+      },
+      {
+        "index": 587,
+        "actual": 78.7,
+        "predicted": 75.0,
+        "error": 3.7
+      },
+      {
+        "index": 1782,
+        "actual": 49.4,
+        "predicted": 46.0,
+        "error": 3.4
+      },
+      {
+        "index": 1386,
+        "actual": 13.9,
+        "predicted": 15.3,
+        "error": 1.4
+      },
+      {
+        "index": 2114,
+        "actual": 42.4,
+        "predicted": 39.6,
+        "error": 2.8
+      },
+      {
+        "index": 2301,
+        "actual": 18.7,
+        "predicted": 17.9,
+        "error": 0.8
+      },
+      {
+        "index": 928,
+        "actual": 33.0,
+        "predicted": 25.0,
+        "error": 8.0
+      },
+      {
+        "index": 1292,
+        "actual": 81.9,
+        "predicted": 76.7,
+        "error": 5.2
+      },
+      {
+        "index": 1820,
+        "actual": 124.1,
+        "predicted": 132.9,
+        "error": 8.8
+      },
+      {
+        "index": 1379,
+        "actual": 118.3,
+        "predicted": 117.5,
+        "error": 0.8
+      },
+      {
+        "index": 1857,
+        "actual": 2.0,
+        "predicted": 6.7,
+        "error": 4.7
+      },
+      {
+        "index": 1870,
+        "actual": 58.8,
+        "predicted": 51.4,
+        "error": 7.4
+      },
+      {
+        "index": 2245,
+        "actual": 90.4,
+        "predicted": 97.1,
+        "error": 6.7
+      },
+      {
+        "index": 544,
+        "actual": 92.7,
+        "predicted": 97.4,
+        "error": 4.7
+      },
+      {
+        "index": 1547,
+        "actual": 53.0,
+        "predicted": 52.4,
+        "error": 0.6
+      },
+      {
+        "index": 2067,
+        "actual": 77.2,
+        "predicted": 80.7,
+        "error": 3.5
+      },
+      {
+        "index": 1520,
+        "actual": 25.4,
+        "predicted": 24.6,
+        "error": 0.8
+      },
+      {
+        "index": 847,
+        "actual": 20.5,
+        "predicted": 13.9,
+        "error": 6.6
+      },
+      {
+        "index": 1287,
+        "actual": 57.3,
+        "predicted": 53.0,
+        "error": 4.3
+      },
+      {
+        "index": 540,
+        "actual": 24.1,
+        "predicted": 27.9,
+        "error": 3.8
+      },
+      {
+        "index": 2026,
+        "actual": 39.9,
+        "predicted": 40.0,
+        "error": 0.1
+      },
+      {
+        "index": 807,
+        "actual": 138.6,
+        "predicted": 141.0,
+        "error": 2.4
+      },
+      {
+        "index": 2088,
+        "actual": 51.1,
+        "predicted": 54.0,
+        "error": 2.9
+      },
+      {
+        "index": 1926,
+        "actual": 101.7,
+        "predicted": 97.9,
+        "error": 3.8
+      },
+      {
+        "index": 1017,
+        "actual": 28.1,
+        "predicted": 31.4,
+        "error": 3.3
+      },
+      {
+        "index": 2101,
+        "actual": 16.2,
+        "predicted": 9.7,
+        "error": 6.5
+      },
+      {
+        "index": 907,
+        "actual": 21.5,
+        "predicted": 22.5,
+        "error": 1.0
+      },
+      {
+        "index": 340,
+        "actual": 2.5,
+        "predicted": 8.1,
+        "error": 5.6
+      },
+      {
+        "index": 1327,
+        "actual": 46.8,
+        "predicted": 45.0,
+        "error": 1.8
+      },
+      {
+        "index": 135,
+        "actual": 33.5,
+        "predicted": 32.5,
+        "error": 1.0
+      },
+      {
+        "index": 1593,
+        "actual": 26.6,
+        "predicted": 26.1,
+        "error": 0.5
+      },
+      {
+        "index": 96,
+        "actual": 59.1,
+        "predicted": 61.1,
+        "error": 2.0
+      },
+      {
+        "index": 640,
+        "actual": 59.6,
+        "predicted": 61.8,
+        "error": 2.2
+      },
+      {
+        "index": 593,
+        "actual": 27.9,
+        "predicted": 21.2,
+        "error": 6.7
+      },
+      {
+        "index": 1230,
+        "actual": 52.3,
+        "predicted": 59.4,
+        "error": 7.1
+      },
+      {
+        "index": 1764,
+        "actual": 39.4,
+        "predicted": 35.5,
+        "error": 3.9
+      },
+      {
+        "index": 115,
+        "actual": 46.8,
+        "predicted": 44.7,
+        "error": 2.1
+      },
+      {
+        "index": 1016,
+        "actual": 59.0,
+        "predicted": 63.0,
+        "error": 4.0
+      },
+      {
+        "index": 1909,
+        "actual": 9.2,
+        "predicted": 11.9,
+        "error": 2.7
+      },
+      {
+        "index": 1494,
+        "actual": 226.9,
+        "predicted": 225.3,
+        "error": 1.6
+      },
+      {
+        "index": 232,
+        "actual": 14.5,
+        "predicted": 16.7,
+        "error": 2.2
+      },
+      {
+        "index": 703,
+        "actual": 27.1,
+        "predicted": 28.6,
+        "error": 1.5
+      }
+    ],
+    "error_by_service_type": [
+      {
+        "service_type": "AC Service",
+        "mae": 3.85,
+        "sample_count": 195
+      },
+      {
+        "service_type": "Battery Check",
+        "mae": 3.64,
+        "sample_count": 198
+      },
+      {
+        "service_type": "Brake Service",
+        "mae": 3.36,
+        "sample_count": 211
+      },
+      {
+        "service_type": "Car Wash",
+        "mae": 3.79,
+        "sample_count": 214
+      },
+      {
+        "service_type": "Denting and Painting",
+        "mae": 3.78,
+        "sample_count": 185
+      },
+      {
+        "service_type": "Diagnosis",
+        "mae": 3.51,
+        "sample_count": 184
+      },
+      {
+        "service_type": "Electrical Repair",
+        "mae": 3.76,
+        "sample_count": 211
+      },
+      {
+        "service_type": "General Service",
+        "mae": 3.52,
+        "sample_count": 192
+      },
+      {
+        "service_type": "Major Accident Repair",
+        "mae": 4.02,
+        "sample_count": 191
+      },
+      {
+        "service_type": "Minor Accident Repair",
+        "mae": 3.7,
+        "sample_count": 199
+      },
+      {
+        "service_type": "Oil Change",
+        "mae": 3.63,
+        "sample_count": 206
+      },
+      {
+        "service_type": "Tyre Service",
+        "mae": 3.61,
+        "sample_count": 214
+      }
+    ]
+  },
+  "service_duration": {
+    "active_model": "Gradient Boosting",
+    "model_version": "1.0.0",
+    "comparison": {
+      "Baseline (Median)": {
+        "mae": 58.4,
+        "rmse": 94.24,
+        "r2": -0.1575,
+        "training_time_sec": 0.06
+      },
+      "Linear Regression": {
+        "mae": 11.1,
+        "rmse": 18.04,
+        "r2": 0.9576,
+        "training_time_sec": 0.04
+      },
+      "Decision Tree": {
+        "mae": 10.26,
+        "rmse": 17.83,
+        "r2": 0.9586,
+        "training_time_sec": 0.07
+      },
+      "Random Forest": {
+        "mae": 9.99,
+        "rmse": 16.92,
+        "r2": 0.9627,
+        "training_time_sec": 0.46
+      },
+      "Gradient Boosting": {
+        "mae": 9.65,
+        "rmse": 16.45,
+        "r2": 0.9647,
+        "training_time_sec": 4.03
+      }
+    },
+    "best_metrics": {
+      "mae": 9.65,
+      "rmse": 16.45,
+      "r2": 0.9647,
+      "training_time_sec": 4.03
+    },
+    "feature_importance": {
+      "historical_average_duration": 96.72,
+      "repair_type_Major Repair": 1.26,
+      "available_mechanics": 1.09,
+      "vehicle_type_SUV": 0.14,
+      "current_workload": 0.12,
+      "repair_type_Standard": 0.1,
+      "hour": 0.08,
+      "active_mechanics": 0.07,
+      "day_of_week": 0.06,
+      "total_bays": 0.06
+    },
+    "actual_vs_pred": [
+      {
+        "index": 154,
+        "actual": 65.4,
+        "predicted": 64.4,
+        "error": 1.0
+      },
+      {
+        "index": 1424,
+        "actual": 44.0,
+        "predicted": 51.1,
+        "error": 7.1
+      },
+      {
+        "index": 440,
+        "actual": 85.2,
+        "predicted": 89.3,
+        "error": 4.1
+      },
+      {
+        "index": 705,
+        "actual": 22.3,
+        "predicted": 22.0,
+        "error": 0.3
+      },
+      {
+        "index": 1940,
+        "actual": 106.6,
+        "predicted": 104.7,
+        "error": 1.9
+      },
+      {
+        "index": 1839,
+        "actual": 170.1,
+        "predicted": 149.6,
+        "error": 20.5
+      },
+      {
+        "index": 434,
+        "actual": 26.6,
+        "predicted": 21.9,
+        "error": 4.7
+      },
+      {
+        "index": 215,
+        "actual": 56.9,
+        "predicted": 55.3,
+        "error": 1.6
+      },
+      {
+        "index": 1174,
+        "actual": 38.2,
+        "predicted": 34.1,
+        "error": 4.1
+      },
+      {
+        "index": 2179,
+        "actual": 82.8,
+        "predicted": 77.4,
+        "error": 5.4
+      },
+      {
+        "index": 874,
+        "actual": 26.5,
+        "predicted": 32.5,
+        "error": 6.0
+      },
+      {
+        "index": 779,
+        "actual": 171.0,
+        "predicted": 169.6,
+        "error": 1.4
+      },
+      {
+        "index": 1561,
+        "actual": 60.4,
+        "predicted": 64.8,
+        "error": 4.4
+      },
+      {
+        "index": 1601,
+        "actual": 52.7,
+        "predicted": 50.9,
+        "error": 1.8
+      },
+      {
+        "index": 1776,
+        "actual": 92.3,
+        "predicted": 107.8,
+        "error": 15.5
+      },
+      {
+        "index": 438,
+        "actual": 22.2,
+        "predicted": 28.2,
+        "error": 6.0
+      },
+      {
+        "index": 1238,
+        "actual": 23.6,
+        "predicted": 20.2,
+        "error": 3.4
+      },
+      {
+        "index": 679,
+        "actual": 73.3,
+        "predicted": 71.7,
+        "error": 1.6
+      },
+      {
+        "index": 660,
+        "actual": 63.7,
+        "predicted": 78.6,
+        "error": 14.9
+      },
+      {
+        "index": 1455,
+        "actual": 20.6,
+        "predicted": 18.6,
+        "error": 2.0
+      },
+      {
+        "index": 2297,
+        "actual": 143.1,
+        "predicted": 228.1,
+        "error": 85.0
+      },
+      {
+        "index": 488,
+        "actual": 62.2,
+        "predicted": 63.1,
+        "error": 0.9
+      },
+      {
+        "index": 1827,
+        "actual": 24.9,
+        "predicted": 28.6,
+        "error": 3.7
+      },
+      {
+        "index": 1844,
+        "actual": 62.3,
+        "predicted": 55.5,
+        "error": 6.8
+      },
+      {
+        "index": 1143,
+        "actual": 378.7,
+        "predicted": 343.0,
+        "error": 35.7
+      },
+      {
+        "index": 647,
+        "actual": 58.7,
+        "predicted": 54.9,
+        "error": 3.8
+      },
+      {
+        "index": 229,
+        "actual": 67.4,
+        "predicted": 68.5,
+        "error": 1.1
+      },
+      {
+        "index": 2030,
+        "actual": 44.4,
+        "predicted": 51.4,
+        "error": 7.0
+      },
+      {
+        "index": 672,
+        "actual": 161.1,
+        "predicted": 163.9,
+        "error": 2.8
+      },
+      {
+        "index": 474,
+        "actual": 37.7,
+        "predicted": 34.2,
+        "error": 3.5
+      },
+      {
+        "index": 1330,
+        "actual": 44.0,
+        "predicted": 40.0,
+        "error": 4.0
+      },
+      {
+        "index": 864,
+        "actual": 90.8,
+        "predicted": 93.7,
+        "error": 2.9
+      },
+      {
+        "index": 349,
+        "actual": 198.6,
+        "predicted": 246.4,
+        "error": 47.8
+      },
+      {
+        "index": 192,
+        "actual": 85.1,
+        "predicted": 108.8,
+        "error": 23.7
+      },
+      {
+        "index": 2335,
+        "actual": 42.8,
+        "predicted": 38.2,
+        "error": 4.6
+      },
+      {
+        "index": 669,
+        "actual": 19.6,
+        "predicted": 20.0,
+        "error": 0.4
+      },
+      {
+        "index": 1362,
+        "actual": 48.4,
+        "predicted": 59.2,
+        "error": 10.8
+      },
+      {
+        "index": 72,
+        "actual": 29.7,
+        "predicted": 34.3,
+        "error": 4.6
+      },
+      {
+        "index": 2143,
+        "actual": 231.8,
+        "predicted": 197.9,
+        "error": 33.9
+      },
+      {
+        "index": 433,
+        "actual": 47.4,
+        "predicted": 49.3,
+        "error": 1.9
+      },
+      {
+        "index": 901,
+        "actual": 35.9,
+        "predicted": 28.2,
+        "error": 7.7
+      },
+      {
+        "index": 656,
+        "actual": 75.1,
+        "predicted": 66.7,
+        "error": 8.4
+      },
+      {
+        "index": 1625,
+        "actual": 424.2,
+        "predicted": 356.6,
+        "error": 67.6
+      },
+      {
+        "index": 2219,
+        "actual": 36.6,
+        "predicted": 38.2,
+        "error": 1.6
+      },
+      {
+        "index": 1683,
+        "actual": 25.0,
+        "predicted": 34.2,
+        "error": 9.2
+      },
+      {
+        "index": 1995,
+        "actual": 231.9,
+        "predicted": 194.6,
+        "error": 37.3
+      },
+      {
+        "index": 1614,
+        "actual": 36.1,
+        "predicted": 34.2,
+        "error": 1.9
+      },
+      {
+        "index": 1352,
+        "actual": 48.6,
+        "predicted": 44.4,
+        "error": 4.2
+      },
+      {
+        "index": 1190,
+        "actual": 24.4,
+        "predicted": 25.9,
+        "error": 1.5
+      },
+      {
+        "index": 846,
+        "actual": 23.0,
+        "predicted": 21.9,
+        "error": 1.1
+      },
+      {
+        "index": 1862,
+        "actual": 64.5,
+        "predicted": 59.1,
+        "error": 5.4
+      },
+      {
+        "index": 680,
+        "actual": 29.4,
+        "predicted": 27.2,
+        "error": 2.2
+      },
+      {
+        "index": 1801,
+        "actual": 50.3,
+        "predicted": 59.6,
+        "error": 9.3
+      },
+      {
+        "index": 2056,
+        "actual": 77.4,
+        "predicted": 71.5,
+        "error": 5.9
+      },
+      {
+        "index": 1142,
+        "actual": 99.2,
+        "predicted": 107.3,
+        "error": 8.1
+      },
+      {
+        "index": 169,
+        "actual": 295.8,
+        "predicted": 260.2,
+        "error": 35.6
+      },
+      {
+        "index": 420,
+        "actual": 37.8,
+        "predicted": 32.8,
+        "error": 5.0
+      },
+      {
+        "index": 2077,
+        "actual": 47.5,
+        "predicted": 40.8,
+        "error": 6.7
+      },
+      {
+        "index": 2286,
+        "actual": 38.0,
+        "predicted": 36.7,
+        "error": 1.3
+      },
+      {
+        "index": 587,
+        "actual": 76.0,
+        "predicted": 82.2,
+        "error": 6.2
+      },
+      {
+        "index": 1782,
+        "actual": 16.5,
+        "predicted": 18.2,
+        "error": 1.7
+      },
+      {
+        "index": 1386,
+        "actual": 71.6,
+        "predicted": 71.0,
+        "error": 0.6
+      },
+      {
+        "index": 2114,
+        "actual": 42.5,
+        "predicted": 44.2,
+        "error": 1.7
+      },
+      {
+        "index": 2301,
+        "actual": 27.8,
+        "predicted": 31.6,
+        "error": 3.8
+      },
+      {
+        "index": 928,
+        "actual": 160.2,
+        "predicted": 164.4,
+        "error": 4.2
+      },
+      {
+        "index": 1292,
+        "actual": 322.8,
+        "predicted": 312.8,
+        "error": 10.0
+      },
+      {
+        "index": 1820,
+        "actual": 158.3,
+        "predicted": 163.8,
+        "error": 5.5
+      },
+      {
+        "index": 1379,
+        "actual": 46.6,
+        "predicted": 34.4,
+        "error": 12.2
+      },
+      {
+        "index": 1857,
+        "actual": 50.5,
+        "predicted": 44.6,
+        "error": 5.9
+      },
+      {
+        "index": 1870,
+        "actual": 21.0,
+        "predicted": 21.1,
+        "error": 0.1
+      },
+      {
+        "index": 2245,
+        "actual": 46.2,
+        "predicted": 42.3,
+        "error": 3.9
+      },
+      {
+        "index": 544,
+        "actual": 34.9,
+        "predicted": 40.9,
+        "error": 6.0
+      },
+      {
+        "index": 1547,
+        "actual": 76.9,
+        "predicted": 63.6,
+        "error": 13.3
+      },
+      {
+        "index": 2067,
+        "actual": 26.6,
+        "predicted": 40.6,
+        "error": 14.0
+      },
+      {
+        "index": 1520,
+        "actual": 40.9,
+        "predicted": 38.6,
+        "error": 2.3
+      },
+      {
+        "index": 847,
+        "actual": 82.9,
+        "predicted": 68.1,
+        "error": 14.8
+      },
+      {
+        "index": 1287,
+        "actual": 33.9,
+        "predicted": 33.1,
+        "error": 0.8
+      },
+      {
+        "index": 540,
+        "actual": 85.7,
+        "predicted": 79.3,
+        "error": 6.4
+      },
+      {
+        "index": 2026,
+        "actual": 21.6,
+        "predicted": 22.0,
+        "error": 0.4
+      },
+      {
+        "index": 807,
+        "actual": 27.8,
+        "predicted": 31.3,
+        "error": 3.5
+      },
+      {
+        "index": 2088,
+        "actual": 31.6,
+        "predicted": 38.3,
+        "error": 6.7
+      },
+      {
+        "index": 1926,
+        "actual": 40.8,
+        "predicted": 38.3,
+        "error": 2.5
+      },
+      {
+        "index": 1017,
+        "actual": 358.1,
+        "predicted": 362.0,
+        "error": 3.9
+      },
+      {
+        "index": 2101,
+        "actual": 63.6,
+        "predicted": 68.1,
+        "error": 4.5
+      },
+      {
+        "index": 907,
+        "actual": 33.3,
+        "predicted": 31.3,
+        "error": 2.0
+      },
+      {
+        "index": 340,
+        "actual": 136.6,
+        "predicted": 154.1,
+        "error": 17.5
+      },
+      {
+        "index": 1327,
+        "actual": 160.1,
+        "predicted": 205.8,
+        "error": 45.7
+      },
+      {
+        "index": 135,
+        "actual": 132.7,
+        "predicted": 144.7,
+        "error": 12.0
+      },
+      {
+        "index": 1593,
+        "actual": 42.4,
+        "predicted": 42.0,
+        "error": 0.4
+      },
+      {
+        "index": 96,
+        "actual": 306.1,
+        "predicted": 315.5,
+        "error": 9.4
+      },
+      {
+        "index": 640,
+        "actual": 343.4,
+        "predicted": 297.8,
+        "error": 45.6
+      },
+      {
+        "index": 593,
+        "actual": 46.1,
+        "predicted": 40.1,
+        "error": 6.0
+      },
+      {
+        "index": 1230,
+        "actual": 36.7,
+        "predicted": 37.9,
+        "error": 1.2
+      },
+      {
+        "index": 1764,
+        "actual": 34.6,
+        "predicted": 34.4,
+        "error": 0.2
+      },
+      {
+        "index": 115,
+        "actual": 249.5,
+        "predicted": 239.4,
+        "error": 10.1
+      },
+      {
+        "index": 1016,
+        "actual": 23.2,
+        "predicted": 37.0,
+        "error": 13.8
+      },
+      {
+        "index": 1909,
+        "actual": 60.5,
+        "predicted": 74.9,
+        "error": 14.4
+      },
+      {
+        "index": 1494,
+        "actual": 113.0,
+        "predicted": 108.9,
+        "error": 4.1
+      },
+      {
+        "index": 232,
+        "actual": 68.9,
+        "predicted": 95.1,
+        "error": 26.2
+      },
+      {
+        "index": 703,
+        "actual": 169.5,
+        "predicted": 147.2,
+        "error": 22.3
+      }
+    ]
+  }
+}
