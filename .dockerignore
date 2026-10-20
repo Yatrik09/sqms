@@ -1,0 +1,13 @@
+frontend/
+node_modules/
+.git/
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+sqms.db
+.vercel/

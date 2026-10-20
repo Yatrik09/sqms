@@ -88,11 +88,17 @@ def init_db():
         if not center:
             center = ServiceCenter(
                 name="Apex Auto Express - Central Hub",
-                location="Andheri East, Mumbai",
+                address="Plot 42, MIDC Central Road, Andheri East",
+                city="Mumbai",
+                area="Andheri East",
+                latitude=19.1136,
+                longitude=72.8697,
+                phone="+91 22 2830 0001",
                 franchise_id=franchise.id,
                 total_bays=6,
-                active_mechanics=5,
-                operating_hours="08:00 AM - 08:00 PM"
+                total_mechanics=5,
+                operating_hours_start="08:00",
+                operating_hours_end="20:00"
             )
             db.add(center)
             db.commit()
