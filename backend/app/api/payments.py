@@ -6,7 +6,10 @@ import datetime
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import razorpay
+try:
+    import razorpay
+except ImportError:
+    razorpay = None
 
 from app.core.config import settings
 from app.database.session import get_db
@@ -22,8 +25,13 @@ from app.schemas.schemas import (
 
 router = APIRouter(tags=["Razorpay Payments"])
 
-def get_razorpay_client() -> razorpay.Client:
+def get_razorpay_client():
     """Initialize and return Razorpay client using configured environment credentials."""
+    if not razorpay:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Razorpay library is not installed."
+        )
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
