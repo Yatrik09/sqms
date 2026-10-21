@@ -174,7 +174,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 2500);
+    const interval = setInterval(loadData, 20000); // 20s background sync to prevent screen flickering
     return () => clearInterval(interval);
   }, [user?.id, lastWsEvent]);
 

@@ -188,10 +188,10 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     }
   };
 
-  // Poll every 2.5s + auto-trigger on WebSocket message
+  // Poll with 20s background sync + auto-trigger on WebSocket message
   useEffect(() => {
     loadFloorData();
-    const interval = setInterval(loadFloorData, 2500);
+    const interval = setInterval(loadFloorData, 20000); // 20s background sync
     return () => clearInterval(interval);
   }, [centerId, lastWsEvent]);
 

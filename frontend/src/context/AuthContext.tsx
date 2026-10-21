@@ -53,12 +53,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         try {
           const profile = await api.getMe();
-          saveUser(profile);
-        } catch {
-          // If token expired or invalid, reset
-          localStorage.removeItem('sqms_token');
-          setToken(null);
-          saveUser(null);
+          if (profile) saveUser(profile);
+        } catch (err: any) {
+          // CRITICAL: Only reset session if server explicitly returned 401 Unauthorized!
+          // If server is waking up, sleeping, or network blipped (502, 503, timeout),
+          // preserve cached user session so website NEVER auto-refreshes or logs out!
+          if (err?.status === 401 || err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
+            localStorage.removeItem('sqms_token');
+            setToken(null);
+            saveUser(null);
+          }
         }
       } else {
         saveUser(null);

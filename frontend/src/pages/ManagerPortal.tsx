@@ -204,13 +204,13 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     }
   };
 
-  // Live real-time polling every 3s + instant WebSocket event listener
+  // Live real-time sync with 20s background interval + instant WebSocket event listener
   useEffect(() => {
     if (centerId) {
       loadCenterData();
       const interval = setInterval(() => {
         loadCenterData();
-      }, 3000);
+      }, 20000); // 20s background sync to prevent screen flickering
       return () => clearInterval(interval);
     }
   }, [centerId, lastWsEvent]);
@@ -1490,7 +1490,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
           onClose={() => setShowPlansModal(false)}
           onSuccess={() => {
             setShowPlansModal(false);
-            window.location.reload();
+            loadCenterData();
           }}
         />
       </div>

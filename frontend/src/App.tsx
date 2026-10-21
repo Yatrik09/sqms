@@ -12,6 +12,21 @@ const MLManagementPortal = React.lazy(() => import('./pages/MLManagementPortal')
 const AboutUsPage = React.lazy(() => import('./pages/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
 const WorkshopFloorMobile = React.lazy(() => import('./pages/WorkshopFloorMobile').then(m => ({ default: m.WorkshopFloorMobile })));
 
+// Preload portal code chunks in background so opening portals is 0ms instant
+if (typeof window !== 'undefined') {
+  const preloadBundles = () => {
+    import('./pages/OwnerPortal');
+    import('./pages/ManagerPortal');
+    import('./pages/CustomerPortal');
+    import('./pages/AdminPortal');
+  };
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(preloadBundles);
+  } else {
+    setTimeout(preloadBundles, 250);
+  }
+}
+
 const PageLoader: React.FC = () => (
   <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3">
     <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />

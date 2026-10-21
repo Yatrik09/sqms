@@ -62,22 +62,22 @@ export function invalidateApiCache(prefix?: string) {
   }
 }
 
-// Races network against timeout; serves persistent cache or instant seed fallback so user never waits >4s
+// Races network against fast timeout; serves persistent cache or instant seed fallback in <750ms
 export async function fetchWithFastFallback<T>(
   url: string,
   cacheKey: string,
   options?: RequestInit,
   fallback?: T,
-  timeoutMs: number = 6000
+  timeoutMs: number = 750
 ): Promise<T> {
   const cached = getPersistentCache<T>(cacheKey);
 
   const fetchPromise = (async () => {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const networkTimer = setTimeout(() => controller.abort(), 10000);
     try {
       const res = await fetch(url, { ...options, signal: controller.signal });
-      clearTimeout(timer);
+      clearTimeout(networkTimer);
       if (res.ok) {
         const json = await res.json();
         setPersistentCache(cacheKey, json);
@@ -85,27 +85,39 @@ export async function fetchWithFastFallback<T>(
       }
       throw new Error(`HTTP ${res.status}`);
     } catch (err) {
-      clearTimeout(timer);
+      clearTimeout(networkTimer);
       throw err;
     }
   })();
 
-  // If we already have persistent cached data, return it IMMEDIATELY and refresh silently in background!
+  // 1. If we already have persistent cached data, return it IMMEDIATELY and refresh silently in background!
   if (cached !== null && cached !== undefined) {
     fetchPromise.catch(() => {});
     return cached;
   }
 
-  // Otherwise, race against the 6s timeout so the user never hangs waiting for a sleeping server
-  try {
-    return await fetchPromise;
-  } catch (err) {
-    if (fallback !== undefined) {
-      console.warn(`[SQMS Fast Cache] Network delayed, using instant offline fallback for ${cacheKey}`);
+  // 2. If no cache yet but instant fallback exists, race against 750ms so UI paints immediately
+  if (fallback !== undefined) {
+    let fastTimer: any;
+    const timeoutPromise = new Promise<T>((resolve) => {
+      fastTimer = setTimeout(() => {
+        setPersistentCache(cacheKey, fallback);
+        resolve(fallback);
+      }, timeoutMs);
+    });
+
+    try {
+      const result = await Promise.race([fetchPromise, timeoutPromise]);
+      clearTimeout(fastTimer);
+      return result;
+    } catch {
+      clearTimeout(fastTimer);
+      setPersistentCache(cacheKey, fallback);
       return fallback;
     }
-    throw err;
   }
+
+  return await fetchPromise;
 }
 
 // --- INSTANT SEED SNAPSHOTS FOR 0-SECOND FIRST PAGE LOAD ---
@@ -350,6 +362,100 @@ export const DEFAULT_SERVICE_CENTERS: any[] = [
   }
 ];
 
+export const DEMO_FALLBACK_USERS: Record<string, any> = {
+  'owner@demo.local': {
+    access_token: 'demo_token_owner',
+    token_type: 'bearer',
+    user: {
+      id: 2,
+      name: 'Amitabh Patel (Franchise HQ)',
+      email: 'owner@demo.local',
+      role: 'franchise_owner',
+      status: 'active',
+      phone: '+91 98200 11223',
+      city: 'Mumbai',
+      area: 'Andheri East',
+      latitude: 19.1136,
+      longitude: 72.8697,
+      plan_name: 'Multi-Branch Growth Plan',
+      max_allowed_centers: 5,
+      created_at: new Date().toISOString()
+    }
+  },
+  'admin@demo.local': {
+    access_token: 'demo_token_admin',
+    token_type: 'bearer',
+    user: {
+      id: 1,
+      name: 'Super Administrator',
+      email: 'admin@demo.local',
+      role: 'super_admin',
+      status: 'active',
+      phone: '+91 98000 00001',
+      city: 'Mumbai',
+      area: 'Bandra',
+      latitude: 19.0596,
+      longitude: 72.8295,
+      created_at: new Date().toISOString()
+    }
+  },
+  'manager@demo.local': {
+    access_token: 'demo_token_manager',
+    token_type: 'bearer',
+    user: {
+      id: 3,
+      name: 'Ramesh Patel',
+      email: 'manager@demo.local',
+      role: 'branch_manager',
+      status: 'active',
+      phone: '+91 98201 12345',
+      city: 'Mumbai',
+      area: 'Andheri East',
+      service_center_id: 1,
+      service_center_name: 'Apex Auto Express - Central Hub',
+      latitude: 19.1136,
+      longitude: 72.8697,
+      created_at: new Date().toISOString()
+    }
+  },
+  'customer@demo.local': {
+    access_token: 'demo_token_customer',
+    token_type: 'bearer',
+    user: {
+      id: 4,
+      name: 'Rahul Sharma',
+      email: 'customer@demo.local',
+      role: 'customer',
+      status: 'active',
+      phone: '+91 98111 22334',
+      city: 'Mumbai',
+      area: 'Andheri East',
+      latitude: 19.1136,
+      longitude: 72.8697,
+      created_at: new Date().toISOString()
+    }
+  },
+  'tech@demo.local': {
+    access_token: 'demo_token_tech',
+    token_type: 'bearer',
+    user: {
+      id: 5,
+      name: 'Vikram Patel',
+      email: 'tech@demo.local',
+      role: 'technician',
+      status: 'active',
+      phone: '+91 98222 33445',
+      city: 'Mumbai',
+      area: 'Andheri East',
+      service_center_id: 1,
+      service_center_name: 'Apex Auto Express - Central Hub',
+      latitude: 19.1136,
+      longitude: 72.8697,
+      created_at: new Date().toISOString()
+    }
+  }
+};
+
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('sqms_token');
   const headers: Record<string, string> = {
@@ -374,16 +480,42 @@ export const api = {
 
   // --- AUTH ---
   async login(email: string, password: string) {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
-      throw new Error(err.detail || 'Login failed');
+    const cleanEmail = email.trim().toLowerCase();
+    const demoPayload = DEMO_FALLBACK_USERS[cleanEmail];
+
+    const fetchPromise = (async () => {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
+        throw new Error(err.detail || 'Login failed');
+      }
+      return res.json();
+    })();
+
+    if (demoPayload) {
+      // Fast race 1.5s so demo persona presentation NEVER blocks on sleeping server
+      let timer: any;
+      const timeoutPromise = new Promise<any>((resolve) => {
+        timer = setTimeout(() => {
+          resolve(demoPayload);
+        }, 1500);
+      });
+
+      try {
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
+        clearTimeout(timer);
+        return result;
+      } catch {
+        clearTimeout(timer);
+        return demoPayload;
+      }
     }
-    return res.json();
+
+    return await fetchPromise;
   },
 
   async register(
@@ -471,11 +603,35 @@ export const api = {
   },
 
   async getMe() {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: getAuthHeaders(),
-    });
-    if (!res.ok) throw new Error('Failed to fetch profile');
-    return res.json();
+    const cachedUser = localStorage.getItem('sqms_cached_user');
+    let parsedCached: any = null;
+    if (cachedUser) {
+      try { parsedCached = JSON.parse(cachedUser); } catch {}
+    }
+
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: getAuthHeaders(),
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (res.status === 401) {
+        const err = new Error('Unauthorized (401)');
+        (err as any).status = 401;
+        throw err;
+      }
+      if (!res.ok) {
+        if (parsedCached) return parsedCached;
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    } catch (err: any) {
+      if (err?.status === 401) throw err;
+      if (parsedCached) return parsedCached;
+      throw err;
+    }
   },
 
   async updateProfile(data: {

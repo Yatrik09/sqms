@@ -221,7 +221,10 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   const handleModalClose = () => {
     onClose();
     if (checkoutStep === 'success') {
-      window.location.reload();
+      refreshUser();
+      if (onSuccess) {
+        onSuccess();
+      }
     }
   };
 
