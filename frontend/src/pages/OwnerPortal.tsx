@@ -267,7 +267,7 @@ export const OwnerPortal: React.FC<{
 
   const copyCredentials = () => {
     if (!createdManagerNotice) return;
-    const text = `SQMS Branch Manager Credentials:\nEmail: ${createdManagerNotice.email}\nPassword: ${createdManagerNotice.pass}\nAssigned Workshop: ${createdManagerNotice.center}`;
+    const text = `DriveOps Branch Manager Credentials:\nEmail: ${createdManagerNotice.email}\nPassword: ${createdManagerNotice.pass}\nAssigned Workshop: ${createdManagerNotice.center}`;
     navigator.clipboard.writeText(text);
     setCopiedNotice(true);
     setTimeout(() => setCopiedNotice(false), 3000);

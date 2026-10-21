@@ -59,9 +59,14 @@ const MainLayout: React.FC = () => {
   if (isLoading && !user && localStorage.getItem('sqms_token')) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center text-[#1d1d1f]">
-        <div className="flex flex-col items-center space-y-3">
-          <div className="w-8 h-8 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium tracking-tight text-[#86868b]">Loading Smart Q Session...</span>
+        <div className="flex flex-col items-center space-y-4">
+          <img
+            src="/logo.png"
+            alt="DriveOps"
+            className="h-10 w-auto object-contain"
+          />
+          <div className="w-7 h-7 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium tracking-tight text-[#86868b]">Loading DriveOps Session...</span>
         </div>
       </div>
     );

@@ -1107,7 +1107,7 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
               Are you sure you want to remove <strong className="text-[#1d1d1f]">{deleteConfirmPlan.name}</strong> (<code className="text-[#b64400]">{deleteConfirmPlan.id}</code>)?
             </p>
             <div className="p-3 rounded-2xl bg-[#f5f5f7] border border-[#e6e6e8] text-[11px] text-[#707070] leading-relaxed">
-              <strong>Safe Deactivation Policy:</strong> If any franchise owner has an active subscription under this tier, SQMS will safely deactivate the plan so their operations continue uninterrupted while removing it from checkout. If unused, it is permanently deleted.
+              <strong>Safe Deactivation Policy:</strong> If any franchise owner has an active subscription under this tier, DriveOps will safely deactivate the plan so their operations continue uninterrupted while removing it from checkout. If unused, it is permanently deleted.
             </div>
 
             <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#e6e6e8]">

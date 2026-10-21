@@ -25,13 +25,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab }) => {
             {/* Column 1: Brand & Platform Overview (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#1d1d1f] flex items-center justify-center">
-                  <Car className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex items-center">
-                  <span className="text-xl font-semibold tracking-tight text-[#1d1d1f]">Smart</span>
-                  <span className="text-xl font-semibold tracking-tight text-[#0071e3] ml-1">Q</span>
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="DriveOps"
+                  className="h-10 sm:h-11 w-auto object-contain max-w-[190px]"
+                />
               </div>
 
               <p className="text-[14px] text-[#707070] leading-relaxed max-w-sm">
@@ -177,7 +175,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab }) => {
                 </div>
 
                 <h4 className="text-[17px] font-semibold text-[#1d1d1f] tracking-tight">
-                  List Your Auto Service Center on Smart Q
+                  List Your Auto Service Center on DriveOps
                 </h4>
                 <p className="text-[14px] text-[#707070] leading-relaxed">
                   Connect your physical workshops, assign dedicated branch managers, automate bay queues, and access AI waiting time prediction models.
@@ -207,7 +205,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab }) => {
                     className="text-[#707070] hover:text-[#0066cc] transition flex items-center space-x-1 cursor-pointer"
                   >
                     <ChevronRight className="w-3.5 h-3.5 text-[#0066cc]" />
-                    <span>About Smart Q Platform</span>
+                    <span>About DriveOps Platform</span>
                   </button>
                 </li>
 
@@ -330,9 +328,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateTab }) => {
           {/* Bottom Bar */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-[#86868b]">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-[#1d1d1f]">Smart Q</span>
+              <span className="font-semibold text-[#1d1d1f]">DriveOps</span>
               <span>•</span>
-              <span>AI-Powered Smart Queue Management System</span>
+              <span>Book Today. Drive Tomorrow.</span>
+              <span>•</span>
+              <span>AI-Powered Workshop Queue & Operations Platform</span>
             </div>
             <div className="text-[12px]">
               Automotive Decision Support Platform • Multi-Center Machine Learning

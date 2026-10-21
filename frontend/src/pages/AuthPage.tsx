@@ -440,8 +440,12 @@ export const AuthPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
           {/* Left Column: Brand & Features Overview (Desktop only) */}
           <div className="hidden lg:block lg:col-span-5 text-left space-y-6 px-2 sm:px-4">
-            <div className="inline-flex w-14 h-14 rounded-2xl bg-[#1d1d1f] items-center justify-center">
-              <Car className="w-8 h-8 text-white" />
+            <div>
+              <img
+                src="/logo.png"
+                alt="DriveOps"
+                className="h-12 w-auto object-contain mb-3"
+              />
             </div>
 
             <div>
@@ -450,8 +454,11 @@ export const AuthPage: React.FC = () => {
                 <span>Automotive Intelligence</span>
               </div>
               <h1 className="text-4xl lg:text-[44px] font-semibold tracking-tight text-[#1d1d1f] leading-[1.08]">
-                Smart Queue Management System
+                DriveOps
               </h1>
+              <p className="mt-1 text-base font-semibold text-[#0071e3]">
+                Book Today. Drive Tomorrow.
+              </p>
               <p className="mt-3 text-[17px] text-[#707070] leading-[1.47]">
                 Real-time queue tracking, predictive machine learning turnaround estimations, automated workshop bay allocation, and multi-service-center workload balancing.
               </p>
@@ -483,6 +490,15 @@ export const AuthPage: React.FC = () => {
 
           {/* Right Column: Apple 28px White Card Form */}
           <div className="w-full lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-10 shadow-none">
+            {/* Mobile Brand Logo */}
+            <div className="flex justify-center mb-6 lg:hidden">
+              <img
+                src="/logo.png"
+                alt="DriveOps"
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+
             {/* Tabs */}
             <div className="flex border-b border-[#d6d6d6] mb-6">
               <button

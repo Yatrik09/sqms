@@ -523,7 +523,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
   const copyTechCredentials = () => {
     if (!createdTechNotice) return;
-    const text = `SQMS Floor Technician Credentials:\nTechnician: ${createdTechNotice.name}\nEmail: ${createdTechNotice.email}\nPassword: ${createdTechNotice.pass}\nWorkshop Hub: ${createdTechNotice.center}\nFloor Screen: http://localhost:5173`;
+    const text = `DriveOps Floor Technician Credentials:\nTechnician: ${createdTechNotice.name}\nEmail: ${createdTechNotice.email}\nPassword: ${createdTechNotice.pass}\nWorkshop Hub: ${createdTechNotice.center}\nFloor Screen: http://localhost:5173`;
     navigator.clipboard.writeText(text);
     setCopiedTechNotice(true);
     setTimeout(() => setCopiedTechNotice(false), 3000);

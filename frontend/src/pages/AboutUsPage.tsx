@@ -19,14 +19,22 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
     <div className="w-full space-y-20 py-6 sm:py-12">
       {/* Hero Section — Pure Gallery White Hero Stage */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <div className="flex justify-center mb-2">
+          <img
+            src="/logo.png"
+            alt="DriveOps"
+            className="h-14 sm:h-20 w-auto object-contain"
+          />
+        </div>
+
         <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#1d1d1f] text-[12px] font-medium">
           <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
           <span>Automotive Intelligence Architecture</span>
         </div>
 
         <div className="space-y-3">
-          <span className="text-[21px] font-semibold tracking-[0.23px] text-[#1d1d1f] block">
-            Smart Queue Management System
+          <span className="text-[21px] font-semibold tracking-[0.23px] text-[#0071e3] block">
+            Book Today. Drive Tomorrow.
           </span>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-[-1.2px] text-[#1d1d1f] leading-[1.05] max-w-4xl mx-auto">
             The intelligent operating system for automotive workshops.
@@ -34,7 +42,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
         </div>
 
         <p className="text-[17px] sm:text-[19px] text-[#707070] leading-[1.47] max-w-3xl mx-auto font-normal">
-          Smart Q is an enterprise-grade AI decision-support platform engineered to eliminate bay bottlenecks, unpredictable wait times, and workshop coordination chaos across the automotive service industry.
+          DriveOps is an enterprise-grade AI decision-support platform engineered to eliminate bay bottlenecks, unpredictable wait times, and workshop coordination chaos across the automotive service industry.
         </p>
 
         <div className="pt-4 flex flex-wrap justify-center items-center gap-3">
@@ -106,7 +114,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
               Beyond Static Tokens: Dynamic AI Predictions
             </h2>
             <p className="text-[#707070] text-[17px] leading-[1.47]">
-              Traditional service centers issue static token numbers with zero visibility. SQMS introduces real-time multivariate predictive modeling.
+              Traditional service centers issue static token numbers with zero visibility. DriveOps introduces real-time multivariate predictive modeling.
             </p>
           </div>
 
@@ -154,7 +162,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
             Comprehensive Vehicle Services Supported
           </h3>
           <p className="text-[15px] text-[#707070] mt-1">
-            SQMS seamlessly coordinates workflows across all major automotive repair classifications:
+            DriveOps seamlessly coordinates workflows across all major automotive repair classifications:
           </p>
         </div>
 
@@ -193,11 +201,11 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
-                List Your Service Center or Workshop on SQMS
+                List Your Service Center or Workshop on DriveOps
               </h2>
 
               <p className="text-[16px] text-[#707070] max-w-2xl leading-relaxed">
-                Whether you operate an independent multi-brand workshop, an authorized dealership, or a nationwide auto repair chain, deploy SQMS to automate bay routing and customer visibility.
+                Whether you operate an independent multi-brand workshop, an authorized dealership, or a nationwide auto repair chain, deploy DriveOps to automate bay routing and customer visibility.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-[14px] text-[#1d1d1f]">

@@ -238,7 +238,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
           <div>
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3] text-xs font-medium mb-2">
               <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
-              <span>SQMS Multi-Tenant Partner Program</span>
+              <span>DriveOps Multi-Tenant Partner Program</span>
             </div>
             <h2 className="text-xl sm:text-3xl font-semibold text-[#1d1d1f] tracking-tight">
               {checkoutStep === 'details'
@@ -850,7 +850,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                               <QrCode className="w-24 h-24 text-[#1d1d1f]" />
                             </div>
                             <span className="text-[10px] font-mono text-[#707070] font-medium">
-                              merchant.sqms@okaxis
+                              merchant.driveops@okaxis
                             </span>
                             <span className="text-[11px] font-semibold text-[#0071e3]">
                               Scan to pay ₹{totalAmount.toLocaleString('en-IN')}
@@ -937,7 +937,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                     {paymentMethod === 'razorpay' ? (
                       <RazorpayCheckoutButton
                         amount={totalAmount}
-                        name="SQMS Mobility Pvt. Ltd."
+                        name="DriveOps Mobility Pvt. Ltd."
                         description={`${selectedPlan.name} Subscription`}
                         planId={selectedPlan.id}
                         billingPeriod={billingPeriod}
@@ -1030,15 +1030,15 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0071e3] bg-[#f5f5f7] px-2.5 py-0.5 rounded-full border border-[#d6d6d6]">
                       Official Tax Invoice
                     </span>
-                    <h4 className="text-lg font-semibold text-[#1d1d1f] mt-1.5">SQMS Mobility Pvt. Ltd.</h4>
+                    <h4 className="text-lg font-semibold text-[#1d1d1f] mt-1.5">DriveOps Mobility Pvt. Ltd.</h4>
                     <p className="text-[11px] text-[#707070]">GSTIN: 24AAACS9988K1ZQ • CIN: U72200GJ2026PTC099182</p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-mono text-[#1d1d1f] block font-semibold">
-                      {purchasedInfo.invoice_number || 'INV-SQMS-2026-94812'}
+                      {purchasedInfo.invoice_number || 'INV-DROPS-2026-94812'}
                     </span>
                     <span className="text-[11px] text-[#707070] block">
-                      Ref: {purchasedInfo.payment_reference || 'PAY-SQMS-9281'}
+                      Ref: {purchasedInfo.payment_reference || 'PAY-DROPS-9281'}
                     </span>
                   </div>
                 </div>

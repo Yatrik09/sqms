@@ -416,12 +416,12 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-[#1d1d1f]">
-                <Smartphone className="w-5 h-5 text-[#0071e3]" />
+              <div className="w-9 h-9 rounded-xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center p-1">
+                <img src="/logo-icon.png" alt="DriveOps" className="w-6 h-6 object-contain" />
               </div>
               <div>
                 <div className="flex items-center space-x-1.5">
-                  <span className="font-semibold text-sm text-[#1d1d1f] tracking-tight">Workshop Floor</span>
+                  <span className="font-semibold text-sm text-[#1d1d1f] tracking-tight">DriveOps Floor</span>
                   <span className="px-2 py-0.5 rounded-full bg-[#f5f5f7] text-[#707070] border border-[#d6d6d6] text-[10px] font-medium">
                     {isTechnician ? 'ASSIGNED HUB ONLY' : 'MOBILE SCREEN'}
                   </span>

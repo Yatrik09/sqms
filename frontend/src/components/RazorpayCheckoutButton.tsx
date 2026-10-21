@@ -46,7 +46,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
   amount,
   amountInPaise,
   currency = 'INR',
-  name = 'Smart Q — Queue Management System',
+  name = 'DriveOps — Queue & Workshop Management',
   description = 'Automotive Service & Subscription Payment',
   receipt,
   notes = {},

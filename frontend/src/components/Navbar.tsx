@@ -110,13 +110,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 else if (user?.role === 'super_admin') switchTab('admin-dashboard');
               }}
             >
-              <div className="w-8 h-8 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center">
-                <Car className="w-4 h-4 text-[#0071e3]" />
-              </div>
-              <div className="flex items-center tracking-tight">
-                <span className="text-lg sm:text-xl font-semibold text-[#1d1d1f]">Smart</span>
-                <span className="text-lg sm:text-xl font-semibold text-[#0071e3] ml-0.5">Q</span>
-              </div>
+              <img
+                src="/logo.png"
+                alt="DriveOps"
+                className="h-8 sm:h-9 w-auto object-contain max-w-[150px] sm:max-w-[170px]"
+              />
             </div>
 
             {/* Navigation Links per Authenticated Role */}
@@ -499,7 +497,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             {/* Direct Prominent Outlined Log Out Pill */}
             <button
               onClick={handleLogout}
-              title="Sign out of SQMS platform"
+              title="Sign out of DriveOps platform"
               className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 text-[#707070]" />
