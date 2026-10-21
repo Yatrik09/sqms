@@ -9,13 +9,22 @@ elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+")
     db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 connect_args = {}
+pool_kwargs = {}
 if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+else:
+    pool_kwargs = {
+        "pool_size": 10,
+        "max_overflow": 20,
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    }
 
 engine = create_engine(
     db_url,
     connect_args=connect_args,
-    echo=False
+    echo=False,
+    **pool_kwargs
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

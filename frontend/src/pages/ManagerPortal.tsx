@@ -1455,9 +1455,9 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
       {/* Workshop Header & Switcher */}
-      <div className="bg-slate-900 rounded-3xl p-5 sm:p-7 text-white shadow-xl border border-slate-800 space-y-5">
+      <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-4 sm:p-7 text-white shadow-xl border border-slate-800 space-y-4 sm:space-y-5">
         {/* Top Hub Selector & Primary Action Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
           <div className="flex flex-wrap items-center gap-2.5">
@@ -1508,7 +1508,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
           </div>
 
           {/* Tab Switcher Controls - Responsive Segmented Bar */}
-          <div className="flex items-center bg-slate-800/90 p-1.5 rounded-2xl border border-slate-700/80 overflow-x-auto no-scrollbar shrink-0 self-start lg:self-auto">
+          <div className="flex items-center bg-slate-800/90 p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-slate-700/80 overflow-x-auto no-scrollbar shrink-0 w-full sm:w-auto">
             <button
               onClick={() => switchTab('manager-queue')}
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 whitespace-nowrap cursor-pointer ${

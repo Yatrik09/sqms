@@ -378,7 +378,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
       )}
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex border-b border-slate-200 space-x-6 text-sm font-semibold overflow-x-auto">
+      <div className="flex border-b border-slate-200 space-x-3 sm:space-x-6 text-xs sm:text-sm font-semibold overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 sm:mx-0 sm:px-0">
         <button
           onClick={() => setTab('active-service')}
           className={`pb-3 border-b-2 transition whitespace-nowrap cursor-pointer ${
@@ -428,28 +428,28 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           {activeService && activeService.has_active ? (
             <div className="space-y-6">
               {/* Active Token Hero Card */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 border border-slate-200 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 mb-5">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-blue-600">Active Service Queue</span>
                     <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">
                       {activeService.vehicle_registration} • {activeService.vehicle_model}
                     </h2>
                     <p className="text-xs text-slate-500 mt-1 flex items-center">
-                      <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400" />
-                      {activeService.service_center_name} ({activeService.service_center_address})
+                      <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400 shrink-0" />
+                      <span>{activeService.service_center_name} ({activeService.service_center_address})</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-blue-50 border-2 border-blue-600 rounded-2xl px-5 py-2.5 text-center">
+                  <div className="flex items-center justify-between sm:justify-start space-x-3 w-full sm:w-auto">
+                    <div className="flex-1 sm:flex-none bg-blue-50 border-2 border-blue-600 rounded-2xl px-4 sm:px-5 py-2 sm:py-2.5 text-center">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block">Digital Token</span>
-                      <span className="text-2xl font-black text-blue-700">{activeService.token_number}</span>
+                      <span className="text-xl sm:text-2xl font-black text-blue-700">{activeService.token_number}</span>
                     </div>
 
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-center">
+                    <div className="flex-1 sm:flex-none bg-slate-50 border border-slate-200 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-center">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Queue Position</span>
-                      <span className="text-xl font-bold text-slate-800">#{activeService.queue_position}</span>
+                      <span className="text-lg sm:text-xl font-bold text-slate-800">#{activeService.queue_position}</span>
                     </div>
                   </div>
                 </div>

@@ -41,8 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     function connectWs() {
       try {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const defaultWs = `${protocol}//${window.location.host}/ws`;
+        const defaultWs = 'wss://sqms-backend-gd00.onrender.com/ws';
         const wsUrl = import.meta.env.VITE_WS_URL || defaultWs;
         ws = new WebSocket(wsUrl);
 

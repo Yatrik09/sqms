@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { CustomerPortal } from './pages/CustomerPortal';
-import { ManagerPortal } from './pages/ManagerPortal';
-import { OwnerPortal } from './pages/OwnerPortal';
-import { AdminPortal } from './pages/AdminPortal';
-import { MLManagementPortal } from './pages/MLManagementPortal';
-import { AboutUsPage } from './pages/AboutUsPage';
 import { AuthPage } from './pages/AuthPage';
-import { WorkshopFloorMobile } from './pages/WorkshopFloorMobile';
+
+const CustomerPortal = React.lazy(() => import('./pages/CustomerPortal').then(m => ({ default: m.CustomerPortal })));
+const ManagerPortal = React.lazy(() => import('./pages/ManagerPortal').then(m => ({ default: m.ManagerPortal })));
+const OwnerPortal = React.lazy(() => import('./pages/OwnerPortal').then(m => ({ default: m.OwnerPortal })));
+const AdminPortal = React.lazy(() => import('./pages/AdminPortal').then(m => ({ default: m.AdminPortal })));
+const MLManagementPortal = React.lazy(() => import('./pages/MLManagementPortal').then(m => ({ default: m.MLManagementPortal })));
+const AboutUsPage = React.lazy(() => import('./pages/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
+const WorkshopFloorMobile = React.lazy(() => import('./pages/WorkshopFloorMobile').then(m => ({ default: m.WorkshopFloorMobile })));
+
+const PageLoader: React.FC = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3">
+    <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <span className="text-xs font-semibold tracking-wider text-slate-400">Loading Workspace...</span>
+  </div>
+);
 
 const MainLayout: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -120,7 +128,9 @@ const MainLayout: React.FC = () => {
       />
 
       <main className="flex-1 pb-16">
-        {renderContent()}
+        <Suspense fallback={<PageLoader />}>
+          {renderContent()}
+        </Suspense>
       </main>
 
       {/* Modern Footer with Workshop Plans Integration */}

@@ -11,10 +11,28 @@ import { AreaSelectDropdown } from '../components/AreaSelectDropdown';
 type AuthMode = 'login' | 'register' | 'reset';
 type ResetStep = 'request_otp' | 'verify_otp';
 
+const DEMO_PERSONAS = [
+  { label: 'Super Admin', email: 'admin@demo.local', pass: 'AdminPassword123!', icon: '👑', role: 'Full Admin' },
+  { label: 'Franchise Owner', email: 'owner@demo.local', pass: 'OwnerPassword123!', icon: '🏢', role: 'HQ & Analytics' },
+  { label: 'Branch Manager', email: 'manager@demo.local', pass: 'ManagerPassword123!', icon: '🔧', role: 'Workshop Floor' },
+  { label: 'Customer', email: 'customer@demo.local', pass: 'CustomerPassword123!', icon: '🚗', role: 'Driver Portal' },
+  { label: 'Technician', email: 'tech@demo.local', pass: 'TechPassword123!', icon: '👨‍🔧', role: 'Floor Bay Cards' },
+];
+
 export const AuthPage: React.FC = () => {
   const { login, register, requestPasswordResetOTP, verifyOTPAndResetPassword, logoutNotice, clearLogoutNotice } = useAuth();
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [resetStep, setResetStep] = useState<ResetStep>('request_otp');
+
+  const handleSelectPersona = (p: typeof DEMO_PERSONAS[0]) => {
+    setAuthMode('login');
+    setEmail(p.email);
+    setPassword(p.pass);
+    setGlobalError(null);
+    setServerErrorField(null);
+    setFieldErrors({});
+    setTouched({ email: true, password: true });
+  };
 
   // Form fields
   const [email, setEmail] = useState<string>('');
@@ -380,16 +398,36 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans selection:bg-blue-600 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-6 sm:py-12 px-3 sm:px-6 lg:px-8 font-sans selection:bg-blue-600 selection:text-white relative overflow-hidden">
       {/* Background ambient automotive lighting */}
       <div className="absolute top-1/4 left-1/4 w-[32rem] h-[32rem] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-[32rem] h-[32rem] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto w-full z-10 px-2 sm:px-6">
+      <div className="max-w-7xl mx-auto w-full z-10">
+        {/* Mobile Brand Header */}
+        <div className="lg:hidden flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Car className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <div className="flex items-center">
+                <span className="text-xl font-black tracking-tight text-white">Smart</span>
+                <span className="text-xl font-black tracking-tight text-blue-500 ml-0.5">Q</span>
+              </div>
+              <span className="text-[10px] font-semibold text-slate-400 block -mt-0.5">Automotive AI Queue System</span>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center space-x-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Cloud Live</span>
+          </span>
+        </div>
+
         {/* Logout Banner */}
         {logoutNotice && (
-          <div className="mb-8 p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-sm flex items-center justify-between shadow-xl">
+          <div className="mb-6 p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-sm flex items-center justify-between shadow-xl">
             <div className="flex items-center space-x-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
               <span>{logoutNotice}</span>
@@ -404,8 +442,8 @@ export const AuthPage: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Brand & Features Overview */}
-          <div className="lg:col-span-5 text-left space-y-6 px-2 sm:px-4">
+          {/* Left Column: Brand & Features Overview (Desktop only) */}
+          <div className="hidden lg:block lg:col-span-5 text-left space-y-6 px-2 sm:px-4">
             <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 items-center justify-center shadow-xl shadow-blue-500/30">
               <Car className="w-9 h-9 text-white" />
             </div>
@@ -448,13 +486,13 @@ export const AuthPage: React.FC = () => {
           </div>
 
           {/* Right Column: High-End Production Form */}
-          <div className="lg:col-span-7 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl">
+          <div className="w-full lg:col-span-7 bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-8 lg:p-10 shadow-2xl">
             {/* Tabs */}
-            <div className="flex border-b border-slate-800 mb-6">
+            <div className="flex border-b border-slate-800 mb-5">
               <button
                 type="button"
                 onClick={() => switchMode('login')}
-                className={`pb-3 text-sm font-bold border-b-2 transition flex-1 text-center cursor-pointer ${
+                className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition flex-1 text-center cursor-pointer ${
                   authMode === 'login'
                     ? 'border-blue-500 text-white'
                     : 'border-transparent text-slate-400 hover:text-slate-300'
@@ -465,7 +503,7 @@ export const AuthPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => switchMode('register')}
-                className={`pb-3 text-sm font-bold border-b-2 transition flex-1 text-center cursor-pointer ${
+                className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition flex-1 text-center cursor-pointer ${
                   authMode === 'register'
                     ? 'border-blue-500 text-white'
                     : 'border-transparent text-slate-400 hover:text-slate-300'
@@ -476,12 +514,48 @@ export const AuthPage: React.FC = () => {
               {authMode === 'reset' && (
                 <button
                   type="button"
-                  className="pb-3 text-sm font-bold border-b-2 border-indigo-500 text-white flex-1 text-center cursor-pointer"
+                  className="pb-3 text-xs sm:text-sm font-bold border-b-2 border-indigo-500 text-white flex-1 text-center cursor-pointer"
                 >
                   Reset Password
                 </button>
               )}
             </div>
+
+            {/* 1-Tap Demo Quick Fill Section */}
+            {authMode === 'login' && (
+              <div className="mb-5 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-800/60 border border-slate-700/70">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>1-Tap Demo Login</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">Tap to auto-fill</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {DEMO_PERSONAS.map((p) => {
+                    const isSelected = email === p.email;
+                    return (
+                      <button
+                        key={p.label}
+                        type="button"
+                        onClick={() => handleSelectPersona(p)}
+                        className={`p-2 rounded-xl text-left border transition flex items-center space-x-2 cursor-pointer active:scale-95 ${
+                          isSelected
+                            ? 'bg-blue-600/30 border-blue-500 text-white shadow-sm ring-1 ring-blue-500/50'
+                            : 'bg-slate-900/80 hover:bg-slate-800 border-slate-700/70 text-slate-300'
+                        }`}
+                      >
+                        <span className="text-base shrink-0">{p.icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-xs font-bold block truncate">{p.label}</span>
+                          <span className="text-[10px] text-slate-400 block truncate">{p.role}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Success Notice */}
             {successNotice && (
@@ -705,7 +779,7 @@ export const AuthPage: React.FC = () => {
                       onChange={(e) => handleChange('email', e.target.value, setEmail)}
                       onBlur={(e) => handleBlur('email', e.target.value)}
                       placeholder="user@example.com"
-                      className={`w-full pl-10 pr-3 py-3 bg-slate-800/90 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none font-mono text-xs sm:text-sm transition ${
+                      className={`w-full pl-10 pr-3 h-12 bg-slate-800/90 border rounded-xl text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none transition ${
                         isEmailError
                           ? 'border-red-500 ring-2 ring-red-500/30 bg-red-950/20'
                           : 'border-slate-700 focus:border-blue-500'
@@ -739,7 +813,7 @@ export const AuthPage: React.FC = () => {
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className={`w-4 h-4 absolute left-3.5 top-3.5 transition-colors ${
+                    <Lock className={`w-4 h-4 absolute left-3.5 top-4 transition-colors ${
                       isPasswordError ? 'text-red-400' : 'text-slate-500'
                     }`} />
                     <input
@@ -748,7 +822,7 @@ export const AuthPage: React.FC = () => {
                       onChange={(e) => handleChange('password', e.target.value, setPassword)}
                       onBlur={(e) => handleBlur('password', e.target.value)}
                       placeholder="••••••••••••"
-                      className={`w-full pl-10 pr-10 py-3 bg-slate-800/90 border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none font-mono text-xs sm:text-sm transition ${
+                      className={`w-full pl-10 pr-10 h-12 bg-slate-800/90 border rounded-xl text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none transition ${
                         isPasswordError
                           ? 'border-red-500 ring-2 ring-red-500/30 bg-red-950/20'
                           : 'border-slate-700 focus:border-blue-500'
