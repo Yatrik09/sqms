@@ -5,13 +5,17 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.database.session import get_db
-from app.models.entities import User, Franchise, ServiceCenter, ServiceBay, Mechanic, AuditLog, SubscriptionInvoice
+from app.models.entities import (
+    User, Franchise, ServiceCenter, ServiceBay, Mechanic, AuditLog,
+    SubscriptionInvoice, SubscriptionPlanModel
+)
 from app.schemas.schemas import (
-    SubscriptionPlan, SubscriptionPurchaseRequest, BranchCreateRequest, BranchManagerCreate,
+    SubscriptionPlan, SubscriptionPlanCreate, SubscriptionPlanUpdate,
+    SubscriptionPurchaseRequest, BranchCreateRequest, BranchManagerCreate,
     BranchManagerResponse, UserResponse
 )
 from app.core.security import get_password_hash
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_roles
 
 router = APIRouter(prefix="/subscription", tags=["Subscriptions & Franchise"])
 
@@ -77,9 +81,210 @@ AVAILABLE_PLANS = [
     ),
 ]
 
+
+def seed_default_plans_if_needed(db: Session):
+    try:
+        count = db.query(SubscriptionPlanModel).count()
+        if count == 0:
+            for p in AVAILABLE_PLANS:
+                model = SubscriptionPlanModel(
+                    id=p.id,
+                    name=p.name,
+                    price_monthly=float(p.price_monthly),
+                    price_yearly=float(p.price_yearly),
+                    max_centers=p.max_centers,
+                    max_bays_per_center=p.max_bays_per_center,
+                    max_managers=p.max_managers,
+                    description=p.description,
+                    features=p.features,
+                    badge=p.badge,
+                    is_active=True
+                )
+                db.add(model)
+            db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[Subscriptions] Plan seed check notice: {e}")
+
+
 @router.get("/plans", response_model=List[SubscriptionPlan])
-def get_plans():
+def get_plans(db: Session = Depends(get_db)):
+    seed_default_plans_if_needed(db)
+    try:
+        models = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.is_active == True).order_by(SubscriptionPlanModel.price_monthly.asc()).all()
+        if models:
+            return [
+                SubscriptionPlan(
+                    id=m.id,
+                    name=m.name,
+                    price_monthly=m.price_monthly,
+                    price_yearly=m.price_yearly,
+                    max_centers=m.max_centers,
+                    max_bays_per_center=m.max_bays_per_center,
+                    max_managers=m.max_managers,
+                    description=m.description or "",
+                    features=m.features or [],
+                    badge=m.badge,
+                    is_active=m.is_active
+                ) for m in models
+            ]
+    except Exception:
+        pass
     return AVAILABLE_PLANS
+
+
+@router.get("/plans/admin", response_model=List[SubscriptionPlan])
+def get_all_plans_admin(
+    current_user: User = Depends(require_roles(["super_admin"])),
+    db: Session = Depends(get_db)
+):
+    seed_default_plans_if_needed(db)
+    try:
+        models = db.query(SubscriptionPlanModel).order_by(SubscriptionPlanModel.price_monthly.asc()).all()
+        if models:
+            return [
+                SubscriptionPlan(
+                    id=m.id,
+                    name=m.name,
+                    price_monthly=m.price_monthly,
+                    price_yearly=m.price_yearly,
+                    max_centers=m.max_centers,
+                    max_bays_per_center=m.max_bays_per_center,
+                    max_managers=m.max_managers,
+                    description=m.description or "",
+                    features=m.features or [],
+                    badge=m.badge,
+                    is_active=m.is_active
+                ) for m in models
+            ]
+    except Exception:
+        pass
+    return AVAILABLE_PLANS
+
+
+@router.post("/plans", response_model=SubscriptionPlan)
+def create_subscription_plan(
+    plan_in: SubscriptionPlanCreate,
+    current_user: User = Depends(require_roles(["super_admin"])),
+    db: Session = Depends(get_db)
+):
+    seed_default_plans_if_needed(db)
+    clean_id = (plan_in.id or plan_in.name.lower().replace(" ", "_").replace("-", "_")).strip()
+    existing = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.id == clean_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Plan with identifier '{clean_id}' already exists.")
+
+    new_plan = SubscriptionPlanModel(
+        id=clean_id,
+        name=plan_in.name.strip(),
+        price_monthly=float(plan_in.price_monthly),
+        price_yearly=float(plan_in.price_yearly),
+        max_centers=plan_in.max_centers,
+        max_bays_per_center=plan_in.max_bays_per_center,
+        max_managers=plan_in.max_managers,
+        description=plan_in.description or "",
+        features=plan_in.features or [],
+        badge=plan_in.badge or "Standard",
+        is_active=True
+    )
+    db.add(new_plan)
+    db.commit()
+    db.refresh(new_plan)
+    return SubscriptionPlan(
+        id=new_plan.id,
+        name=new_plan.name,
+        price_monthly=new_plan.price_monthly,
+        price_yearly=new_plan.price_yearly,
+        max_centers=new_plan.max_centers,
+        max_bays_per_center=new_plan.max_bays_per_center,
+        max_managers=new_plan.max_managers,
+        description=new_plan.description or "",
+        features=new_plan.features or [],
+        badge=new_plan.badge,
+        is_active=new_plan.is_active
+    )
+
+
+@router.put("/plans/{plan_id}", response_model=SubscriptionPlan)
+@router.patch("/plans/{plan_id}", response_model=SubscriptionPlan)
+def update_subscription_plan(
+    plan_id: str,
+    plan_in: SubscriptionPlanUpdate,
+    current_user: User = Depends(require_roles(["super_admin"])),
+    db: Session = Depends(get_db)
+):
+    seed_default_plans_if_needed(db)
+    plan = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Subscription plan not found.")
+
+    if plan_in.name is not None:
+        plan.name = plan_in.name.strip()
+    if plan_in.price_monthly is not None:
+        plan.price_monthly = float(plan_in.price_monthly)
+    if plan_in.price_yearly is not None:
+        plan.price_yearly = float(plan_in.price_yearly)
+    if plan_in.max_centers is not None:
+        plan.max_centers = plan_in.max_centers
+    if plan_in.max_bays_per_center is not None:
+        plan.max_bays_per_center = plan_in.max_bays_per_center
+    if plan_in.max_managers is not None:
+        plan.max_managers = plan_in.max_managers
+    if plan_in.description is not None:
+        plan.description = plan_in.description
+    if plan_in.features is not None:
+        plan.features = plan_in.features
+    if plan_in.badge is not None:
+        plan.badge = plan_in.badge
+    if plan_in.is_active is not None:
+        plan.is_active = plan_in.is_active
+
+    db.commit()
+    db.refresh(plan)
+    return SubscriptionPlan(
+        id=plan.id,
+        name=plan.name,
+        price_monthly=plan.price_monthly,
+        price_yearly=plan.price_yearly,
+        max_centers=plan.max_centers,
+        max_bays_per_center=plan.max_bays_per_center,
+        max_managers=plan.max_managers,
+        description=plan.description or "",
+        features=plan.features or [],
+        badge=plan.badge,
+        is_active=plan.is_active
+    )
+
+
+@router.delete("/plans/{plan_id}")
+def delete_subscription_plan(
+    plan_id: str,
+    current_user: User = Depends(require_roles(["super_admin"])),
+    db: Session = Depends(get_db)
+):
+    seed_default_plans_if_needed(db)
+    plan = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.id == plan_id).first()
+    if not plan:
+        raise HTTPException(status_code=404, detail="Subscription plan not found.")
+
+    active_subscribers = db.query(User).filter(User.plan_tier == plan_id).count()
+    if active_subscribers > 0:
+        plan.is_active = False
+        db.commit()
+        return {
+            "success": True,
+            "message": f"Plan '{plan.name}' is currently used by {active_subscribers} user(s). It has been deactivated.",
+            "action": "deactivated"
+        }
+
+    db.delete(plan)
+    db.commit()
+    return {
+        "success": True,
+        "message": f"Plan '{plan.name}' was permanently deleted.",
+        "action": "deleted"
+    }
+
 
 @router.post("/purchase")
 def purchase_plan(
@@ -87,7 +292,13 @@ def purchase_plan(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    plan = next((p for p in AVAILABLE_PLANS if p.id == req.plan_id), None)
+    seed_default_plans_if_needed(db)
+    db_plan = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.id == req.plan_id).first()
+    if db_plan:
+        plan = db_plan
+    else:
+        plan = next((p for p in AVAILABLE_PLANS if p.id == req.plan_id), None)
+
     if not plan:
         raise HTTPException(status_code=400, detail="Invalid subscription plan selected.")
 

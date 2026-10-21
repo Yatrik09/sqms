@@ -313,13 +313,6 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           >
             <span>My Vehicles ({Array.isArray(vehicles) ? vehicles.length : 0})</span>
           </button>
-          <button
-            onClick={() => setShowPlansModal(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-blue-500 to-indigo-600 hover:from-emerald-400 hover:to-indigo-500 text-white font-bold text-xs shadow-lg transition flex items-center space-x-1.5 cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-300" />
-            <span>Become Franchise Owner</span>
-          </button>
         </div>
       </div>
 

@@ -7,27 +7,61 @@ export { useAuth } from './auth-context';
 export type { AuthContextType } from './auth-context';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const cached = localStorage.getItem('sqms_cached_user');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState<string | null>(localStorage.getItem('sqms_token'));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    const t = localStorage.getItem('sqms_token');
+    const c = localStorage.getItem('sqms_cached_user');
+    return Boolean(t && !c);
+  });
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [lastWsEvent, setLastWsEvent] = useState<any>(null);
   const [logoutNotice, setLogoutNotice] = useState<string | null>(null);
 
-  // Initialize or load profile
+  const saveUser = (u: User | null) => {
+    setUser(u);
+    if (u) {
+      try {
+        localStorage.setItem('sqms_cached_user', JSON.stringify(u));
+      } catch {
+        // ignore
+      }
+    } else {
+      localStorage.removeItem('sqms_cached_user');
+    }
+  };
+
+  // Proactive Keepalive to prevent Render free-tier cold starts
+  useEffect(() => {
+    api.warmupBackend();
+    const keepalive = setInterval(() => {
+      api.warmupBackend();
+    }, 210000); // 3.5 mins
+    return () => clearInterval(keepalive);
+  }, []);
+
+  // Initialize or revalidate profile in background
   useEffect(() => {
     async function loadUser() {
-      if (token && !user) {
+      if (token) {
         try {
           const profile = await api.getMe();
-          setUser(profile);
+          saveUser(profile);
         } catch {
+          // If token expired or invalid, reset
           localStorage.removeItem('sqms_token');
           setToken(null);
-          setUser(null);
+          saveUser(null);
         }
-      } else if (!token) {
-        setUser(null);
+      } else {
+        saveUser(null);
       }
       setIsLoading(false);
     }
@@ -92,7 +126,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const res = await api.login(email, pass);
     localStorage.setItem('sqms_token', res.access_token);
     setToken(res.access_token);
-    setUser(res.user);
+    saveUser(res.user);
     return res;
   };
 
@@ -110,7 +144,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const res = await api.register(name, email, pass, phone, city, area, latitude, longitude);
     localStorage.setItem('sqms_token', res.access_token);
     setToken(res.access_token);
-    setUser(res.user);
+    saveUser(res.user);
     return res;
   };
 
@@ -119,7 +153,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const res = await api.resetPassword(email, newPassword);
     localStorage.setItem('sqms_token', res.access_token);
     setToken(res.access_token);
-    setUser(res.user);
+    saveUser(res.user);
     return res;
   };
 
@@ -133,7 +167,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const res = await api.verifyOTPAndResetPassword(email, otp, newPassword);
     localStorage.setItem('sqms_token', res.access_token);
     setToken(res.access_token);
-    setUser(res.user);
+    saveUser(res.user);
     return res;
   };
 
@@ -149,14 +183,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     new_password?: string;
   }) => {
     const updatedUser = await api.updateProfile(data);
-    setUser(updatedUser);
+    saveUser(updatedUser);
     return updatedUser;
   };
 
   const refreshUser = async () => {
     try {
       const profile = await api.getMe();
-      setUser(profile);
+      saveUser(profile);
       return profile;
     } catch (e) {
       console.error('Failed to refresh user:', e);
@@ -167,7 +201,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     localStorage.removeItem('sqms_token');
     setToken(null);
-    setUser(null);
+    saveUser(null);
     setLogoutNotice('You have been logged out successfully. Sign in with your credentials to access the system.');
   };
 

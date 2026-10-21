@@ -13,7 +13,7 @@ except ImportError:
 
 from app.core.config import settings
 from app.database.session import get_db
-from app.models.entities import User, Franchise, ServiceCenter, ServiceBay, Mechanic, SubscriptionInvoice, AuditLog
+from app.models.entities import User, Franchise, ServiceCenter, ServiceBay, Mechanic, SubscriptionInvoice, AuditLog, SubscriptionPlanModel
 from app.api.deps import get_optional_current_user
 from app.api.subscriptions import AVAILABLE_PLANS
 from app.schemas.schemas import (
@@ -196,7 +196,9 @@ def verify_razorpay_payment(
 
     # 3. Post-verification: Fulfill subscription and upgrade customer to franchise_owner
     plan_id = (req.plan_id or (req.notes and req.notes.get("plan_id")) or "growth").lower()
-    plan_obj = next((p for p in AVAILABLE_PLANS if p.id.lower() == plan_id), None)
+    plan_obj = db.query(SubscriptionPlanModel).filter(SubscriptionPlanModel.id == plan_id).first()
+    if not plan_obj:
+        plan_obj = next((p for p in AVAILABLE_PLANS if p.id.lower() == plan_id), None)
 
     plan_names = {
         "starter": "Single Hub Starter",

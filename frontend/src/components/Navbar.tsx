@@ -98,70 +98,65 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 text-white shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
-          <div
-            className="flex items-center space-x-3 cursor-pointer select-none"
-            onClick={() => {
-              if (user?.role === 'customer') switchTab('active-service');
-              else if (user?.role === 'branch_manager') switchTab('manager-queue');
-              else if (user?.role === 'franchise_owner') switchTab('owner-overview');
-              else if (user?.role === 'super_admin') switchTab('admin-dashboard');
-            }}
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30">
-              <Car className="w-6 h-6 text-white" />
+          {/* Brand Logo & Navigation Links */}
+          <div className="flex items-center">
+            {/* Logo & Brand */}
+            <div
+              className="flex items-center space-x-3 cursor-pointer select-none mr-8 lg:mr-10 shrink-0"
+              onClick={() => {
+                if (user?.role === 'customer') switchTab('active-service');
+                else if (user?.role === 'branch_manager') switchTab('manager-queue');
+                else if (user?.role === 'franchise_owner') switchTab('owner-overview');
+                else if (user?.role === 'super_admin') switchTab('admin-dashboard');
+              }}
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30">
+                <Car className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex items-center">
+                <span className="text-2xl font-black tracking-tight text-white">Smart</span>
+                <span className="text-2xl font-black tracking-tight text-blue-500 ml-1">Q</span>
+              </div>
             </div>
-            <div className="flex items-center">
-              <span className="text-2xl font-black tracking-tight text-white">Smart</span>
-              <span className="text-2xl font-black tracking-tight text-blue-500 ml-1">Q</span>
-            </div>
-          </div>
 
-          {/* Navigation Links per Authenticated Role */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {user?.role === 'customer' && (
-              <>
-                <button
-                  onClick={() => switchTab('active-service')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'active-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Live Service Tracking
-                </button>
-                <button
-                  onClick={() => switchTab('book-service')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'book-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Book Service & AI Recommendation
-                </button>
-                <button
-                  onClick={() => switchTab('my-vehicles')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'my-vehicles' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  My Vehicles
-                </button>
-                <button
-                  onClick={() => switchTab('about-us')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  About Us
-                </button>
-                <button
-                  onClick={() => setShowPlansModal(true)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500/25 via-blue-500/25 to-indigo-500/25 hover:from-emerald-500/35 hover:to-indigo-500/35 text-emerald-300 border border-emerald-500/40 shadow-sm cursor-pointer ml-1"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                  <span>Upgrade to Franchise</span>
-                </button>
-              </>
-            )}
+            {/* Navigation Links per Authenticated Role */}
+            <nav className="hidden md:flex items-center space-x-1.5">
+              {user?.role === 'customer' && (
+                <>
+                  <button
+                    onClick={() => switchTab('active-service')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      currentTab === 'active-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    Live Service Queue Tracking
+                  </button>
+                  <button
+                    onClick={() => switchTab('book-service')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      currentTab === 'book-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    Book Service & AI Recommendation
+                  </button>
+                  <button
+                    onClick={() => switchTab('my-vehicles')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      currentTab === 'my-vehicles' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    My Vehicles
+                  </button>
+                  <button
+                    onClick={() => switchTab('about-us')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                      currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
 
             {user?.role === 'technician' && (
               <>
@@ -301,6 +296,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               </>
             )}
           </nav>
+        </div>
 
           {/* Right Controls: User Profile, Notifications, Direct Log Out */}
           <div className="flex items-center space-x-3 sm:space-x-4 pl-4 border-l border-slate-800">
@@ -452,27 +448,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                       </button>
                     )}
 
-                    {/* 2b. For Customers: Upgrade to Franchise Owner CTA */}
-                    {user?.role === 'customer' && (
-                      <button
-                        onClick={() => {
-                          setOpenDropdown(null);
-                          setShowPlansModal(true);
-                        }}
-                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-indigo-500/20 hover:from-emerald-500/30 hover:to-indigo-500/30 text-emerald-300 hover:text-emerald-200 border border-emerald-500/30 text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer shadow-sm text-left"
-                      >
-                        <Sparkles className="w-4 h-4 text-yellow-300 shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <span className="leading-tight">Upgrade to Franchise</span>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-200 font-semibold border border-emerald-400/30">
-                              Partner
-                            </span>
-                          </div>
-                          <div className="text-[10px] text-emerald-300/80 font-normal">Start your workshop franchise</div>
-                        </div>
-                      </button>
-                    )}
+
 
 
                     {/* 3. Log Out */}
@@ -524,7 +500,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   }`}
                 >
                   <Car className="w-4 h-4 text-blue-400" />
-                  <span>Live Service Tracking</span>
+                  <span>Live Service Queue Tracking</span>
                 </button>
                 <button
                   onClick={() => { switchTab('book-service'); setMobileMenuOpen(false); }}
@@ -552,13 +528,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 >
                   <Building2 className="w-4 h-4 text-slate-400" />
                   <span>About Us</span>
-                </button>
-                <button
-                  onClick={() => { setShowPlansModal(true); setMobileMenuOpen(false); }}
-                  className="w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500/20 to-blue-500/20 text-emerald-300 border border-emerald-500/40 transition flex items-center space-x-2.5 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-300" />
-                  <span>Upgrade to Franchise</span>
                 </button>
               </>
             )}

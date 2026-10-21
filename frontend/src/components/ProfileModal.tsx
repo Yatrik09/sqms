@@ -252,38 +252,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onO
               </div>
             )}
 
-            {/* For Customers: Upgrade to Franchise Owner Card */}
-            {user.role === 'customer' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-slate-800/80 to-blue-950/60 border border-emerald-500/40 space-y-3 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-300 flex items-center space-x-1.5 uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-                    <span>SQMS Partner Program</span>
-                  </span>
-                  <span className="text-[10px] font-black text-emerald-300 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40">
-                    Workshop Franchise
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Upgrade your customer account to a <strong className="text-white">Franchise Owner</strong>. Launch your own workshop centers, auto-provision service bays, assign technicians, and monitor AI queue analytics in real-time.
-                </p>
-                <div className="pt-2 border-t border-slate-700/60 flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-xs text-slate-400">Razorpay Standard Checkout available</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenPlans?.();
-                    }}
-                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-emerald-500/25 cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                    <span>View Plans & Upgrade</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Feedback messages */}
             {successMessage && (

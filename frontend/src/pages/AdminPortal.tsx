@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import type { ServiceCenter } from '../types';
+import type { ServiceCenter, SubscriptionPlan } from '../types';
 import {
   Shield, Building2, Users, Activity, Settings, RefreshCw, CheckCircle2,
   Clock, Layers, Sparkles, TrendingUp, CreditCard, ArrowRight, Check,
-  DollarSign, Receipt, Award
+  DollarSign, Receipt, Award, Edit3, Trash2, Plus, X, AlertCircle, AlertTriangle,
+  Eye, EyeOff, CheckCircle
 } from 'lucide-react';
 
 export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'overview' }) => {
@@ -13,24 +14,162 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
   const [analytics, setAnalytics] = useState<any>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [subscriptionOverview, setSubscriptionOverview] = useState<any>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Admin Plan Management State
+  const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [deleteConfirmPlan, setDeleteConfirmPlan] = useState<SubscriptionPlan | null>(null);
+  const [planActionLoading, setPlanActionLoading] = useState<boolean>(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Plan Form State
+  const [formId, setFormId] = useState('');
+  const [formName, setFormName] = useState('');
+  const [formBadge, setFormBadge] = useState('Standard');
+  const [formPriceMonthly, setFormPriceMonthly] = useState<number>(499);
+  const [formPriceYearly, setFormPriceYearly] = useState<number>(5000);
+  const [formMaxCenters, setFormMaxCenters] = useState<number>(1);
+  const [formMaxBays, setFormMaxBays] = useState<number>(8);
+  const [formMaxManagers, setFormMaxManagers] = useState<number>(1);
+  const [formDescription, setFormDescription] = useState('');
+  const [formFeaturesText, setFormFeaturesText] = useState('');
+  const [formIsActive, setFormIsActive] = useState<boolean>(true);
 
   const loadData = async () => {
     try {
-      const [cList, aData, logs, subData] = await Promise.all([
+      const [cList, aData, logs, subData, pList] = await Promise.all([
         api.getServiceCenters().catch(() => []),
         api.getAdminAnalytics().catch(() => null),
         api.getAuditLogs(30).catch(() => []),
         api.getAdminSubscriptionOverview().catch(() => null),
+        api.getAdminSubscriptionPlans().catch(() => []),
       ]);
       setCenters(cList);
       setAnalytics(aData);
       setAuditLogs(logs);
       setSubscriptionOverview(subData);
+      setPlans(pList);
     } catch (e) {
       console.error('Failed to load admin data', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenEdit = (plan: SubscriptionPlan) => {
+    setEditingPlan(plan);
+    setFormId(plan.id);
+    setFormName(plan.name);
+    setFormBadge(plan.badge || 'Standard');
+    setFormPriceMonthly(plan.price_monthly);
+    setFormPriceYearly(plan.price_yearly);
+    setFormMaxCenters(plan.max_centers);
+    setFormMaxBays(plan.max_bays_per_center);
+    setFormMaxManagers(plan.max_managers);
+    setFormDescription(plan.description || '');
+    setFormFeaturesText((plan.features || []).join('\n'));
+    setFormIsActive(plan.is_active !== false);
+    setFeedback(null);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingPlan(null);
+    setFormId('');
+    setFormName('');
+    setFormBadge('Custom Hub');
+    setFormPriceMonthly(999);
+    setFormPriceYearly(9999);
+    setFormMaxCenters(2);
+    setFormMaxBays(10);
+    setFormMaxManagers(2);
+    setFormDescription('Targeted multi-bay workshop configuration with high concurrency.');
+    setFormFeaturesText('2 Service Center Locations\nDynamic Wait Time Queue Prediction\nUp to 10 Service Bays\n2 Dedicated Branch Managers');
+    setFormIsActive(true);
+    setIsCreateModalOpen(true);
+    setFeedback(null);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlan) return;
+    setPlanActionLoading(true);
+    try {
+      const features = formFeaturesText
+        .split('\n')
+        .map(f => f.trim())
+        .filter(f => f.length > 0);
+
+      await api.updateSubscriptionPlan(editingPlan.id, {
+        name: formName.trim(),
+        price_monthly: Number(formPriceMonthly),
+        price_yearly: Number(formPriceYearly),
+        max_centers: Number(formMaxCenters),
+        max_bays_per_center: Number(formMaxBays),
+        max_managers: Number(formMaxManagers),
+        badge: formBadge.trim(),
+        description: formDescription.trim(),
+        features,
+        is_active: formIsActive
+      });
+
+      setFeedback({ type: 'success', message: `Plan "${formName}" updated successfully!` });
+      setEditingPlan(null);
+      await loadData();
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err?.message || 'Failed to update plan' });
+    } finally {
+      setPlanActionLoading(false);
+    }
+  };
+
+  const handleSaveCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPlanActionLoading(true);
+    try {
+      const features = formFeaturesText
+        .split('\n')
+        .map(f => f.trim())
+        .filter(f => f.length > 0);
+
+      const cleanId = (formId.trim() || formName.toLowerCase().replace(/[^a-z0-9]+/g, '_')).trim();
+
+      await api.createSubscriptionPlan({
+        id: cleanId,
+        name: formName.trim(),
+        price_monthly: Number(formPriceMonthly),
+        price_yearly: Number(formPriceYearly),
+        max_centers: Number(formMaxCenters),
+        max_bays_per_center: Number(formMaxBays),
+        max_managers: Number(formMaxManagers),
+        badge: formBadge.trim(),
+        description: formDescription.trim(),
+        features,
+      });
+
+      setFeedback({ type: 'success', message: `New Plan "${formName}" created successfully!` });
+      setIsCreateModalOpen(false);
+      await loadData();
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err?.message || 'Failed to create plan' });
+    } finally {
+      setPlanActionLoading(false);
+    }
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!deleteConfirmPlan) return;
+    setPlanActionLoading(true);
+    try {
+      const res = await api.deleteSubscriptionPlan(deleteConfirmPlan.id);
+      setFeedback({ type: 'success', message: res.message || `Plan "${deleteConfirmPlan.name}" removed.` });
+      setDeleteConfirmPlan(null);
+      await loadData();
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err?.message || 'Failed to delete plan' });
+    } finally {
+      setPlanActionLoading(false);
     }
   };
 
@@ -180,102 +319,190 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
       {/* TAB 1: PLANS & REVENUE ANALYTICS */}
       {tab === 'overview' && (
         <div className="space-y-8">
-          {/* 3 Plans Sales & Revenue Breakdown Cards */}
+          {/* Feedback banner */}
+          {feedback && (
+            <div className={`p-4 rounded-2xl flex items-center justify-between border ${
+              feedback.type === 'success'
+                ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
+                : 'bg-red-950/60 border-red-500/40 text-red-300'
+            }`}>
+              <div className="flex items-center space-x-2.5 text-xs font-semibold">
+                {feedback.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />}
+                <span>{feedback.message}</span>
+              </div>
+              <button onClick={() => setFeedback(null)} className="p-1 hover:text-white cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Subscription Plans Management Header & Grid */}
           <div>
-            <div className="mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-emerald-400" />
-                <span>Subscription Plans Sales & Revenue Breakdown</span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Track how many of each subscription tier have been purchased by franchise owners and total revenue generated.
-              </p>
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center space-x-2">
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                  <span>Subscription Plans Management & Pricing</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Full Super Admin control to create, edit, customize pricing, quotas, features, or deactivate subscription tiers.
+                </p>
+              </div>
+              <button
+                onClick={handleOpenCreate}
+                className="px-4 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create New Plan</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Plan 1: Starter */}
-              <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-xl hover:border-slate-700 transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    Single Workshop
-                  </span>
-                  <span className="text-xs font-mono font-bold text-slate-400">₹499 / mo</span>
-                </div>
+              {(plans.length > 0 ? plans : [
+                {
+                  id: 'starter',
+                  name: 'Single Hub Starter',
+                  price_monthly: 499,
+                  price_yearly: 5000,
+                  max_centers: 1,
+                  max_bays_per_center: 8,
+                  max_managers: 1,
+                  badge: 'Single Workshop',
+                  description: 'Single-location service centers with up to 8 bays & 1 manager.',
+                  features: ['1 Workshop listing', 'Dynamic Wait Time ML', 'Up to 8 Bays', '1 Branch Manager'],
+                  is_active: true
+                },
+                {
+                  id: 'growth',
+                  name: 'Multi-Branch Growth',
+                  price_monthly: 1499,
+                  price_yearly: 15000,
+                  max_centers: 5,
+                  max_bays_per_center: 15,
+                  max_managers: 5,
+                  badge: 'Most Popular',
+                  description: 'Multi-city automotive networks with up to 5 branch locations.',
+                  features: ['Up to 5 Service Centers', 'Multi-Branch Load Balancing', '5 Branch Managers', 'Surge Predictions'],
+                  is_active: true
+                },
+                {
+                  id: 'enterprise',
+                  name: 'Enterprise Franchise',
+                  price_monthly: 1999,
+                  price_yearly: 20000,
+                  max_centers: 999,
+                  max_bays_per_center: 30,
+                  max_managers: 999,
+                  badge: 'Full Network',
+                  description: 'Unlimited workshop branches, custom ML retraining, and SLA.',
+                  features: ['Unlimited Branches', 'Unlimited Managers', 'Custom ML Retraining', '24/7 SLA Support'],
+                  is_active: true
+                }
+              ]).map((p) => {
+                const tierStat = subscriptionOverview?.tier_breakdown?.[p.id];
+                const isInactive = p.is_active === false;
+                return (
+                  <div
+                    key={p.id}
+                    className={`bg-slate-900/90 border rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-xl card-glow flex flex-col justify-between transition ${
+                      isInactive ? 'border-slate-800 opacity-70' : 'border-slate-800 hover:border-purple-500/50'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                            {p.badge || 'Standard'}
+                          </span>
+                          {isInactive ? (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
+                              <EyeOff className="w-3 h-3 text-slate-400" /> Inactive
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                              <Eye className="w-3 h-3 text-emerald-400" /> Active
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-base font-black text-white">₹{Number(p.price_monthly).toLocaleString()} <span className="text-[10px] font-normal text-slate-400">/ mo</span></div>
+                          <div className="text-[11px] font-medium text-slate-400">₹{Number(p.price_yearly).toLocaleString()} / yr</div>
+                        </div>
+                      </div>
 
-                <div>
-                  <h4 className="text-xl font-black text-white">{tier.starter?.name || 'Single Hub Starter'}</h4>
-                  <p className="text-xs text-slate-400 mt-1">Single-location service centers with up to 8 bays & 1 manager.</p>
-                </div>
+                      <h4 className="text-xl font-black text-white">{p.name}</h4>
+                      <div className="text-[11px] font-mono text-slate-500">ID: {p.id}</div>
+                      <p className="text-xs text-slate-300 mt-2 leading-relaxed">{p.description}</p>
 
-                <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4">
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Plans Sold</span>
-                    <span className="text-2xl font-black text-white mt-0.5 block">{tier.starter?.count ?? 0}</span>
+                      {/* Quotas */}
+                      <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800/80 text-center">
+                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Centers</span>
+                          <span className="text-sm font-black text-white">{p.max_centers}</span>
+                        </div>
+                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Bays/Ctr</span>
+                          <span className="text-sm font-black text-white">{p.max_bays_per_center}</span>
+                        </div>
+                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Managers</span>
+                          <span className="text-sm font-black text-white">{p.max_managers}</span>
+                        </div>
+                      </div>
+
+                      {/* Features bullet list */}
+                      {p.features && p.features.length > 0 && (
+                        <div className="mt-4 space-y-1.5 pt-3 border-t border-slate-800/60">
+                          {p.features.slice(0, 5).map((feat, fidx) => (
+                            <div key={fidx} className="flex items-start text-xs text-slate-300">
+                              <Check className="w-3.5 h-3.5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                              <span className="leading-tight">{feat}</span>
+                            </div>
+                          ))}
+                          {p.features.length > 5 && (
+                            <div className="text-[11px] text-slate-500 pl-5.5">+ {p.features.length - 5} more features</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      {/* Sales telemetry */}
+                      <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Plans Sold</span>
+                          <span className="text-lg font-black text-white mt-0.5 block">{tierStat?.count ?? 0}</span>
+                        </div>
+                        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Revenue</span>
+                          <span className="text-lg font-black text-emerald-400 mt-0.5 block">
+                            ₹{(tierStat?.revenue ?? 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons: Edit and Delete */}
+                      <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+                        <button
+                          onClick={() => handleOpenEdit(p)}
+                          className="flex-1 py-2 px-3 rounded-xl bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit Plan</span>
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmPlan(p)}
+                          className="py-2 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 hover:text-red-200 border border-red-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          title="Delete or Deactivate Plan"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Revenue</span>
-                    <span className="text-2xl font-black text-emerald-400 mt-0.5 block">
-                      ₹{(tier.starter?.revenue ?? 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Plan 2: Growth (Most Popular) */}
-              <div className="bg-slate-900/90 border border-indigo-500/40 rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-xl hover:border-indigo-500/60 transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                    Most Popular
-                  </span>
-                  <span className="text-xs font-mono font-bold text-indigo-300">₹11,999 / mo</span>
-                </div>
-
-                <div>
-                  <h4 className="text-xl font-black text-white">{tier.growth?.name || 'Multi-Branch Growth'}</h4>
-                  <p className="text-xs text-slate-300 mt-1">Multi-city automotive networks with up to 5 branch locations.</p>
-                </div>
-
-                <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4">
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Plans Sold</span>
-                    <span className="text-2xl font-black text-white mt-0.5 block">{tier.growth?.count ?? 0}</span>
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Revenue</span>
-                    <span className="text-2xl font-black text-emerald-400 mt-0.5 block">
-                      ₹{Math.round(tier.growth?.revenue ?? 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Plan 3: Enterprise */}
-              <div className="bg-slate-900/90 border border-purple-500/30 rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-xl hover:border-purple-500/50 transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                    Full Network
-                  </span>
-                  <span className="text-xs font-mono font-bold text-purple-300">₹24,999 / mo</span>
-                </div>
-
-                <div>
-                  <h4 className="text-xl font-black text-white">{tier.enterprise?.name || 'Enterprise Franchise'}</h4>
-                  <p className="text-xs text-slate-400 mt-1">Unlimited workshop branches, custom ML retraining, and SLA.</p>
-                </div>
-
-                <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4">
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Plans Sold</span>
-                    <span className="text-2xl font-black text-white mt-0.5 block">{tier.enterprise?.count ?? 0}</span>
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
-                    <span className="text-[10px] text-slate-500 uppercase font-bold block">Revenue</span>
-                    <span className="text-2xl font-black text-emerald-400 mt-0.5 block">
-                      ₹{(tier.enterprise?.revenue ?? 0).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
 
@@ -507,6 +734,385 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: EDIT PLAN */}
+      {editingPlan && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-2xl w-full text-white shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Edit Subscription Plan</h3>
+                  <span className="text-xs font-mono text-purple-400">ID: {editingPlan.id}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingPlan(null)}
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Display Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    placeholder="e.g. Single Hub Starter"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Badge Tag</label>
+                  <input
+                    type="text"
+                    value={formBadge}
+                    onChange={(e) => setFormBadge(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    placeholder="e.g. Most Popular, Single Workshop"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Monthly Price (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    step={1}
+                    value={formPriceMonthly}
+                    onChange={(e) => setFormPriceMonthly(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Yearly Price (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    step={1}
+                    value={formPriceYearly}
+                    onChange={(e) => setFormPriceYearly(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Centers</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxCenters}
+                    onChange={(e) => setFormMaxCenters(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Bays / Center</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxBays}
+                    onChange={(e) => setFormMaxBays(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Managers</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxManagers}
+                    onChange={(e) => setFormMaxManagers(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Plan Description</label>
+                <textarea
+                  rows={2}
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+                  placeholder="Summary of who this plan is tailored for..."
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-300">Features List</label>
+                  <span className="text-[10px] text-slate-400">One feature per line</span>
+                </div>
+                <textarea
+                  rows={5}
+                  value={formFeaturesText}
+                  onChange={(e) => setFormFeaturesText(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500 leading-relaxed"
+                  placeholder="1 Service Center&#10;Up to 8 Bays&#10;Dynamic Waiting Time Prediction"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="formIsActiveEdit"
+                  checked={formIsActive}
+                  onChange={(e) => setFormIsActive(e.target.checked)}
+                  className="w-4 h-4 rounded text-purple-600 bg-slate-950 border-slate-700 cursor-pointer"
+                />
+                <label htmlFor="formIsActiveEdit" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                  Plan is Active (Visible to franchise owners during purchase/upgrade)
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingPlan(null)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={planActionLoading}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-purple-500/25 cursor-pointer disabled:opacity-50"
+                >
+                  {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Plan Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: CREATE PLAN */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-2xl w-full text-white shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-500/30">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Create New Subscription Plan</h3>
+                  <span className="text-xs text-slate-400">Add a custom franchise tier with bespoke quotas & pricing</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsCreateModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCreate} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Identifier (Slug) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formId}
+                    onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500"
+                    placeholder="e.g. regional_tier"
+                  />
+                  <span className="text-[10px] text-slate-500 mt-0.5 block">Lowercase key used internally & by payment gateway</span>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Display Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    placeholder="e.g. Regional Fleet Pro"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Badge Tag</label>
+                  <input
+                    type="text"
+                    value={formBadge}
+                    onChange={(e) => setFormBadge(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    placeholder="e.g. Custom Hub"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Monthly Price (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    step={1}
+                    value={formPriceMonthly}
+                    onChange={(e) => setFormPriceMonthly(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Yearly Price (₹) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    step={1}
+                    value={formPriceYearly}
+                    onChange={(e) => setFormPriceYearly(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Centers</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxCenters}
+                    onChange={(e) => setFormMaxCenters(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Bays / Center</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxBays}
+                    onChange={(e) => setFormMaxBays(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Managers</label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={formMaxManagers}
+                    onChange={(e) => setFormMaxManagers(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-300 block mb-1">Plan Description</label>
+                <textarea
+                  rows={2}
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+                  placeholder="Short overview of the plan..."
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-300">Features List</label>
+                  <span className="text-[10px] text-slate-400">One feature per line</span>
+                </div>
+                <textarea
+                  rows={4}
+                  value={formFeaturesText}
+                  onChange={(e) => setFormFeaturesText(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500 leading-relaxed"
+                  placeholder="2 Workshop Centers&#10;Up to 10 Service Bays&#10;Dynamic Waiting Time Prediction"
+                />
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={planActionLoading}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-purple-500/25 cursor-pointer disabled:opacity-50"
+                >
+                  {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Create Plan</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: DELETE CONFIRMATION */}
+      {deleteConfirmPlan && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-red-500/40 rounded-3xl p-6 sm:p-7 max-w-md w-full text-white shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-red-400">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-base font-bold text-white">Delete Subscription Plan?</h3>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Are you sure you want to remove <strong className="text-white">{deleteConfirmPlan.name}</strong> (<code className="text-red-300">{deleteConfirmPlan.id}</code>)?
+            </p>
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+              💡 <strong>Safe Deactivation Policy:</strong> If any franchise owner has an active subscription under this tier, SQMS will safely deactivate the plan so their operations continue uninterrupted while removing it from checkout. If unused, it is permanently deleted.
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmPlan(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={planActionLoading}
+                onClick={handleExecuteDelete}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-red-500/25 cursor-pointer disabled:opacity-50"
+              >
+                {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                <span>Yes, Delete / Deactivate</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

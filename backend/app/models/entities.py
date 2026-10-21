@@ -66,6 +66,23 @@ class SubscriptionInvoice(Base):
     franchise = relationship("Franchise")
 
 
+class SubscriptionPlanModel(Base):
+    __tablename__ = "subscription_plans"
+
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    price_monthly = Column(Float, nullable=False, default=499.0)
+    price_yearly = Column(Float, nullable=False, default=5000.0)
+    max_centers = Column(Integer, default=1)
+    max_bays_per_center = Column(Integer, default=8)
+    max_managers = Column(Integer, default=1)
+    description = Column(Text, nullable=True)
+    features = Column(JSON, default=list)
+    badge = Column(String(50), nullable=True, default="Standard")
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
 class Franchise(Base):
     __tablename__ = "franchises"
 

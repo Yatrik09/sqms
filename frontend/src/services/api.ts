@@ -1,5 +1,33 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sqms-backend-gd00.onrender.com/api';
 
+// In-memory lightweight cache with TTL for static/infrequent data (prevents redundant network round-trips)
+const apiCache = new Map<string, { timestamp: number; data: any }>();
+const CACHE_TTL_MS = 30000; // 30s cache
+
+function getCached<T>(key: string): T | null {
+  const cached = apiCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data as T;
+  }
+  return null;
+}
+
+function setCache(key: string, data: any) {
+  apiCache.set(key, { timestamp: Date.now(), data });
+}
+
+export function invalidateApiCache(prefix?: string) {
+  if (!prefix) {
+    apiCache.clear();
+  } else {
+    for (const key of apiCache.keys()) {
+      if (key.startsWith(prefix)) {
+        apiCache.delete(key);
+      }
+    }
+  }
+}
+
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('sqms_token');
   const headers: Record<string, string> = {
@@ -12,6 +40,16 @@ function getAuthHeaders(): HeadersInit {
 }
 
 export const api = {
+  // --- KEEPALIVE & WARMUP (Prevents Render cold starts) ---
+  warmupBackend() {
+    try {
+      const rootUrl = API_BASE_URL.replace(/\/api\/?$/, '');
+      fetch(`${rootUrl}/health`, { method: 'GET', keepalive: true }).catch(() => {});
+    } catch {
+      // ignore
+    }
+  },
+
   // --- AUTH ---
   async login(email: string, password: string) {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -494,8 +532,89 @@ export const api = {
   },
 
   // --- SUBSCRIPTIONS & FRANCHISE ---
-  async getSubscriptionPlans() {
+  async getSubscriptionPlans(forceRefresh: boolean = false) {
+    const cacheKey = 'subscription_plans';
+    if (!forceRefresh) {
+      const cached = getCached<any>(cacheKey);
+      if (cached) return cached;
+    }
     const res = await fetch(`${API_BASE_URL}/subscription/plans`);
+    const data = await res.json();
+    setCache(cacheKey, data);
+    return data;
+  },
+
+  async getAdminSubscriptionPlans() {
+    const res = await fetch(`${API_BASE_URL}/subscription/plans/admin`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to fetch admin subscription plans' }));
+      throw new Error(err.detail || 'Failed to fetch admin subscription plans');
+    }
+    return res.json();
+  },
+
+  async createSubscriptionPlan(data: {
+    id?: string;
+    name: string;
+    price_monthly: number;
+    price_yearly: number;
+    max_centers: number;
+    max_bays_per_center: number;
+    max_managers: number;
+    description?: string;
+    features?: string[];
+    badge?: string;
+  }) {
+    const res = await fetch(`${API_BASE_URL}/subscription/plans`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to create subscription plan' }));
+      throw new Error(err.detail || 'Failed to create subscription plan');
+    }
+    invalidateApiCache('subscription_plans');
+    return res.json();
+  },
+
+  async updateSubscriptionPlan(planId: string, data: {
+    name?: string;
+    price_monthly?: number;
+    price_yearly?: number;
+    max_centers?: number;
+    max_bays_per_center?: number;
+    max_managers?: number;
+    description?: string;
+    features?: string[];
+    badge?: string;
+    is_active?: boolean;
+  }) {
+    const res = await fetch(`${API_BASE_URL}/subscription/plans/${encodeURIComponent(planId)}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to update subscription plan' }));
+      throw new Error(err.detail || 'Failed to update subscription plan');
+    }
+    invalidateApiCache('subscription_plans');
+    return res.json();
+  },
+
+  async deleteSubscriptionPlan(planId: string) {
+    const res = await fetch(`${API_BASE_URL}/subscription/plans/${encodeURIComponent(planId)}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to delete subscription plan' }));
+      throw new Error(err.detail || 'Failed to delete subscription plan');
+    }
+    invalidateApiCache('subscription_plans');
     return res.json();
   },
 

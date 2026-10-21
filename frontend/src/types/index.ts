@@ -196,6 +196,7 @@ export interface SubscriptionPlan {
   description: string;
   features: string[];
   badge?: string;
+  is_active?: boolean;
 }
 
 export interface SubscriptionPurchaseRequest {

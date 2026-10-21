@@ -106,5 +106,4 @@ from app.database.init_db import init_db
 @app.on_event("startup")
 def on_startup():
     init_db()
-    predictor.load_models()
     print("SQMS Backend initialized successfully.")

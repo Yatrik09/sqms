@@ -102,14 +102,40 @@ class VerifyOTPResetPasswordRequest(BaseModel):
 class SubscriptionPlan(BaseModel):
     id: str
     name: str
-    price_monthly: int
-    price_yearly: int
+    price_monthly: float
+    price_yearly: float
     max_centers: int
     max_bays_per_center: int
     max_managers: int
     description: str
-    features: List[str]
+    features: List[str] = []
     badge: Optional[str] = None
+    is_active: Optional[bool] = True
+
+class SubscriptionPlanCreate(BaseModel):
+    id: Optional[str] = None
+    name: str
+    price_monthly: float
+    price_yearly: float
+    max_centers: int = 1
+    max_bays_per_center: int = 8
+    max_managers: int = 1
+    description: str = ""
+    features: List[str] = []
+    badge: Optional[str] = "Standard"
+
+class SubscriptionPlanUpdate(BaseModel):
+    name: Optional[str] = None
+    price_monthly: Optional[float] = None
+    price_yearly: Optional[float] = None
+    max_centers: Optional[int] = None
+    max_bays_per_center: Optional[int] = None
+    max_managers: Optional[int] = None
+    description: Optional[str] = None
+    features: Optional[List[str]] = None
+    badge: Optional[str] = None
+    is_active: Optional[bool] = None
+
 
 class SubscriptionPurchaseRequest(BaseModel):
     plan_id: str
