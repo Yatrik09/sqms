@@ -5,7 +5,7 @@ import type { QueueEntry, ServiceBay, Mechanic } from '../types';
 import {
   Smartphone, RefreshCw, Search, CheckCircle2, Clock, Wrench, Sparkles,
   ArrowRight, ShieldCheck, Car, Phone, Filter, ChevronRight, X, Plus,
-  Layers, Check, AlertCircle, Volume2, VolumeX, Eye, ArrowLeft, Building2
+  Layers, Check, AlertCircle, Volume2, VolumeX, Eye, ArrowLeft, Building2, Lock
 } from 'lucide-react';
 
 interface WorkshopFloorMobileProps {
@@ -214,19 +214,62 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     }
   }, [lastWsEvent, centerId]);
 
-  // Handle instant stage advance (1-Tap!)
+  // Helper to check dedicated bay capacity for a specific service type
+  const getBayCapacityForService = (serviceType?: string) => {
+    const st = (serviceType || '').toLowerCase();
+    const matchingBays = bays.filter((b) => {
+      const bs = (b.supported_service_type || '').toLowerCase();
+      if (!bs || bs === 'all' || bs.includes('multi')) return true;
+      if (bs === st || bs.includes(st) || st.includes(bs)) return true;
+      if (bs.includes('general') && (st.includes('general') || st.includes('routine') || st.includes('maintenance'))) return true;
+      if (bs.includes('wash') && st.includes('wash')) return true;
+      if ((bs.includes('accident') || bs.includes('repair')) && (st.includes('accident') || st.includes('repair'))) return true;
+      if (bs.includes('oil') && st.includes('oil')) return true;
+      if (bs.includes('brake') && st.includes('brake')) return true;
+      if (bs.includes('ac') && st.includes('ac')) return true;
+      return false;
+    });
+
+    const total = matchingBays.length;
+    const available = matchingBays.filter((b) => b.status === 'Available');
+    const occupied = matchingBays.filter((b) => b.status === 'Occupied');
+    return {
+      total,
+      available: available.length,
+      occupied: occupied.length,
+      isFull: total > 0 && available.length === 0,
+      availableBays: available,
+    };
+  };
+
+  // Handle 1-Tap Quick Advance with strict bay capacity enforcement
   const handleQuickAdvance = async (entry: QueueEntry) => {
-    const cfg = STAGE_CONFIG[entry.status] || STAGE_CONFIG['Waiting'];
+    const cfg = STAGE_CONFIG[entry.status];
+    if (!cfg) return;
+
     const nextStatus = cfg.nextStage;
     if (!nextStatus) return;
 
+    // Strict bay capacity check for In Service transition
+    if (nextStatus === 'Service In Progress') {
+      const cap = getBayCapacityForService(entry.service_type);
+      if (cap.isFull && !entry.assigned_bay_id) {
+        alert(
+          `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${entry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${entry.service_type || 'General Service'}" until an active bay is completed and freed.`
+        );
+        return;
+      }
+    }
+
     setUpdatingEntryId(entry.id);
 
-    // Auto-pick available bay if going into service
+    // Auto-pick available matching bay if going into service
     let bayId = entry.assigned_bay_id;
     if (!bayId && nextStatus === 'Service In Progress') {
-      const freeBay = bays.find((b) => b.status === 'Available');
-      if (freeBay) bayId = freeBay.id;
+      const cap = getBayCapacityForService(entry.service_type);
+      if (cap.availableBays.length > 0) {
+        bayId = cap.availableBays[0].id;
+      }
     }
 
     // Auto-pick available mechanic
@@ -256,9 +299,20 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     }
   };
 
-  // Handle custom status update from modal
+  // Handle custom status update from modal with capacity check
   const handleCustomUpdate = async (newStatus: string, bayId?: number, mechId?: number) => {
     if (!editEntry) return;
+
+    if (newStatus === 'Service In Progress') {
+      const cap = getBayCapacityForService(editEntry.service_type);
+      if (cap.isFull && !editEntry.assigned_bay_id && !bayId) {
+        alert(
+          `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${editEntry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${editEntry.service_type || 'General Service'}" until an active bay is completed and freed.`
+        );
+        return;
+      }
+    }
+
     setUpdatingEntryId(editEntry.id);
     try {
       await api.updateQueueStatus(editEntry.id, {
@@ -652,37 +706,68 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
                     </div>
                   </div>
 
-                  {/* 3. GIANT 1-TAP ACTION BUTTON */}
+                  {/* 3. GIANT 1-TAP ACTION BUTTON WITH CAPACITY LIMIT CHECK */}
                   <div className="pt-3">
-                    {cfg.nextStage ? (
-                      <button
-                        onClick={() => handleQuickAdvance(entry)}
-                        disabled={isUpdating}
-                        className={`w-full py-3 rounded-xl font-black text-sm tracking-wide shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] ${
-                          cfg.nextStage === 'Completed'
-                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/30'
-                            : cfg.nextStage === 'Ready for Pickup'
-                            ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white shadow-emerald-600/30'
-                            : cfg.nextStage === 'Washing'
-                            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-600/30'
-                            : cfg.nextStage === 'Quality Check'
-                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-600/30'
-                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-600/30'
-                        }`}
-                      >
-                        {isUpdating ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Updating Stage...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>{cfg.nextAction}</span>
-                            <ArrowRight className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    ) : (
+                    {cfg.nextStage ? (() => {
+                      const isStartingService = cfg.nextStage === 'Service In Progress';
+                      const bayCap = isStartingService ? getBayCapacityForService(entry.service_type) : null;
+                      const isBayBlocked = isStartingService && bayCap && bayCap.isFull && !entry.assigned_bay_id;
+
+                      if (isBayBlocked) {
+                        return (
+                          <div className="space-y-1.5">
+                            <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] leading-tight flex items-center space-x-2">
+                              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span>
+                                Only <strong>{bayCap?.total} bays</strong> available for {entry.service_type || 'General Service'} (all {bayCap?.total} busy). System cannot start 3rd vehicle until an active bay finishes.
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                alert(
+                                  `⚠️ Bay Capacity Reached:\n\nOnly ${bayCap?.total} bays are available for "${entry.service_type || 'General Service'}", and all ${bayCap?.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${entry.service_type || 'General Service'}" until an active bay is completed and freed.`
+                                );
+                              }}
+                              className="w-full py-3 rounded-xl font-bold text-xs tracking-wide border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 flex items-center justify-center space-x-2 cursor-pointer transition shadow-sm"
+                            >
+                              <Lock className="w-4 h-4 text-amber-400" />
+                              <span>Bays Full ({bayCap?.total}/{bayCap?.total} {entry.service_type || 'General Service'} In Use)</span>
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <button
+                          onClick={() => handleQuickAdvance(entry)}
+                          disabled={isUpdating}
+                          className={`w-full py-3 rounded-xl font-black text-sm tracking-wide shadow-lg transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98] ${
+                            cfg.nextStage === 'Completed'
+                              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-600/30'
+                              : cfg.nextStage === 'Ready for Pickup'
+                              ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white shadow-emerald-600/30'
+                              : cfg.nextStage === 'Washing'
+                              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-600/30'
+                              : cfg.nextStage === 'Quality Check'
+                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-600/30'
+                              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-600/30'
+                          }`}
+                        >
+                          {isUpdating ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <span>Updating Stage...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{cfg.nextAction}</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      );
+                    })() : (
                       <div className="w-full py-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 text-center text-xs font-bold text-emerald-400 flex items-center justify-center space-x-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                         <span>Service Fully Completed</span>
@@ -851,6 +936,28 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
                   </select>
                 </div>
               </div>
+
+              {/* Real-time Bay Capacity Indicator for Selected Walk-In Service */}
+              {(() => {
+                const wCap = getBayCapacityForService(walkinService);
+                if (wCap.isFull) {
+                  return (
+                    <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] leading-relaxed flex items-start space-x-2">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-bold">Only {wCap.total} bays configured for {walkinService} (All {wCap.total} Occupied)</strong>
+                        <span>System cannot start service immediately. This vehicle will join the driveway waiting queue until an active bay finishes.</span>
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[11px] flex items-center space-x-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span><strong>{wCap.available} of {wCap.total} bays</strong> available for {walkinService}.</span>
+                  </div>
+                );
+              })()}
 
               <div className="pt-2 flex justify-end space-x-2">
                 <button

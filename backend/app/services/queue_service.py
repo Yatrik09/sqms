@@ -47,32 +47,73 @@ def recalculate_center_workload(db: Session, center_id: int):
     center.current_workload = max(0.05, min(0.98, round(workload, 2)))
     db.commit()
 
+def bay_supports_service_type(bay_supported_type: Optional[str], requested_service: Optional[str]) -> bool:
+    """
+    Determines if a bay's configured supported_service_type can accommodate the requested service_type.
+    """
+    bs = (bay_supported_type or "").strip().lower()
+    st = (requested_service or "").strip().lower()
+
+    if not bs or bs in ["all", "any", "all services", "general / all", "multi-purpose", "standard"]:
+        return True
+    if bs == st or bs in st or st in bs:
+        return True
+    if "general" in bs and ("general" in st or "routine" in st or "maintenance" in st or "periodic" in st):
+        return True
+    if "wash" in bs and "wash" in st:
+        return True
+    if any(k in bs for k in ["accident", "repair", "body", "dent", "paint"]) and any(k in st for k in ["accident", "repair", "body", "dent", "paint"]):
+        return True
+    if "oil" in bs and "oil" in st:
+        return True
+    if "brake" in bs and "brake" in st:
+        return True
+    if "ac" in bs and ("ac" in st or "air cond" in st or "cool" in st):
+        return True
+    return False
+
+
+def get_service_bay_capacity(db: Session, center_id: int, service_type: str) -> Dict[str, Any]:
+    """
+    Calculates bay allocation and capacity for a specific service type at a workshop center.
+    Returns:
+      - total: total number of bays configured for this service type
+      - available: list of free ServiceBay objects matching this service type
+      - occupied: list of occupied ServiceBay objects matching this service type
+      - is_full: True if total > 0 and len(available) == 0
+    """
+    all_bays = db.query(ServiceBay).filter(
+        ServiceBay.service_center_id == center_id,
+        ServiceBay.status != "Disabled",
+        ServiceBay.status != "Maintenance"
+    ).all()
+
+    matching = [b for b in all_bays if bay_supports_service_type(b.supported_service_type, service_type)]
+    
+    # If no bay specifically matches, fall back to general/multi-purpose bays
+    if not matching:
+        matching = [b for b in all_bays if bay_supports_service_type(b.supported_service_type, "General Service")]
+
+    available = [b for b in matching if b.status == "Available"]
+    occupied = [b for b in matching if b.status == "Occupied"]
+
+    return {
+        "total": len(matching),
+        "available": available,
+        "occupied": occupied,
+        "is_full": len(matching) > 0 and len(available) == 0
+    }
+
+
 def find_best_bay_for_service(db: Session, center_id: int, service_type: str) -> Optional[ServiceBay]:
     """
-    Intelligently select the best available service bay based on service type.
-    E.g. Washing -> Washing bay, Accident/Dent/Paint -> Repair/Accident Repair bay,
-    General -> General Service bay. If occupied, selects next free available bay.
+    Intelligently select the best available service bay strictly matching the service type.
+    Does NOT assign incompatible bays (e.g. will NOT assign a Washing bay to General Service).
     """
-    query = db.query(ServiceBay).filter(
-        ServiceBay.service_center_id == center_id,
-        ServiceBay.status == "Available"
-    )
-    all_available = query.order_by(ServiceBay.id.asc()).all()
-    if not all_available:
-        return None
-
-    st_lower = (service_type or "").lower()
-    for bay in all_available:
-        bay_support = (bay.supported_service_type or "").lower()
-        if "wash" in st_lower and "wash" in bay_support:
-            return bay
-        if any(w in st_lower for w in ["accident", "dent", "paint", "body", "repair"]) and any(w in bay_support for w in ["repair", "accident"]):
-            return bay
-        if "general" in st_lower and "general" in bay_support:
-            return bay
-
-    # Fallback to the first available bay
-    return all_available[0]
+    cap = get_service_bay_capacity(db, center_id, service_type)
+    if cap["available"]:
+        return cap["available"][0]
+    return None
 
 
 def find_best_mechanic_for_service(db: Session, center_id: int, service_type: str) -> Optional[Mechanic]:
@@ -173,7 +214,59 @@ async def update_service_status(
     is_finishing = new_status in ["Completed", "Cancelled", "Ready for Pickup"]
     is_in_service = ("In Progress" in new_status) or (new_status in ["Washing", "Quality Check", "Inspection", "Repair In Progress"])
 
-    # Update status
+    # Resource Allocation Management & Bay Capacity Enforcement
+    bay_to_assign = None
+    mech_to_assign = None
+
+    if is_in_service:
+        # Check if this queue entry already has a valid assigned bay currently active
+        has_active_bay = False
+        if queue_entry.assigned_bay_id:
+            curr_bay = db.query(ServiceBay).filter(ServiceBay.id == queue_entry.assigned_bay_id).first()
+            if curr_bay and (curr_bay.current_service_id == service_request.id or curr_bay.status == "Available"):
+                has_active_bay = True
+                bay_to_assign = curr_bay
+
+        if assigned_bay_id:
+            explicit_bay = db.query(ServiceBay).filter(ServiceBay.id == assigned_bay_id).first()
+            if not explicit_bay:
+                raise ValueError("Selected bay not found.")
+            if explicit_bay.service_center_id != center_id:
+                raise ValueError("Selected bay does not belong to this workshop center.")
+            if explicit_bay.status == "Occupied" and explicit_bay.current_service_id != service_request.id:
+                raise ValueError(f"Bay {explicit_bay.bay_number} is already occupied by another vehicle.")
+            if not bay_supports_service_type(explicit_bay.supported_service_type, service_request.service_type):
+                raise ValueError(
+                    f"Bay {explicit_bay.bay_number} is reserved for '{explicit_bay.supported_service_type}', "
+                    f"which cannot be used for '{service_request.service_type}'."
+                )
+            bay_to_assign = explicit_bay
+        elif not has_active_bay:
+            # Auto-assign next best matching bay, strictly enforcing bay capacity by service type
+            cap = get_service_bay_capacity(db, center_id, service_request.service_type)
+            total_matching = cap["total"]
+            available_matching = cap["available"]
+            st_name = service_request.service_type or "General Service"
+
+            if total_matching > 0 and len(available_matching) == 0:
+                raise ValueError(
+                    f"Bay capacity reached: Only {total_matching} bay{'s are' if total_matching != 1 else ' is'} available for '{st_name}', "
+                    f"and all {total_matching} are currently occupied. System does not allow adding or starting a 3rd car for '{st_name}' until an active bay is completed and freed."
+                )
+
+            bay_to_assign = find_best_bay_for_service(db, center_id, service_request.service_type)
+            if not bay_to_assign:
+                raise ValueError(
+                    f"No available bays for '{st_name}'. All matching bays are occupied. Please wait for an active service to finish."
+                )
+
+        # Mechanic allocation
+        if assigned_mechanic_id:
+            mech_to_assign = db.query(Mechanic).filter(Mechanic.id == assigned_mechanic_id).first()
+        elif not queue_entry.assigned_mechanic_id:
+            mech_to_assign = find_best_mechanic_for_service(db, center_id, service_request.service_type)
+
+    # Update status only after capacity and resource validation passes
     service_request.status = new_status
     if new_status in ["Completed", "Cancelled"]:
         queue_entry.status = new_status
@@ -182,28 +275,11 @@ async def update_service_status(
     else:
         queue_entry.status = "Waiting"
 
-    # Resource Allocation Management
     if is_in_service:
-        # Bay allocation
-        bay_to_assign = None
-        if assigned_bay_id:
-            bay_to_assign = db.query(ServiceBay).filter(ServiceBay.id == assigned_bay_id).first()
-        elif not queue_entry.assigned_bay_id:
-            # Auto-assign next best available matching bay
-            bay_to_assign = find_best_bay_for_service(db, center_id, service_request.service_type)
-
         if bay_to_assign:
             queue_entry.assigned_bay_id = bay_to_assign.id
             bay_to_assign.status = "Occupied"
             bay_to_assign.current_service_id = service_request.id
-
-        # Mechanic allocation
-        mech_to_assign = None
-        if assigned_mechanic_id:
-            mech_to_assign = db.query(Mechanic).filter(Mechanic.id == assigned_mechanic_id).first()
-        elif not queue_entry.assigned_mechanic_id:
-            # Auto-assign next best available matching technician
-            mech_to_assign = find_best_mechanic_for_service(db, center_id, service_request.service_type)
 
         if mech_to_assign:
             queue_entry.assigned_mechanic_id = mech_to_assign.id

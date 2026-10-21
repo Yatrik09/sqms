@@ -305,6 +305,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
           {/* Right Controls: User Profile, Notifications, Direct Log Out */}
           <div className="flex items-center space-x-3 sm:space-x-4 pl-4 border-l border-slate-800">
 
+            {/* Mobile Backdrop Overlay for Dropdowns */}
+            {openDropdown && (
+              <div
+                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs sm:hidden"
+                onClick={() => setOpenDropdown(null)}
+              />
+            )}
+
             {/* Notifications Dropdown */}
             <div className="relative" ref={notificationsRef}>
               <button
@@ -323,24 +331,40 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               </button>
 
               {openDropdown === 'notifications' && (
-                <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl py-2 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
-                    <span className="text-xs font-bold text-white">Notifications ({unreadCount})</span>
-                    {unreadCount > 0 && (
-                      <button onClick={handleMarkAllRead} className="text-[11px] text-blue-400 hover:underline">
-                        Mark all read
+                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl py-2 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700">
+                    <div className="flex items-center space-x-1.5">
+                      <Bell className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="text-xs font-bold text-white">Notifications ({unreadCount})</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {unreadCount > 0 && (
+                        <button onClick={handleMarkAllRead} className="text-[11px] text-blue-400 hover:underline cursor-pointer">
+                          Mark all read
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setOpenDropdown(null)}
+                        className="p-1 text-slate-400 hover:text-white sm:hidden cursor-pointer rounded-lg"
+                        title="Close notifications"
+                      >
+                        <X className="w-4 h-4" />
                       </button>
-                    )}
+                    </div>
                   </div>
                   <div className="max-h-72 overflow-y-auto divide-y divide-slate-700/50">
                     {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-slate-400">No notifications yet.</div>
+                      <div className="p-6 text-center text-xs text-slate-400 space-y-1">
+                        <Bell className="w-6 h-6 text-slate-600 mx-auto mb-2 opacity-60" />
+                        <div className="font-semibold text-slate-300">No notifications yet</div>
+                        <div className="text-[11px] text-slate-500">Live service stage and bay updates will arrive here.</div>
+                      </div>
                     ) : (
                       notifications.map((n) => (
                         <div key={n.id} className={`p-3 text-xs ${n.read_status ? 'opacity-60' : 'bg-slate-700/30'}`}>
                           <div className="font-semibold text-slate-200">{n.title}</div>
-                          <div className="text-slate-300 mt-0.5 text-[11px]">{n.message}</div>
-                          <div className="text-[10px] text-slate-500 mt-1">{n.created_at.slice(0, 16)}</div>
+                          <div className="text-slate-300 mt-0.5 text-[11px] leading-relaxed break-words">{n.message}</div>
+                          <div className="text-[10px] text-slate-500 mt-1 font-mono">{n.created_at ? n.created_at.slice(0, 16).replace('T', ' ') : ''}</div>
                         </div>
                       ))
                     )}
@@ -371,7 +395,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
               {/* User Account Popover */}
               {openDropdown === 'user' && (
-                <div className="absolute right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-72 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-700">
                     <div className="flex items-center space-x-2.5">
                       <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">
@@ -384,7 +408,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                     </div>
                     <button
                       onClick={() => setOpenDropdown(null)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-white"
+                      className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>

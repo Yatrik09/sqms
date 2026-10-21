@@ -293,8 +293,41 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     return matching || availMechs[0];
   };
 
-  // 1-Click Automated Start Service
+  // Dedicated bay capacity evaluation for service types
+  const getBayCapacityForService = (serviceType?: string) => {
+    const st = (serviceType || '').toLowerCase();
+    const matchingBays = bays.filter((b) => {
+      const bs = (b.supported_service_type || '').toLowerCase();
+      if (!bs || bs === 'all' || bs.includes('multi')) return true;
+      if (bs === st || bs.includes(st) || st.includes(bs)) return true;
+      if (bs.includes('general') && (st.includes('general') || st.includes('routine') || st.includes('maintenance'))) return true;
+      if (bs.includes('wash') && st.includes('wash')) return true;
+      if ((bs.includes('accident') || bs.includes('repair')) && (st.includes('accident') || st.includes('repair'))) return true;
+      if (bs.includes('oil') && st.includes('oil')) return true;
+      if (bs.includes('brake') && st.includes('brake')) return true;
+      if (bs.includes('ac') && st.includes('ac')) return true;
+      return false;
+    });
+
+    const total = matchingBays.length;
+    const available = matchingBays.filter((b) => b.status === 'Available');
+    return {
+      total,
+      available: available.length,
+      occupied: total - available.length,
+      isFull: total > 0 && available.length === 0,
+    };
+  };
+
+  // 1-Click Automated Start Service with capacity enforcement
   const handleQuickStartService = async (entry: QueueEntry) => {
+    const cap = getBayCapacityForService(entry.service_type);
+    if (cap.isFull && !entry.assigned_bay_id) {
+      alert(
+        `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${entry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${entry.service_type || 'General Service'}" until an active bay is completed and freed.`
+      );
+      return;
+    }
     try {
       await api.updateQueueStatus(entry.id, {
         new_status: 'Service In Progress',
@@ -328,10 +361,20 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     }
   };
 
-  // Handle status update
+  // Handle status update with bay capacity check
   const handleUpdateStatusSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEntry) return;
+
+    if (targetStatus === 'Service In Progress') {
+      const cap = getBayCapacityForService(selectedEntry.service_type);
+      if (cap.isFull && !selectedEntry.assigned_bay_id && targetBayId === '') {
+        alert(
+          `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${selectedEntry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${selectedEntry.service_type || 'General Service'}" until an active bay is completed and freed.`
+        );
+        return;
+      }
+    }
 
     try {
       await api.updateQueueStatus(selectedEntry.id, {
