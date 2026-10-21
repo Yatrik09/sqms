@@ -16,143 +16,145 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
   const [showPlansModal, setShowPlansModal] = useState(false);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-      {/* Hero Section */}
-      <div className="relative rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-8 sm:p-12 text-white shadow-2xl overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full space-y-20 py-6 sm:py-12">
+      {/* Hero Section — Pure Gallery White Hero Stage */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#1d1d1f] text-[12px] font-medium">
+          <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
+          <span>Automotive Intelligence Architecture</span>
+        </div>
 
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Next-Gen Automotive Intelligence</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            About <span className="text-white">Smart</span> <span className="text-blue-500">Q</span>
+        <div className="space-y-3">
+          <span className="text-[21px] font-semibold tracking-[0.23px] text-[#1d1d1f] block">
+            Smart Queue Management System
+          </span>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-[-1.2px] text-[#1d1d1f] leading-[1.05] max-w-4xl mx-auto">
+            The intelligent operating system for automotive workshops.
           </h1>
+        </div>
 
-          <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-            <strong>Smart Q</strong> is an enterprise-grade AI/ML decision-support software platform engineered to eliminate bay bottlenecks, unpredictable wait times, and workshop coordination chaos across the automotive service industry.
-          </p>
+        <p className="text-[17px] sm:text-[19px] text-[#707070] leading-[1.47] max-w-3xl mx-auto font-normal">
+          Smart Q is an enterprise-grade AI decision-support platform engineered to eliminate bay bottlenecks, unpredictable wait times, and workshop coordination chaos across the automotive service industry.
+        </p>
 
-          <div className="pt-2 flex flex-wrap gap-4">
-            {user?.role === 'super_admin' ? (
-              <>
-                <button
-                  onClick={() => onNavigateTab && onNavigateTab('admin-dashboard')}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2 cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-emerald-300" />
-                  <span>Platform System Console</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => onNavigateTab && onNavigateTab('admin-centers')}
-                  className="px-6 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-white font-semibold text-sm transition flex items-center space-x-2 cursor-pointer"
-                >
-                  <Building2 className="w-4 h-4 text-blue-400" />
-                  <span>Manage Service Centers</span>
-                </button>
-              </>
-            ) : user?.role === 'branch_manager' ? (
+        <div className="pt-4 flex flex-wrap justify-center items-center gap-3">
+          {user?.role === 'super_admin' ? (
+            <>
               <button
-                onClick={() => onNavigateTab && onNavigateTab('manager-queue')}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2 cursor-pointer"
+                onClick={() => onNavigateTab && onNavigateTab('admin-dashboard')}
+                className="px-6 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
               >
-                <Clock className="w-4 h-4 text-emerald-300" />
-                <span>Go to Live Workshop Queue</span>
+                <ShieldCheck className="w-4 h-4" />
+                <span>Platform System Console</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-            ) : user?.role === 'franchise_owner' ? (
               <button
-                onClick={() => onNavigateTab && onNavigateTab('owner-overview')}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2 cursor-pointer"
+                onClick={() => onNavigateTab && onNavigateTab('admin-centers')}
+                className="px-6 py-3 rounded-full bg-white hover:bg-[#f5f5f7] border border-[#86868b] text-[#1d1d1f] font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
               >
-                <Building2 className="w-4 h-4 text-indigo-300" />
-                <span>Manage Franchise Branches</span>
-                <ArrowRight className="w-4 h-4" />
+                <Building2 className="w-4 h-4 text-[#707070]" />
+                <span>Manage Service Centers</span>
               </button>
-            ) : (
-              <button
-                onClick={() => setShowPlansModal(true)}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2 cursor-pointer"
-              >
-                <Building2 className="w-4 h-4 text-yellow-300" />
-                <span>List Your Workshop & Partner</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            )}
+            </>
+          ) : user?.role === 'branch_manager' ? (
+            <button
+              onClick={() => onNavigateTab && onNavigateTab('manager-queue')}
+              className="px-6 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
+            >
+              <Clock className="w-4 h-4" />
+              <span>Go to Live Workshop Queue</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : user?.role === 'franchise_owner' ? (
+            <button
+              onClick={() => onNavigateTab && onNavigateTab('owner-overview')}
+              className="px-6 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
+            >
+              <Building2 className="w-4 h-4" />
+              <span>Manage Franchise Branches</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowPlansModal(true)}
+              className="px-6 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
+            >
+              <Building2 className="w-4 h-4" />
+              <span>List Your Workshop & Partner</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
 
-            {user?.role === 'customer' && onNavigateTab && (
-              <button
-                onClick={() => onNavigateTab('book-service')}
-                className="px-6 py-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-white font-semibold text-sm transition flex items-center space-x-2 cursor-pointer"
-              >
-                <Car className="w-4 h-4 text-blue-400" />
-                <span>Book Vehicle Service</span>
-              </button>
-            )}
+          {user?.role === 'customer' && onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('book-service')}
+              className="px-6 py-3 rounded-full bg-white hover:bg-[#f5f5f7] border border-[#86868b] text-[#1d1d1f] font-normal text-[14px] transition flex items-center space-x-2 cursor-pointer shadow-none"
+            >
+              <Car className="w-4 h-4 text-[#707070]" />
+              <span>Book Vehicle Service</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Highlights Band — Studio Mist (#f5f5f7) with 28px White Feature Cards */}
+      <div className="w-full bg-[#f5f5f7] border-y border-[#d6d6d6] py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-[12px] font-semibold uppercase tracking-wider text-[#0066cc]">Core Technical Contribution</span>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-[#1d1d1f] tracking-tight">
+              Beyond Static Tokens: Dynamic AI Predictions
+            </h2>
+            <p className="text-[#707070] text-[17px] leading-[1.47]">
+              Traditional service centers issue static token numbers with zero visibility. SQMS introduces real-time multivariate predictive modeling.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-8 space-y-4 shadow-none">
+              <div className="w-12 h-12 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-[#0071e3]">
+                <Clock className="w-6 h-6" />
+              </div>
+              <h3 className="text-[21px] font-semibold text-[#1d1d1f] tracking-tight">Dual ML Regression Engine</h3>
+              <p className="text-[15px] text-[#707070] leading-relaxed">
+                Trained on extensive automotive telemetry:
+                <br /><strong className="text-[#1d1d1f]">• Model A:</strong> Waiting Time prediction factoring queue depth, active mechanics, and bay load.
+                <br /><strong className="text-[#1d1d1f]">• Model B:</strong> Service Duration based on repair complexity, vehicle segment, and service type.
+              </p>
+            </div>
+
+            <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-8 space-y-4 shadow-none">
+              <div className="w-12 h-12 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-emerald-600">
+                <Layers className="w-6 h-6" />
+              </div>
+              <h3 className="text-[21px] font-semibold text-[#1d1d1f] tracking-tight">Dynamic Resource State Machine</h3>
+              <p className="text-[15px] text-[#707070] leading-relaxed">
+                Intelligent workshop dispatch automatically matches service requirements (General, Electrical, Washing, Accidental) to compatible bays and certified technicians. Resources occupy upon stage start and instantly free upon completion.
+              </p>
+            </div>
+
+            <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-8 space-y-4 shadow-none">
+              <div className="w-12 h-12 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-[#b64400]">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="text-[21px] font-semibold text-[#1d1d1f] tracking-tight">Real-Time Sync Architecture</h3>
+              <p className="text-[15px] text-[#707070] leading-relaxed">
+                As technicians advance vehicle stages in the workshop bay, customer dashboards update live across synchronized streams. Estimated completion times automatically recalibrate in real time without screen refresh delays.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* What SQMS Solves */}
-      <div className="space-y-6">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Core Technical Contribution</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-            Beyond Static Tokens: Dynamic AI Predictions
-          </h2>
-          <p className="text-slate-400 text-sm">
-            Traditional service centers issue static token numbers with zero visibility. SQMS introduces real-time multivariate predictive modeling.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-3 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
-              <Clock className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Dual ML Regression Engine</h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Trained on extensive automotive service telemetry:
-              <br />• <strong>Model A:</strong> Waiting Time ($T_&#123;wait&#125;$) prediction factoring queue depth, active mechanics, and bay load.
-              <br />• <strong>Model B:</strong> Service Duration ($T_&#123;service&#125;$) based on repair complexity, vehicle segment, and service type.
-            </p>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-3 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <Layers className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Dynamic Resource State Machine</h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              Intelligent workshop dispatch automatically matches service requirements (General, Electrical, Washing, Accidental) to compatible bays and certified technicians. Resources occupy upon stage start and instantly free upon completion.
-            </p>
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-7 space-y-3 shadow-lg">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
-              <Zap className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-white">Real-Time WebSocket Sync</h3>
-            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              As technicians advance vehicle stages in the workshop bay, customer dashboards update live across WebSockets without refreshing. Estimated completion times automatically recalibrate in real time.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Automotive Services Covered */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+      {/* Automotive Services Covered — White Editorial Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Service Coverage</span>
-          <h3 className="text-xl sm:text-2xl font-bold text-white mt-1">
+          <span className="text-[12px] font-semibold uppercase tracking-wider text-[#0066cc]">Service Catalog</span>
+          <h3 className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] tracking-tight mt-1">
             Comprehensive Vehicle Services Supported
           </h3>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            SQMS seamlessly manages workflows for all major passenger vehicle categories:
+          <p className="text-[15px] text-[#707070] mt-1">
+            SQMS seamlessly coordinates workflows across all major automotive repair classifications:
           </p>
         </div>
 
@@ -171,91 +173,94 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
             { name: 'Minor Accident Repair', cat: 'Collision', est: '150 min' },
             { name: 'Major Collision Restoration', cat: 'Collision', est: '280 min' },
           ].map((s, idx) => (
-            <div key={idx} className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3.5 space-y-1">
-              <span className="text-[10px] font-bold uppercase text-blue-400">{s.cat}</span>
-              <h4 className="text-sm font-bold text-white truncate">{s.name}</h4>
-              <span className="text-xs text-slate-400 block">Est: ~{s.est}</span>
+            <div key={idx} className="bg-white border border-[#d6d6d6] rounded-[20px] p-5 space-y-1.5 shadow-none">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#0066cc]">{s.cat}</span>
+              <h4 className="text-[15px] font-semibold text-[#1d1d1f] truncate">{s.name}</h4>
+              <span className="text-[13px] text-[#707070] block">Estimated: ~{s.est}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Workshop & Franchise Partnership CTA Section */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-950 border border-indigo-500/40 p-8 sm:p-12 text-white shadow-2xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-8 space-y-4">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/30 border border-indigo-400/40 text-indigo-200 text-xs font-bold">
-              <Building2 className="w-3.5 h-3.5 text-yellow-300" />
-              <span>Partner With Us • Workshop Network</span>
+      {/* Workshop & Franchise Partnership CTA Section — Studio Mist (#f5f5f7) with 28px White Card */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-[#f5f5f7] border border-[#d6d6d6] rounded-[28px] p-8 sm:p-12 shadow-none">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8 space-y-4">
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white border border-[#d6d6d6] text-[#1d1d1f] text-[12px] font-medium shadow-none">
+                <Building2 className="w-3.5 h-3.5 text-[#0071e3]" />
+                <span>Partner Network</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-semibold text-[#1d1d1f] tracking-tight leading-tight">
+                List Your Service Center or Workshop on SQMS
+              </h2>
+
+              <p className="text-[16px] text-[#707070] max-w-2xl leading-relaxed">
+                Whether you operate an independent multi-brand workshop, an authorized dealership, or a nationwide auto repair chain, deploy SQMS to automate bay routing and customer visibility.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-[14px] text-[#1d1d1f]">
+                <div className="flex items-center space-x-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#0071e3] shrink-0" />
+                  <span>Live workshop capacity & service publishing</span>
+                </div>
+                <div className="flex items-center space-x-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#0071e3] shrink-0" />
+                  <span>Automated Bay & Mechanic assignment engine</span>
+                </div>
+                <div className="flex items-center space-x-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#0071e3] shrink-0" />
+                  <span>Dedicated Branch Manager console credentials</span>
+                </div>
+                <div className="flex items-center space-x-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#0071e3] shrink-0" />
+                  <span>Real-time ML turnaround time predictions</span>
+                </div>
+              </div>
             </div>
 
-            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-              List Your Service Center or Workshop on SQMS
-            </h2>
+            {/* Floating Pricing Callout Card — 28px White Capsule with Pricing Blue Pill */}
+            <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-center">
+              <div className="bg-white border border-[#d6d6d6] p-7 rounded-[28px] text-center space-y-4 w-full sm:max-w-xs shadow-none">
+                {user?.role === 'super_admin' ? (
+                  <div>
+                    <span className="text-[12px] uppercase font-semibold text-[#707070] block">Platform Governance</span>
+                    <span className="text-2xl font-semibold text-[#1d1d1f] mt-1 block">Root Console</span>
+                    <span className="text-[12px] text-[#86868b] block mt-0.5">Manage All Franchises & Centers</span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-[12px] uppercase font-semibold text-[#707070] block">Subscription Plans From</span>
+                    <span className="text-3xl font-semibold text-[#1d1d1f] mt-1 block">₹499<span className="text-sm font-normal text-[#707070]">/mo</span></span>
+                    <span className="text-[12px] text-[#86868b] block mt-0.5">Flexible monthly & annual tiers</span>
+                  </div>
+                )}
 
-            <p className="text-sm sm:text-base text-indigo-100 max-w-2xl leading-relaxed">
-              Are you an independent workshop owner, authorized dealer, or multi-city auto repair brand? Join the SQMS partner network:
-            </p>
+                {user?.role === 'super_admin' ? (
+                  <button
+                    onClick={() => onNavigateTab && onNavigateTab('admin-dashboard')}
+                    className="w-full py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center justify-center space-x-2 cursor-pointer shadow-none"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Platform Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowPlansModal(true)}
+                    className="w-full py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[14px] transition flex items-center justify-center space-x-2 cursor-pointer shadow-none"
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>List Your Branch Now</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs sm:text-sm text-indigo-100">
-              <div className="flex items-center space-x-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Publish your workshop with live capacity & services</span>
+                <span className="text-[11px] text-[#86868b] block">
+                  {user?.role === 'super_admin' ? 'Root platform access • Full privileges' : 'Instant setup • Includes initial bays & mechanics'}
+                </span>
               </div>
-              <div className="flex items-center space-x-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Automated Bay & Mechanic assignment engine</span>
-              </div>
-              <div className="flex items-center space-x-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Individual Branch Manager accounts & credentials</span>
-              </div>
-              <div className="flex items-center space-x-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Real-time machine learning waiting time predictions</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-center">
-            <div className="bg-slate-950/60 backdrop-blur-md border border-indigo-400/30 p-6 rounded-3xl text-center space-y-4 w-full sm:max-w-xs shadow-xl">
-              {user?.role === 'super_admin' ? (
-                <div>
-                  <span className="text-xs uppercase font-bold text-purple-300 block">Platform Administration</span>
-                  <span className="text-2xl font-black text-white mt-1 block">Root Console</span>
-                  <span className="text-[11px] text-slate-300 block mt-0.5">Manage All Franchises & Workshops</span>
-                </div>
-              ) : (
-                <div>
-                  <span className="text-xs uppercase font-bold text-indigo-300 block">Subscription Plans From</span>
-                  <span className="text-3xl font-black text-white mt-1 block">₹499<span className="text-sm font-normal text-indigo-300">/mo</span></span>
-                  <span className="text-[11px] text-slate-300 block mt-0.5">Flexible monthly & yearly tiers</span>
-                </div>
-              )}
-
-              {user?.role === 'super_admin' ? (
-                <button
-                  onClick={() => onNavigateTab && onNavigateTab('admin-dashboard')}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-500/30 transition flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-purple-200" />
-                  <span>Platform Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowPlansModal(true)}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-500/30 transition flex items-center justify-center space-x-2 cursor-pointer"
-                >
-                  <Building2 className="w-4 h-4 text-yellow-300" />
-                  <span>List Your Branch Now</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
-
-              <span className="text-[10px] text-slate-400 block">
-                {user?.role === 'super_admin' ? 'Root platform access • Full privileges' : 'Instant setup • Includes initial bays & mechanics'}
-              </span>
             </div>
           </div>
         </div>

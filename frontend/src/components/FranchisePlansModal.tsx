@@ -231,26 +231,23 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto py-8 sm:py-14">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-5xl shadow-2xl text-white my-auto overflow-hidden relative z-[10000]">
-        {/* Ambient Top Glow */}
-        <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
-
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-3 sm:p-6 bg-black/40 backdrop-blur-sm overflow-y-auto py-8 sm:py-14 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-5xl shadow-2xl text-[#1d1d1f] my-auto overflow-hidden relative z-[10000]">
         {/* Header */}
-        <div className="p-5 sm:p-7 flex items-start justify-between border-b border-slate-800/80">
+        <div className="p-6 sm:p-8 flex items-start justify-between border-b border-[#f0f0f2]">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3] text-xs font-medium mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
               <span>SQMS Multi-Tenant Partner Program</span>
             </div>
-            <h2 className="text-xl sm:text-3xl font-extrabold text-white">
+            <h2 className="text-xl sm:text-3xl font-semibold text-[#1d1d1f] tracking-tight">
               {checkoutStep === 'details'
                 ? (isAlreadySubscribed ? `Upgrade Checkout & Payment Gateway: ${selectedPlan?.name || 'Enterprise'}` : `Secure Checkout: ${selectedPlan?.name || 'Franchise'} Plan`)
                 : checkoutStep === 'success'
                 ? (isAlreadySubscribed ? 'Plan Upgraded Successfully!' : 'Payment Confirmed & Workshop Activated!')
                 : (isAlreadySubscribed ? 'Upgrade Your Workshop Franchise Plan' : 'Choose Your Workshop Franchise Plan')}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#707070] mt-1 max-w-2xl">
               {checkoutStep === 'details'
                 ? (isAlreadySubscribed
                     ? 'Review your upgrade details and complete payment via Credit/Debit Card, UPI QR, or Net Banking.'
@@ -265,36 +262,36 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 
           <button
             onClick={handleModalClose}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition cursor-pointer"
+            className="p-2 rounded-full border border-[#d6d6d6] hover:bg-[#f5f5f7] text-[#1d1d1f] transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-8 max-h-[78vh] overflow-y-auto">
+        <div className="p-6 sm:p-8 max-h-[78vh] overflow-y-auto">
           {/* STEP 1: PLAN SELECTOR */}
           {checkoutStep === 'select' && (
             <div className="space-y-6">
               {/* If user is already subscribed, show Current Plan Info Banner */}
               {isAlreadySubscribed && (
-                <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/70 to-slate-900 border border-indigo-500/40 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                <div className="p-5 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[#1d1d1f]">
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30 shrink-0">
-                      <Sparkles className="w-4 h-4 text-yellow-400" />
+                    <div className="w-9 h-9 rounded-full bg-white text-[#0071e3] flex items-center justify-center border border-[#d6d6d6] shrink-0">
+                      <Sparkles className="w-4 h-4 text-[#0071e3]" />
                     </div>
                     <div>
-                      <span className="font-bold text-white block text-sm">
+                      <span className="font-semibold text-[#1d1d1f] block text-sm">
                         Active Subscription: {user?.plan_name || 'Multi-Branch Growth'}
                       </span>
-                      <span className="text-slate-400 text-xs">
+                      <span className="text-[#707070] text-xs">
                         Your franchise currently has quota for {user?.max_allowed_centers || 5} Workshop Centers. Select a higher tier below to upgrade your plan.
                       </span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="text-emerald-400 font-bold bg-emerald-500/20 px-3 py-1 rounded-full border border-emerald-500/30 text-[11px] inline-flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[#10b981] font-medium bg-white px-3 py-1 rounded-full border border-emerald-200 text-[11px] inline-flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981]" />
                       Status: ACTIVE
                     </span>
                   </div>
@@ -303,27 +300,27 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 
               {/* Billing Toggle */}
               <div className="flex justify-center">
-                <div className="bg-slate-950 p-1.5 rounded-2xl border border-slate-800 inline-flex items-center space-x-2">
+                <div className="bg-[#f5f5f7] p-1 rounded-full border border-[#d6d6d6] inline-flex items-center space-x-1">
                   <button
                     onClick={() => setBillingPeriod('monthly')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    className={`px-4 py-2 rounded-full text-xs font-medium transition cursor-pointer ${
                       billingPeriod === 'monthly'
-                        ? 'bg-blue-600 text-white shadow'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-[#1d1d1f] shadow-sm'
+                        : 'text-[#707070] hover:text-[#1d1d1f]'
                     }`}
                   >
                     Monthly Billing
                   </button>
                   <button
                     onClick={() => setBillingPeriod('yearly')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+                    className={`px-4 py-2 rounded-full text-xs font-medium transition flex items-center space-x-1.5 cursor-pointer ${
                       billingPeriod === 'yearly'
-                        ? 'bg-blue-600 text-white shadow'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-[#1d1d1f] shadow-sm'
+                        : 'text-[#707070] hover:text-[#1d1d1f]'
                     }`}
                   >
                     <span>Yearly Billing</span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    <span className="text-[10px] bg-emerald-50 text-[#10b981] px-2 py-0.5 rounded-full border border-emerald-200 font-medium">
                       Save 16%
                     </span>
                   </button>
@@ -333,7 +330,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
               {/* Plans Grid */}
               {loadingPlans ? (
                 <div className="flex items-center justify-center py-16">
-                  <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+                  <RefreshCw className="w-8 h-8 text-[#0071e3] animate-spin" />
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -349,42 +346,42 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                     return (
                       <div
                         key={p.id}
-                        className={`rounded-3xl p-6 border transition-all duration-300 flex flex-col justify-between relative ${
+                        className={`rounded-[28px] p-6 border transition-all duration-300 flex flex-col justify-between relative shadow-none ${
                           isCurrentPlan
-                            ? 'bg-emerald-950/20 border-emerald-500/50 shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/30'
+                            ? 'bg-[#fafafc] border-2 border-[#10b981]'
                             : isUpgrade
-                            ? 'bg-slate-800/90 border-indigo-500/80 shadow-2xl shadow-indigo-500/20 ring-1 ring-indigo-400/40'
+                            ? 'bg-white border-2 border-[#0071e3]'
                             : isLowerTier
-                            ? 'bg-slate-900/40 border-slate-800/60 opacity-60'
+                            ? 'bg-[#fafafc] border-[#d6d6d6] opacity-60'
                             : isPopular
-                            ? 'bg-slate-800/80 border-blue-500/50 shadow-xl shadow-blue-500/10'
-                            : 'bg-slate-800/30 border-slate-800 hover:border-slate-700'
+                            ? 'bg-white border-2 border-[#0071e3]'
+                            : 'bg-white border border-[#d6d6d6] hover:border-[#86868b]'
                         }`}
                       >
                         {isCurrentPlan && (
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-600 text-[10px] font-black tracking-wider uppercase text-white shadow-md flex items-center space-x-1">
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#10b981] text-[10px] font-medium tracking-wider uppercase text-white shadow-sm flex items-center space-x-1">
                             <Check className="w-3 h-3 text-white" />
                             <span>Your Current Plan</span>
                           </div>
                         )}
                         {isUpgrade && (
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-[10px] font-black tracking-wider uppercase text-white shadow-md flex items-center space-x-1">
-                            <Sparkles className="w-3 h-3 text-yellow-300" />
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#0071e3] text-[10px] font-medium tracking-wider uppercase text-white shadow-sm flex items-center space-x-1">
+                            <Sparkles className="w-3 h-3 text-white" />
                             <span>Recommended Upgrade</span>
                           </div>
                         )}
                         {isPopular && (
-                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-blue-600 text-[10px] font-black tracking-wider uppercase text-white shadow-md">
+                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#0071e3] text-[10px] font-medium tracking-wider uppercase text-white shadow-sm">
                             Recommended for Growth
                           </div>
                         )}
 
                         <div>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            <span className="text-xs font-medium uppercase tracking-wider text-[#707070]">
                               {isCurrentPlan ? 'Active Plan' : isLowerTier ? 'Included Tier' : isUpgrade ? 'Upgrade Tier' : p.badge}
                             </span>
-                            <div className="p-2 rounded-xl bg-slate-900 border border-slate-700/60 text-blue-400">
+                            <div className="p-2 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3]">
                               {p.max_centers === 1 ? (
                                 <Building2 className="w-4 h-4" />
                               ) : (
@@ -393,19 +390,19 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                             </div>
                           </div>
 
-                          <h3 className="text-xl font-black text-white mt-3 flex items-center gap-2">
+                          <h3 className="text-xl font-semibold text-[#1d1d1f] mt-3 flex items-center gap-2">
                             <span>{p.name}</span>
                           </h3>
-                          <p className="text-xs text-slate-400 mt-1 min-h-[32px]">{p.description}</p>
+                          <p className="text-xs text-[#707070] mt-1 min-h-[32px]">{p.description}</p>
 
                           {/* Plan Limit Callout */}
-                          <div className="mt-4 p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/80 flex items-center space-x-2 text-xs">
-                            <Info className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span className="text-slate-300 font-semibold">
+                          <div className="mt-4 p-3 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center space-x-2 text-xs">
+                            <Info className="w-4 h-4 text-[#0071e3] shrink-0" />
+                            <span className="text-[#1d1d1f] font-medium">
                               {isStarter ? (
-                                <>Limit: <strong className="text-amber-400">1 Service Center</strong> only</>
+                                <>Limit: <strong className="text-[#1d1d1f]">1 Service Center</strong> only</>
                               ) : (
-                                <>Limit: <strong className="text-emerald-400">Up to {p.max_centers === 999 ? 'Unlimited' : p.max_centers} Centers</strong> across cities</>
+                                <>Limit: <strong className="text-[#10b981]">Up to {p.max_centers === 999 ? 'Unlimited' : p.max_centers} Centers</strong> across cities</>
                               )}
                             </span>
                           </div>
@@ -413,21 +410,21 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           {/* Pricing */}
                           <div className="mt-4">
                             <div className="flex items-baseline space-x-1">
-                              <span className="text-3xl font-black text-white">
+                              <span className="text-3xl font-semibold text-[#1d1d1f]">
                                 ₹{price.toLocaleString('en-IN')}
                               </span>
-                              <span className="text-xs text-slate-400">/{billingPeriod === 'monthly' ? 'month' : 'year'}</span>
+                              <span className="text-xs text-[#707070]">/{billingPeriod === 'monthly' ? 'month' : 'year'}</span>
                             </div>
-                            <span className="text-[11px] text-slate-500 block mt-0.5">
+                            <span className="text-[11px] text-[#707070] block mt-0.5">
                               + 18% GST Applicable (₹{Math.round(price * 0.18).toLocaleString('en-IN')})
                             </span>
                           </div>
 
                           {/* Features list */}
-                          <ul className="mt-5 space-y-2 text-xs text-slate-300">
+                          <ul className="mt-5 space-y-2 text-xs text-[#707070]">
                             {p.features.map((feat, idx) => (
                               <li key={idx} className="flex items-start space-x-2">
-                                <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                                <Check className="w-3.5 h-3.5 text-[#0071e3] shrink-0 mt-0.5" />
                                 <span className="leading-tight">{feat}</span>
                               </li>
                             ))}
@@ -439,16 +436,16 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           <button
                             type="button"
                             disabled
-                            className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center space-x-1.5 cursor-default"
+                            className="mt-6 w-full py-2.5 rounded-full font-medium text-xs bg-[#f5f5f7] text-[#10b981] border border-emerald-200 flex items-center justify-center space-x-1.5 cursor-default"
                           >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
                             <span>Your Current Active Plan</span>
                           </button>
                         ) : isLowerTier ? (
                           <button
                             type="button"
                             disabled
-                            className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-slate-800/40 text-slate-500 border border-slate-700/40 flex items-center justify-center space-x-1.5 cursor-not-allowed"
+                            className="mt-6 w-full py-2.5 rounded-full font-medium text-xs bg-[#f5f5f7] text-[#707070] border border-[#d6d6d6] flex items-center justify-center space-x-1.5 cursor-not-allowed"
                           >
                             <span>Included in Higher Tier</span>
                           </button>
@@ -456,9 +453,9 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleSelectPlan(p)}
-                            className="mt-6 w-full py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-indigo-500/30 flex items-center justify-center space-x-1.5 cursor-pointer"
+                            className="mt-6 w-full py-2.5 rounded-full font-medium text-xs bg-[#0071e3] hover:bg-[#0077ed] text-white shadow-none flex items-center justify-center space-x-1.5 cursor-pointer transition"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                            <Sparkles className="w-3.5 h-3.5 text-white" />
                             <span>Upgrade to {p.name.split(' ')[0]}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
@@ -466,10 +463,10 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleSelectPlan(p)}
-                            className={`mt-6 w-full py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer ${
+                            className={`mt-6 w-full py-2.5 rounded-full font-medium text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-none ${
                               isPopular
-                                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25'
-                                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                                ? 'bg-[#0071e3] hover:bg-[#0077ed] text-white'
+                                : 'bg-[#1d1d1f] hover:bg-black text-white'
                             }`}
                           >
                             <span>Select {p.name.split(' ')[0]}</span>
@@ -488,36 +485,36 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
           {checkoutStep === 'details' && selectedPlan && (
             <form onSubmit={handleCompletePurchase} className="space-y-6 max-w-4xl mx-auto">
               {errorMessage && (
-                <div className="p-4 rounded-2xl bg-red-950/70 border border-red-500/40 text-red-300 text-xs flex items-center space-x-2.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-[#b64400] text-xs flex items-center space-x-2.5 font-medium">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#b64400]" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* Selected Plan Summary Banner */}
-              <div className="bg-indigo-950/40 border border-indigo-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="bg-[#f5f5f7] border border-[#d6d6d6] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[#1d1d1f]">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
+                  <span className="text-[10px] uppercase font-medium text-[#707070] tracking-wider">
                     Selected Subscription Plan
                   </span>
-                  <div className="text-base font-extrabold text-white flex items-center space-x-2">
+                  <div className="text-base font-semibold text-[#1d1d1f] flex items-center space-x-2 mt-0.5">
                     <span>{selectedPlan.name}</span>
-                    <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                    <span className="text-xs bg-white text-[#0071e3] px-2.5 py-0.5 rounded-full border border-[#d6d6d6] font-medium">
                       {selectedPlan.max_centers === 1 ? '1 Center Allowed' : `Up to ${selectedPlan.max_centers} Centers`}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <span className="text-sm font-extrabold text-emerald-400">
+                    <span className="text-base font-semibold text-[#10b981]">
                       ₹{totalAmount.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-[10px] text-slate-400 block">incl. 18% GST</span>
+                    <span className="text-[10px] text-[#707070] block">incl. 18% GST</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setCheckoutStep('select')}
-                    className="text-xs text-indigo-300 hover:text-white underline font-semibold cursor-pointer"
+                    className="text-xs text-[#0066cc] hover:underline font-medium cursor-pointer"
                   >
                     Change Plan
                   </button>
@@ -528,62 +525,62 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {isAlreadySubscribed ? (
                   /* Upgrade Comparison Card */
-                  <div className="lg:col-span-7 bg-slate-800/40 border border-slate-700/80 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
+                  <div className="lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[24px] p-6 space-y-4 shadow-none text-[#1d1d1f]">
+                    <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f2]">
+                      <h4 className="text-xs font-medium uppercase tracking-wider text-[#707070] flex items-center space-x-2">
+                        <Sparkles className="w-4 h-4 text-[#0071e3]" />
                         <span>Franchise Plan Upgrade Summary</span>
                       </h4>
-                      <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30 font-semibold">
+                      <span className="text-[10px] bg-[#f5f5f7] text-[#0071e3] px-2.5 py-0.5 rounded-full border border-[#d6d6d6] font-medium">
                         Instant Tier Upgrade
                       </span>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                    <div className="p-4 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] space-y-3">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Current Plan:</span>
-                        <span className="font-bold text-slate-300">{user?.plan_name || 'Multi-Branch Growth'}</span>
+                        <span className="text-[#707070]">Current Plan:</span>
+                        <span className="font-semibold text-[#1d1d1f]">{user?.plan_name || 'Multi-Branch Growth'}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Upgrading To:</span>
-                        <span className="font-black text-emerald-400 text-sm flex items-center gap-1.5">
+                        <span className="text-[#707070]">Upgrading To:</span>
+                        <span className="font-semibold text-[#10b981] text-sm flex items-center gap-1.5">
                           <span>{selectedPlan.name}</span>
-                          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-semibold">
+                          <span className="text-[10px] bg-white text-[#10b981] px-2 py-0.5 rounded-full border border-emerald-200 font-medium">
                             {selectedPlan.max_centers === 999 ? 'Unlimited Centers' : `${selectedPlan.max_centers} Centers`}
                           </span>
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Franchise Brand:</span>
-                        <span className="font-semibold text-white">{franchiseName || `${user?.name || 'Partner'}'s Auto Group`}</span>
+                        <span className="text-[#707070]">Franchise Brand:</span>
+                        <span className="font-semibold text-[#1d1d1f]">{franchiseName || `${user?.name || 'Partner'}'s Auto Group`}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Existing Branch Network:</span>
-                        <span className="font-semibold text-blue-300">All data & branches automatically preserved</span>
+                        <span className="text-[#707070]">Existing Branch Network:</span>
+                        <span className="font-medium text-[#0071e3]">All data & branches automatically preserved</span>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30 text-xs text-blue-200 space-y-1.5">
-                      <div className="font-bold flex items-center gap-1.5 text-blue-300">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <div className="p-4 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] text-xs text-[#1d1d1f] space-y-1.5">
+                      <div className="font-semibold flex items-center gap-1.5 text-[#1d1d1f]">
+                        <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
                         <span>Automated Zero-Downtime Migration</span>
                       </div>
-                      <p className="text-[11px] text-blue-300/80 leading-relaxed">
+                      <p className="text-[11px] text-[#707070] leading-relaxed">
                         Your account will instantly transition to {selectedPlan.name}. All existing service centers, manager credentials, and queue schedules remain untouched with enhanced quota immediately available.
                       </p>
                     </div>
                   </div>
                 ) : (
                   /* Workshop Setup Details (7 Cols) */
-                  <div className="lg:col-span-7 bg-slate-800/40 border border-slate-800 rounded-2xl p-5 space-y-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
-                      <Building2 className="w-4 h-4 text-blue-400" />
+                  <div className="lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[24px] p-6 space-y-4 shadow-none text-[#1d1d1f]">
+                    <h4 className="text-xs font-medium uppercase tracking-wider text-[#707070] flex items-center space-x-2">
+                      <Building2 className="w-4 h-4 text-[#0071e3]" />
                       <span>Workshop Registration Details</span>
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        <label className="block text-xs font-medium text-[#707070] mb-1">
                           Franchise / Workshop Business Brand Name *
                         </label>
                         <input
@@ -592,12 +589,12 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           value={franchiseName}
                           onChange={(e) => setFranchiseName(e.target.value)}
                           placeholder="e.g. Apex Auto Mobility Services"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        <label className="block text-xs font-medium text-[#707070] mb-1">
                           Primary Service Center Name *
                         </label>
                         <input
@@ -606,79 +603,79 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           value={primaryCenterName}
                           onChange={(e) => setPrimaryCenterName(e.target.value)}
                           placeholder="e.g. Apex Auto - Central Hub"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">City *</label>
+                        <label className="block text-xs font-medium text-[#707070] mb-1">City *</label>
                         <input
                           type="text"
                           required
                           value={city}
                           onChange={(e) => setCity(e.target.value)}
                           placeholder="e.g. Ahmedabad"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Area / Neighborhood *</label>
+                        <label className="block text-xs font-medium text-[#707070] mb-1">Area / Neighborhood *</label>
                         <input
                           type="text"
                           required
                           value={area}
                           onChange={(e) => setArea(e.target.value)}
                           placeholder="e.g. SG Highway"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Physical Address *</label>
+                        <label className="block text-xs font-medium text-[#707070] mb-1">Physical Address *</label>
                         <input
                           type="text"
                           required
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
                           placeholder="e.g. Plot 42, Motorway Hub"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">Official Workshop Phone *</label>
+                        <label className="block text-xs font-medium text-[#707070] mb-1">Official Workshop Phone *</label>
                         <input
                           type="text"
                           required
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="+91 98250 12345"
-                          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1">Service Bays</label>
+                          <label className="block text-xs font-medium text-[#707070] mb-1">Service Bays</label>
                           <input
                             type="number"
                             min={2}
                             max={selectedPlan.max_bays_per_center}
                             value={totalBays}
                             onChange={(e) => setTotalBays(Number(e.target.value))}
-                            className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white text-center focus:outline-none focus:border-blue-500"
+                            className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1">Technicians</label>
+                          <label className="block text-xs font-medium text-[#707070] mb-1">Technicians</label>
                           <input
                             type="number"
                             min={2}
                             max={25}
                             value={totalMechanics}
                             onChange={(e) => setTotalMechanics(Number(e.target.value))}
-                            className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white text-center focus:outline-none focus:border-blue-500"
+                            className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
                           />
                         </div>
                       </div>
@@ -687,41 +684,41 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                 )}
 
                 {/* Real-Time Payment Gateway Simulator (5 Cols) */}
-                <div className="lg:col-span-5 bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-4 flex flex-col justify-between">
+                <div className="lg:col-span-5 bg-[#f5f5f7] border border-[#d6d6d6] rounded-[24px] p-6 space-y-4 flex flex-col justify-between shadow-none text-[#1d1d1f]">
                   <div>
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-700">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center space-x-2">
-                        <CreditCard className="w-4 h-4 text-emerald-400" />
+                    <div className="flex items-center justify-between pb-3 border-b border-[#d6d6d6]">
+                      <h4 className="text-xs font-medium uppercase tracking-wider text-[#707070] flex items-center space-x-2">
+                        <CreditCard className="w-4 h-4 text-[#0071e3]" />
                         <span>Payment Gateway</span>
                       </h4>
-                      <div className="flex items-center space-x-1 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <div className="flex items-center space-x-1 text-[10px] text-[#10b981] font-medium bg-white px-2 py-0.5 rounded-full border border-emerald-200">
                         <ShieldCheck className="w-3 h-3" />
                         <span>256-Bit SSL</span>
                       </div>
                     </div>
 
                     {/* Method Selector Tabs */}
-                    <div className="grid grid-cols-4 gap-1.5 mt-3 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                    <div className="grid grid-cols-4 gap-1 mt-3 bg-white p-1 rounded-full border border-[#d6d6d6]">
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('razorpay')}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center space-x-1 cursor-pointer ${
+                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
                           paymentMethod === 'razorpay'
-                            ? 'bg-blue-600 text-white shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-[#0071e3] text-white shadow-none'
+                            : 'text-[#707070] hover:text-[#1d1d1f]'
                         }`}
                       >
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
+                        <ShieldCheck className="w-3.5 h-3.5 text-white" />
                         <span>Razorpay</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('card')}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center space-x-1 cursor-pointer ${
+                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
                           paymentMethod === 'card'
-                            ? 'bg-blue-600 text-white shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-[#0071e3] text-white shadow-none'
+                            : 'text-[#707070] hover:text-[#1d1d1f]'
                         }`}
                       >
                         <CreditCard className="w-3 h-3" />
@@ -731,10 +728,10 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('upi')}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center space-x-1 cursor-pointer ${
+                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
                           paymentMethod === 'upi'
-                            ? 'bg-blue-600 text-white shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-[#0071e3] text-white shadow-none'
+                            : 'text-[#707070] hover:text-[#1d1d1f]'
                         }`}
                       >
                         <Smartphone className="w-3 h-3" />
@@ -744,10 +741,10 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('netbanking')}
-                        className={`py-1.5 rounded-lg text-[11px] font-bold transition flex items-center justify-center space-x-1 cursor-pointer ${
+                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
                           paymentMethod === 'netbanking'
-                            ? 'bg-blue-600 text-white shadow'
-                            : 'text-slate-400 hover:text-white'
+                            ? 'bg-[#0071e3] text-white shadow-none'
+                            : 'text-[#707070] hover:text-[#1d1d1f]'
                         }`}
                       >
                         <Landmark className="w-3 h-3" />
@@ -758,30 +755,30 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                     {/* Method Specific Form */}
                     <div className="mt-4 space-y-3">
                       {paymentMethod === 'razorpay' && (
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-950/70 to-slate-900 border border-blue-500/30 space-y-3">
+                        <div className="p-4 rounded-2xl bg-white border border-[#d6d6d6] space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              <span className="font-extrabold text-white text-xs">Razorpay Standard Checkout</span>
-                              <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30 font-semibold">
+                              <span className="font-semibold text-[#1d1d1f] text-xs">Razorpay Standard Checkout</span>
+                              <span className="text-[10px] bg-[#f5f5f7] text-[#0071e3] px-2 py-0.5 rounded-full border border-[#d6d6d6] font-medium">
                                 Test Mode
                               </span>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-mono">rzp_test</span>
+                            <span className="text-[10px] text-[#707070] font-mono">rzp_test</span>
                           </div>
-                          <p className="text-xs text-slate-300 leading-relaxed">
+                          <p className="text-xs text-[#707070] leading-relaxed">
                             Official Razorpay modal popup with live test environment support for Cards, UPI apps, QR codes, and Netbanking with HMAC-SHA256 signature verification.
                           </p>
-                          <div className="flex flex-wrap gap-1.5 text-[10px] text-slate-300">
-                            <span className="px-2 py-0.5 bg-slate-800 rounded border border-slate-700/60 font-medium">All Cards</span>
-                            <span className="px-2 py-0.5 bg-slate-800 rounded border border-slate-700/60 font-medium">Google Pay / PhonePe / Paytm</span>
-                            <span className="px-2 py-0.5 bg-slate-800 rounded border border-slate-700/60 font-medium">Netbanking</span>
+                          <div className="flex flex-wrap gap-1.5 text-[10px] text-[#707070]">
+                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">All Cards</span>
+                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">Google Pay / PhonePe / Paytm</span>
+                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">Netbanking</span>
                           </div>
                         </div>
                       )}
                       {paymentMethod === 'card' && (
                         <>
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
                               Card Number
                             </label>
                             <div className="relative">
@@ -791,16 +788,16 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                                 value={cardNumber}
                                 onChange={(e) => handleCardNumberChange(e.target.value)}
                                 placeholder="4532 8819 9201 3491"
-                                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
                               />
-                              <span className="absolute right-3 top-2 text-[10px] font-black uppercase text-blue-400 bg-blue-500/20 px-1.5 py-0.5 rounded">
+                              <span className="absolute right-3 top-2 text-[10px] font-semibold uppercase text-[#0071e3] bg-[#f5f5f7] px-1.5 py-0.5 rounded border border-[#d6d6d6]">
                                 VISA
                               </span>
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
                               Cardholder Name
                             </label>
                             <input
@@ -809,13 +806,13 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                               value={cardName}
                               onChange={(e) => setCardName(e.target.value)}
                               placeholder="e.g. Rajesh Patel"
-                              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                              className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
                             />
                           </div>
 
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                              <label className="block text-[11px] font-medium text-[#707070] mb-1">
                                 Expiry (MM/YY)
                               </label>
                               <input
@@ -824,11 +821,11 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                                 value={cardExpiry}
                                 onChange={(e) => handleCardExpiryChange(e.target.value)}
                                 placeholder="08/28"
-                                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono text-center focus:outline-none focus:border-blue-500"
+                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                              <label className="block text-[11px] font-medium text-[#707070] mb-1">
                                 CVV
                               </label>
                               <input
@@ -838,7 +835,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                                 value={cardCvv}
                                 onChange={(e) => setCardCvv(e.target.value)}
                                 placeholder="•••"
-                                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono text-center focus:outline-none focus:border-blue-500"
+                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
                               />
                             </div>
                           </div>
@@ -848,20 +845,20 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                       {paymentMethod === 'upi' && (
                         <div className="space-y-3">
                           {/* Dynamic QR Code display */}
-                          <div className="bg-white p-3 rounded-2xl flex flex-col items-center justify-center text-slate-950 space-y-1.5">
-                            <div className="w-28 h-28 border-2 border-slate-900 p-1 rounded-xl flex items-center justify-center bg-slate-50">
-                              <QrCode className="w-24 h-24 text-slate-900" />
+                          <div className="bg-white p-4 rounded-2xl border border-[#d6d6d6] flex flex-col items-center justify-center text-[#1d1d1f] space-y-1.5">
+                            <div className="w-28 h-28 border border-[#d6d6d6] p-1 rounded-xl flex items-center justify-center bg-[#fafafc]">
+                              <QrCode className="w-24 h-24 text-[#1d1d1f]" />
                             </div>
-                            <span className="text-[10px] font-mono text-slate-600 font-bold">
+                            <span className="text-[10px] font-mono text-[#707070] font-medium">
                               merchant.sqms@okaxis
                             </span>
-                            <span className="text-[11px] font-black text-indigo-700">
+                            <span className="text-[11px] font-semibold text-[#0071e3]">
                               Scan to pay ₹{totalAmount.toLocaleString('en-IN')}
                             </span>
                           </div>
 
                           <div>
-                            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
                               Or Enter Virtual Payment Address (UPI ID)
                             </label>
                             <div className="flex space-x-1.5">
@@ -873,18 +870,18 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                                   setUpiVerified(true);
                                 }}
                                 placeholder="user@okhdfcbank"
-                                className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                                className="flex-1 px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
                               />
                               <button
                                 type="button"
                                 onClick={() => setUpiVerified(true)}
-                                className="px-2.5 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-[11px] font-bold text-slate-200 cursor-pointer"
+                                className="px-3 py-1.5 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[11px] font-medium text-[#1d1d1f] cursor-pointer"
                               >
-                                {upiVerified ? <Check className="w-4 h-4 text-emerald-400" /> : 'Verify'}
+                                {upiVerified ? <Check className="w-4 h-4 text-[#10b981]" /> : 'Verify'}
                               </button>
                             </div>
                             {upiVerified && (
-                              <span className="text-[10px] text-emerald-400 flex items-center space-x-1 mt-1 font-semibold">
+                              <span className="text-[10px] text-[#10b981] flex items-center space-x-1 mt-1 font-medium">
                                 <CheckCircle className="w-3 h-3" />
                                 <span>Verified Merchant / User UPI account</span>
                               </span>
@@ -895,7 +892,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 
                       {paymentMethod === 'netbanking' && (
                         <div className="space-y-3">
-                          <label className="block text-[11px] font-semibold text-slate-300">
+                          <label className="block text-[11px] font-medium text-[#707070]">
                             Select Your Bank
                           </label>
                           <div className="grid grid-cols-2 gap-2">
@@ -904,10 +901,10 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                                 key={b}
                                 type="button"
                                 onClick={() => setSelectedBank(b)}
-                                className={`p-2 rounded-xl border text-left text-xs font-semibold transition cursor-pointer ${
+                                className={`p-2.5 rounded-xl border text-left text-xs font-medium transition cursor-pointer ${
                                   selectedBank === b
-                                    ? 'bg-blue-600/20 border-blue-500 text-white'
-                                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                                    ? 'bg-white border-[#0071e3] text-[#0071e3] shadow-sm'
+                                    : 'bg-white border-[#d6d6d6] text-[#707070] hover:text-[#1d1d1f]'
                                 }`}
                               >
                                 <div className="truncate">{b}</div>
@@ -919,18 +916,18 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                     </div>
 
                     {/* Order Tax Breakdown */}
-                    <div className="mt-4 pt-3 border-t border-slate-700/80 space-y-1.5 text-xs">
-                      <div className="flex justify-between text-slate-400">
+                    <div className="mt-4 pt-3 border-t border-[#d6d6d6] space-y-1.5 text-xs">
+                      <div className="flex justify-between text-[#707070]">
                         <span>Plan Base ({selectedPlan.name}):</span>
-                        <span className="font-mono text-slate-300">₹{basePrice.toLocaleString('en-IN')}</span>
+                        <span className="font-mono text-[#1d1d1f]">₹{basePrice.toLocaleString('en-IN')}</span>
                       </div>
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-[#707070]">
                         <span>GST 18% (CGST 9% + SGST 9%):</span>
-                        <span className="font-mono text-slate-300">₹{gstAmount.toLocaleString('en-IN')}</span>
+                        <span className="font-mono text-[#1d1d1f]">₹{gstAmount.toLocaleString('en-IN')}</span>
                       </div>
-                      <div className="flex justify-between text-white font-extrabold pt-1.5 border-t border-slate-700">
+                      <div className="flex justify-between text-[#1d1d1f] font-semibold pt-1.5 border-t border-[#d6d6d6]">
                         <span>Total Payable:</span>
-                        <span className="font-mono text-emerald-400 text-sm">₹{totalAmount.toLocaleString('en-IN')}</span>
+                        <span className="font-mono text-[#10b981] text-sm">₹{totalAmount.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
@@ -982,7 +979,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-blue-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-600/30 transition flex items-center justify-center space-x-2 cursor-pointer"
+                        className="w-full py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-xs sm:text-sm shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
                       >
                         {submitting ? (
                           <>
@@ -991,7 +988,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                           </>
                         ) : (
                           <>
-                            <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                            <ShieldCheck className="w-4 h-4 text-white" />
                             <span>
                               {isAlreadySubscribed
                                 ? `Pay ₹${totalAmount.toLocaleString('en-IN')} & Complete Upgrade`
@@ -1001,7 +998,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                         )}
                       </button>
                     )}
-                    <span className="text-[10px] text-slate-400 text-center block mt-2">
+                    <span className="text-[10px] text-[#707070] text-center block mt-2">
                       RBI Digital Sandbox Compliant • Instant Activation
                     </span>
                   </div>
@@ -1015,32 +1012,32 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
             <div className="max-w-2xl mx-auto space-y-6 py-4">
               {/* Top Success Badge */}
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20">
+                <div className="w-16 h-16 bg-[#f5f5f7] border border-[#d6d6d6] text-[#10b981] rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-9 h-9" />
                 </div>
-                <h3 className="text-2xl font-black text-white">
+                <h3 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">
                   Payment Confirmed • Franchise Workshop Active!
                 </h3>
-                <p className="text-xs text-slate-400 max-w-md mx-auto">
-                  Your payment has been settled. Your account has been upgraded to <strong className="text-white">Franchise Owner</strong> with your workshop online.
+                <p className="text-xs text-[#707070] max-w-md mx-auto">
+                  Your payment has been settled. Your account has been upgraded to <strong className="text-[#1d1d1f]">Franchise Owner</strong> with your workshop online.
                 </p>
               </div>
 
               {/* Tax Invoice Card */}
-              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-2xl relative overflow-hidden">
-                <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+              <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 space-y-4 shadow-xl relative overflow-hidden text-[#1d1d1f]">
+                <div className="flex items-start justify-between border-b border-[#f0f0f2] pb-4">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0071e3] bg-[#f5f5f7] px-2.5 py-0.5 rounded-full border border-[#d6d6d6]">
                       Official Tax Invoice
                     </span>
-                    <h4 className="text-lg font-black text-white mt-1">SQMS Mobility Pvt. Ltd.</h4>
-                    <p className="text-[11px] text-slate-400">GSTIN: 24AAACS9988K1ZQ • CIN: U72200GJ2026PTC099182</p>
+                    <h4 className="text-lg font-semibold text-[#1d1d1f] mt-1.5">SQMS Mobility Pvt. Ltd.</h4>
+                    <p className="text-[11px] text-[#707070]">GSTIN: 24AAACS9988K1ZQ • CIN: U72200GJ2026PTC099182</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-mono text-slate-300 block font-bold">
+                    <span className="text-xs font-mono text-[#1d1d1f] block font-semibold">
                       {purchasedInfo.invoice_number || 'INV-SQMS-2026-94812'}
                     </span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="text-[11px] text-[#707070] block">
                       Ref: {purchasedInfo.payment_reference || 'PAY-SQMS-9281'}
                     </span>
                   </div>
@@ -1049,41 +1046,41 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                 {/* Bill To & Workshop Info */}
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className="text-slate-500 font-semibold block text-[10px] uppercase">Billed To</span>
-                    <span className="font-bold text-white block">{purchasedInfo.franchise_name}</span>
-                    <span className="text-slate-400 block">{purchasedInfo.primary_center_name}</span>
-                    <span className="text-slate-500 text-[11px] block">{user?.email}</span>
+                    <span className="text-[#707070] font-medium block text-[10px] uppercase">Billed To</span>
+                    <span className="font-semibold text-[#1d1d1f] block">{purchasedInfo.franchise_name}</span>
+                    <span className="text-[#707070] block">{purchasedInfo.primary_center_name}</span>
+                    <span className="text-[#707070] text-[11px] block">{user?.email}</span>
                   </div>
 
                   <div>
-                    <span className="text-slate-500 font-semibold block text-[10px] uppercase">Plan Specification</span>
-                    <span className="font-bold text-indigo-400 block">{purchasedInfo.plan_name}</span>
-                    <span className="text-slate-300 block">
-                      Allowed Limit: <strong className="text-emerald-400">{purchasedInfo.max_allowed_centers} Workshop Center(s)</strong>
+                    <span className="text-[#707070] font-medium block text-[10px] uppercase">Plan Specification</span>
+                    <span className="font-semibold text-[#0071e3] block">{purchasedInfo.plan_name}</span>
+                    <span className="text-[#1d1d1f] block">
+                      Allowed Limit: <strong className="text-[#10b981]">{purchasedInfo.max_allowed_centers} Workshop Center(s)</strong>
                     </span>
-                    <span className="text-slate-400 text-[11px] block">
-                      Status: <strong className="text-emerald-400">Active & Verified</strong>
+                    <span className="text-[#707070] text-[11px] block">
+                      Status: <strong className="text-[#10b981]">Active & Verified</strong>
                     </span>
                   </div>
                 </div>
 
                 {/* Amount Table */}
-                <div className="bg-slate-900 rounded-xl p-3 space-y-2 text-xs">
-                  <div className="flex justify-between text-slate-400">
+                <div className="bg-[#f5f5f7] rounded-2xl p-4 space-y-2 text-xs border border-[#d6d6d6]">
+                  <div className="flex justify-between text-[#707070]">
                     <span>Base Subscription Fee:</span>
-                    <span className="font-mono text-slate-200">
+                    <span className="font-mono text-[#1d1d1f]">
                       ₹{((purchasedInfo.amount_paid || totalAmount) - (purchasedInfo.tax_amount || gstAmount)).toLocaleString('en-IN')}
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-[#707070]">
                     <span>GST @ 18% (Tax):</span>
-                    <span className="font-mono text-slate-200">
+                    <span className="font-mono text-[#1d1d1f]">
                       ₹{(purchasedInfo.tax_amount || gstAmount).toLocaleString('en-IN')}
                     </span>
                   </div>
-                  <div className="flex justify-between text-white font-extrabold pt-2 border-t border-slate-800">
+                  <div className="flex justify-between text-[#1d1d1f] font-semibold pt-2 border-t border-[#d6d6d6]">
                     <span>Total Paid (via {purchasedInfo.payment_method || 'Online Payment'}):</span>
-                    <span className="font-mono text-emerald-400 text-sm">
+                    <span className="font-mono text-[#10b981] text-sm">
                       ₹{(purchasedInfo.amount_paid || totalAmount).toLocaleString('en-IN')}
                     </span>
                   </div>
@@ -1095,7 +1092,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="w-full sm:w-1/2 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition flex items-center justify-center space-x-2 border border-slate-700 cursor-pointer"
+                  className="w-full sm:w-1/2 py-3 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] font-medium text-xs transition flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download / Print Invoice</span>
@@ -1104,7 +1101,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                 <button
                   type="button"
                   onClick={handleModalClose}
-                  className="w-full sm:w-1/2 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl transition flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full sm:w-1/2 py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <span>Enter Franchise Command Center</span>
                   <ArrowRight className="w-4 h-4" />

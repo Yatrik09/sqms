@@ -98,27 +98,28 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
     try {
       const features = formFeaturesText
         .split('\n')
-        .map(f => f.trim())
-        .filter(f => f.length > 0);
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-      await api.updateSubscriptionPlan(editingPlan.id, {
+      const updated = await api.updateSubscriptionPlan(editingPlan.id, {
         name: formName.trim(),
+        badge: formBadge.trim(),
         price_monthly: Number(formPriceMonthly),
         price_yearly: Number(formPriceYearly),
         max_centers: Number(formMaxCenters),
         max_bays_per_center: Number(formMaxBays),
         max_managers: Number(formMaxManagers),
-        badge: formBadge.trim(),
         description: formDescription.trim(),
         features,
-        is_active: formIsActive
+        is_active: formIsActive,
       });
 
-      setFeedback({ type: 'success', message: `Plan "${formName}" updated successfully!` });
+      setPlans((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
       setEditingPlan(null);
+      setFeedback({ type: 'success', message: `Plan "${updated.name}" updated successfully.` });
       await loadData();
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err?.message || 'Failed to update plan' });
+      setFeedback({ type: 'error', message: err.message || 'Failed to update plan' });
     } finally {
       setPlanActionLoading(false);
     }
@@ -130,29 +131,29 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
     try {
       const features = formFeaturesText
         .split('\n')
-        .map(f => f.trim())
-        .filter(f => f.length > 0);
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-      const cleanId = (formId.trim() || formName.toLowerCase().replace(/[^a-z0-9]+/g, '_')).trim();
-
-      await api.createSubscriptionPlan({
-        id: cleanId,
+      const created = await api.createSubscriptionPlan({
+        id: formId.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'),
         name: formName.trim(),
+        badge: formBadge.trim(),
         price_monthly: Number(formPriceMonthly),
         price_yearly: Number(formPriceYearly),
         max_centers: Number(formMaxCenters),
         max_bays_per_center: Number(formMaxBays),
         max_managers: Number(formMaxManagers),
-        badge: formBadge.trim(),
         description: formDescription.trim(),
         features,
+        is_active: true,
       });
 
-      setFeedback({ type: 'success', message: `New Plan "${formName}" created successfully!` });
+      setPlans((prev) => [...prev, created]);
       setIsCreateModalOpen(false);
+      setFeedback({ type: 'success', message: `New plan "${created.name}" created successfully.` });
       await loadData();
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err?.message || 'Failed to create plan' });
+      setFeedback({ type: 'error', message: err.message || 'Failed to create plan' });
     } finally {
       setPlanActionLoading(false);
     }
@@ -163,11 +164,23 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
     setPlanActionLoading(true);
     try {
       const res = await api.deleteSubscriptionPlan(deleteConfirmPlan.id);
-      setFeedback({ type: 'success', message: res.message || `Plan "${deleteConfirmPlan.name}" removed.` });
+      if (res.action === 'deactivated') {
+        setPlans((prev) => prev.map((p) => (p.id === deleteConfirmPlan.id ? { ...p, is_active: false } : p)));
+        setFeedback({
+          type: 'success',
+          message: `Plan "${deleteConfirmPlan.name}" was deactivated (existing franchise subscriptions remain protected).`,
+        });
+      } else {
+        setPlans((prev) => prev.filter((p) => p.id !== deleteConfirmPlan.id));
+        setFeedback({
+          type: 'success',
+          message: `Plan "${deleteConfirmPlan.name}" permanently deleted.`,
+        });
+      }
       setDeleteConfirmPlan(null);
       await loadData();
     } catch (err: any) {
-      setFeedback({ type: 'error', message: err?.message || 'Failed to delete plan' });
+      setFeedback({ type: 'error', message: err.message || 'Failed to delete plan' });
     } finally {
       setPlanActionLoading(false);
     }
@@ -177,44 +190,40 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
     loadData();
   }, []);
 
-  useEffect(() => {
-    if (initialTab) {
-      setTab(initialTab === 'centers' || initialTab === 'audit' ? initialTab : 'overview');
-    }
-  }, [initialTab]);
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="flex items-center space-x-3 text-slate-400">
-          <RefreshCw className="w-5 h-5 animate-spin text-purple-500" />
-          <span className="text-sm font-medium">Loading system administration & revenue telemetry...</span>
+      <div className="flex items-center justify-center min-h-[60vh] bg-white">
+        <div className="flex flex-col items-center space-y-4 text-[#707070]">
+          <div className="w-10 h-10 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium tracking-tight text-[#1d1d1f]">
+            Loading Super Administrator Console...
+          </span>
         </div>
       </div>
     );
   }
 
-  const tier = subscriptionOverview?.tier_breakdown || {
-    starter: { count: 0, revenue: 0, price_monthly: 499, name: "Single Hub Starter" },
-    growth: { count: 0, revenue: 0, price_monthly: 1499, name: "Multi-Branch Growth" },
+  const defaultTierStats = {
+    starter: { count: 0, revenue: 0, price_monthly: 4999, name: "Single Hub Starter" },
+    growth: { count: 0, revenue: 0, price_monthly: 12999, name: "Multi-Branch Growth" },
     enterprise: { count: 0, revenue: 0, price_monthly: 24999, name: "Enterprise Franchise" }
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#1d1d1f]">
       {/* Admin Header */}
-      <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
+      <div className="bg-white rounded-[28px] p-6 sm:p-8 text-[#1d1d1f] shadow-none flex flex-col md:flex-row md:items-center justify-between gap-6 border border-[#d6d6d6]">
         <div>
           <div className="flex items-center space-x-2.5">
-            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
               Super Administrator Console
             </span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 font-semibold">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#707070] border border-[#d6d6d6] font-medium">
               Platform Root
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2 text-white">System Architecture & Overview</h1>
-          <p className="text-slate-400 text-xs mt-1 max-w-2xl">
+          <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-[#1d1d1f] tracking-tight">System Architecture & Overview</h1>
+          <p className="text-[#707070] text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
             Managing Multi-Tenant Franchises, Subscription Plan Revenue, Workshop Centers, and Live Queue Dispatch.
           </p>
         </div>
@@ -222,7 +231,7 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
         <div className="flex items-center space-x-3">
           <button
             onClick={loadData}
-            className="p-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer"
+            className="p-2 rounded-full bg-[#f5f5f7] hover:bg-[#e6e6e8] text-[#1d1d1f] border border-[#d6d6d6] transition cursor-pointer"
             title="Refresh All Telemetry"
           >
             <RefreshCw className="w-4 h-4" />
@@ -233,62 +242,64 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
       {/* Metric KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* KPI 1: Active Queues */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Active Queues</span>
-          <span className="text-2xl font-black text-amber-400 mt-1 block">{analytics?.active_queues ?? 0}</span>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Live waiting vehicles</span>
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">Active Queues</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">{analytics?.active_queues ?? 0}</span>
+          <span className="text-[10px] text-[#86868b] block mt-0.5">Live waiting vehicles</span>
         </div>
 
         {/* KPI 2: System Avg Wait */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">System Avg Wait</span>
-          <span className="text-2xl font-black text-blue-400 mt-1 block">{analytics?.system_avg_wait_minutes ?? 25.0}m</span>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Across all branches</span>
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">System Avg Wait</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">{analytics?.system_avg_wait_minutes ?? 25.0}m</span>
+          <span className="text-[10px] text-[#86868b] block mt-0.5">Across all branches</span>
         </div>
 
         {/* KPI 3: Daily Customers */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Customers</span>
-          <span className="text-2xl font-black text-purple-400 mt-1 block">{analytics?.total_customers ?? 0}</span>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Registered user accounts</span>
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">Total Customers</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">{analytics?.total_customers ?? 0}</span>
+          <span className="text-[10px] text-[#86868b] block mt-0.5">Registered user accounts</span>
         </div>
 
         {/* KPI 4: Franchise Networks */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Franchise Networks</span>
-          <span className="text-2xl font-black text-emerald-400 mt-1 block">
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">Franchise Networks</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">
             {subscriptionOverview?.total_franchises ?? analytics?.total_franchises ?? 0}
           </span>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Active partner groups</span>
+          <span className="text-[10px] text-[#86868b] block mt-0.5">Active partner groups</span>
         </div>
 
         {/* KPI 5: Franchise Owners */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Franchise Owners</span>
-          <span className="text-2xl font-black text-indigo-400 mt-1 block">
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">Franchise Owners</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">
             {subscriptionOverview?.total_franchise_owners ?? 0}
           </span>
-          <span className="text-[10px] text-slate-400 block mt-0.5">Verified workshop owners</span>
+          <span className="text-[10px] text-[#86868b] block mt-0.5">Verified workshop owners</span>
         </div>
 
         {/* KPI 6: Plans Revenue */}
-        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-sm">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Plans Revenue</span>
-          <span className="text-2xl font-black text-emerald-400 mt-1 block">
+        <div className="bg-white p-5 rounded-[24px] border border-[#d6d6d6] hover:border-[#86868b] transition-all shadow-none">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block">Plans Revenue</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">
             ₹{Math.round(subscriptionOverview?.total_revenue || 0).toLocaleString()}
           </span>
-          <span className="text-[10px] text-emerald-400/80 block mt-0.5">
-            ● {subscriptionOverview?.total_plans_sold || 0} Plans Sold
+          <span className="text-[10px] text-[#707070] block mt-0.5">
+            {subscriptionOverview?.total_plans_sold || 0} Plans Sold
           </span>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-800 space-x-6 text-sm font-semibold">
+      <div className="flex items-center space-x-2 border-b border-[#e6e6e8] pb-4 overflow-x-auto">
         <button
           onClick={() => setTab('overview')}
-          className={`pb-3 border-b-2 transition cursor-pointer flex items-center space-x-2 ${
-            tab === 'overview' ? 'border-purple-500 text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
+            tab === 'overview'
+              ? 'bg-[#1d1d1f] text-white shadow-none'
+              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
           }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -297,8 +308,10 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
         <button
           onClick={() => setTab('centers')}
-          className={`pb-3 border-b-2 transition cursor-pointer flex items-center space-x-2 ${
-            tab === 'centers' ? 'border-purple-500 text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
+            tab === 'centers'
+              ? 'bg-[#1d1d1f] text-white shadow-none'
+              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
           }`}
         >
           <Building2 className="w-4 h-4" />
@@ -307,8 +320,10 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
         <button
           onClick={() => setTab('audit')}
-          className={`pb-3 border-b-2 transition cursor-pointer flex items-center space-x-2 ${
-            tab === 'audit' ? 'border-purple-500 text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-200'
+          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
+            tab === 'audit'
+              ? 'bg-[#1d1d1f] text-white shadow-none'
+              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
           }`}
         >
           <Receipt className="w-4 h-4" />
@@ -321,16 +336,16 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
         <div className="space-y-8">
           {/* Feedback banner */}
           {feedback && (
-            <div className={`p-4 rounded-2xl flex items-center justify-between border ${
+            <div className={`p-4 rounded-[20px] flex items-center justify-between border ${
               feedback.type === 'success'
-                ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                : 'bg-red-950/60 border-red-500/40 text-red-300'
+                ? 'bg-[#f5f5f7] border-[#d6d6d6] text-[#1d1d1f]'
+                : 'bg-[#f5f5f7] border-[#b64400] text-[#b64400]'
             }`}>
-              <div className="flex items-center space-x-2.5 text-xs font-semibold">
-                {feedback.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />}
+              <div className="flex items-center space-x-2.5 text-xs font-medium">
+                {feedback.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-600" /> : <AlertCircle className="w-4 h-4 text-[#b64400]" />}
                 <span>{feedback.message}</span>
               </div>
-              <button onClick={() => setFeedback(null)} className="p-1 hover:text-white cursor-pointer">
+              <button onClick={() => setFeedback(null)} className="p-1 hover:text-[#1d1d1f] cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -340,17 +355,17 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
           <div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-lg font-semibold text-[#1d1d1f] flex items-center space-x-2">
+                  <DollarSign className="w-5 h-5 text-[#0071e3]" />
                   <span>Subscription Plans Management & Pricing</span>
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#707070]">
                   Full Super Admin control to create, edit, customize pricing, quotas, features, or deactivate subscription tiers.
                 </p>
               </div>
               <button
                 onClick={handleOpenCreate}
-                className="px-4 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-auto"
+                className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs shadow-none transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-auto"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create New Plan</span>
@@ -404,63 +419,63 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                 return (
                   <div
                     key={p.id}
-                    className={`bg-slate-900/90 border rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-xl card-glow flex flex-col justify-between transition ${
-                      isInactive ? 'border-slate-800 opacity-70' : 'border-slate-800 hover:border-purple-500/50'
+                    className={`bg-white border rounded-[28px] p-6 relative space-y-4 shadow-none flex flex-col justify-between transition ${
+                      isInactive ? 'border-[#e6e6e8] opacity-70' : 'border-[#d6d6d6] hover:border-[#86868b]'
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          <span className="text-xs font-medium px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
                             {p.badge || 'Standard'}
                           </span>
                           {isInactive ? (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
-                              <EyeOff className="w-3 h-3 text-slate-400" /> Inactive
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f5f5f7] text-[#707070] border border-[#d6d6d6] flex items-center gap-1">
+                              <EyeOff className="w-3 h-3 text-[#707070]" /> Inactive
                             </span>
                           ) : (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                              <Eye className="w-3 h-3 text-emerald-400" /> Active
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] flex items-center gap-1">
+                              <Eye className="w-3 h-3 text-emerald-600" /> Active
                             </span>
                           )}
                         </div>
                         <div className="text-right">
-                          <div className="text-base font-black text-white">₹{Number(p.price_monthly).toLocaleString()} <span className="text-[10px] font-normal text-slate-400">/ mo</span></div>
-                          <div className="text-[11px] font-medium text-slate-400">₹{Number(p.price_yearly).toLocaleString()} / yr</div>
+                          <div className="text-base font-semibold text-[#1d1d1f]">₹{Number(p.price_monthly).toLocaleString()} <span className="text-[11px] font-normal text-[#707070]">/ mo</span></div>
+                          <div className="text-[11px] font-normal text-[#707070]">₹{Number(p.price_yearly).toLocaleString()} / yr</div>
                         </div>
                       </div>
 
-                      <h4 className="text-xl font-black text-white">{p.name}</h4>
-                      <div className="text-[11px] font-mono text-slate-500">ID: {p.id}</div>
-                      <p className="text-xs text-slate-300 mt-2 leading-relaxed">{p.description}</p>
+                      <h4 className="text-xl font-semibold text-[#1d1d1f]">{p.name}</h4>
+                      <div className="text-[11px] font-mono text-[#86868b]">ID: {p.id}</div>
+                      <p className="text-xs text-[#707070] mt-2 leading-relaxed">{p.description}</p>
 
                       {/* Quotas */}
-                      <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-800/80 text-center">
-                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Centers</span>
-                          <span className="text-sm font-black text-white">{p.max_centers}</span>
+                      <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-[#e6e6e8] text-center">
+                        <div className="bg-[#f5f5f7] p-2.5 rounded-[16px] border border-[#e6e6e8]">
+                          <span className="text-[9px] text-[#707070] uppercase font-semibold block">Centers</span>
+                          <span className="text-sm font-semibold text-[#1d1d1f]">{p.max_centers}</span>
                         </div>
-                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Bays/Ctr</span>
-                          <span className="text-sm font-black text-white">{p.max_bays_per_center}</span>
+                        <div className="bg-[#f5f5f7] p-2.5 rounded-[16px] border border-[#e6e6e8]">
+                          <span className="text-[9px] text-[#707070] uppercase font-semibold block">Bays/Ctr</span>
+                          <span className="text-sm font-semibold text-[#1d1d1f]">{p.max_bays_per_center}</span>
                         </div>
-                        <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800">
-                          <span className="text-[9px] text-slate-400 uppercase font-bold block">Managers</span>
-                          <span className="text-sm font-black text-white">{p.max_managers}</span>
+                        <div className="bg-[#f5f5f7] p-2.5 rounded-[16px] border border-[#e6e6e8]">
+                          <span className="text-[9px] text-[#707070] uppercase font-semibold block">Managers</span>
+                          <span className="text-sm font-semibold text-[#1d1d1f]">{p.max_managers}</span>
                         </div>
                       </div>
 
                       {/* Features bullet list */}
                       {p.features && p.features.length > 0 && (
-                        <div className="mt-4 space-y-1.5 pt-3 border-t border-slate-800/60">
+                        <div className="mt-4 space-y-1.5 pt-3 border-t border-[#e6e6e8]">
                           {p.features.slice(0, 5).map((feat, fidx) => (
-                            <div key={fidx} className="flex items-start text-xs text-slate-300">
-                              <Check className="w-3.5 h-3.5 text-emerald-400 mr-2 shrink-0 mt-0.5" />
+                            <div key={fidx} className="flex items-start text-xs text-[#707070]">
+                              <Check className="w-3.5 h-3.5 text-[#1d1d1f] mr-2 shrink-0 mt-0.5" />
                               <span className="leading-tight">{feat}</span>
                             </div>
                           ))}
                           {p.features.length > 5 && (
-                            <div className="text-[11px] text-slate-500 pl-5.5">+ {p.features.length - 5} more features</div>
+                            <div className="text-[11px] text-[#86868b] pl-5.5">+ {p.features.length - 5} more features</div>
                           )}
                         </div>
                       )}
@@ -468,31 +483,31 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
                     <div>
                       {/* Sales telemetry */}
-                      <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Plans Sold</span>
-                          <span className="text-lg font-black text-white mt-0.5 block">{tierStat?.count ?? 0}</span>
+                      <div className="pt-3 border-t border-[#e6e6e8] grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-[#f5f5f7] p-2.5 rounded-[16px] border border-[#e6e6e8]">
+                          <span className="text-[10px] text-[#707070] uppercase font-semibold block">Plans Sold</span>
+                          <span className="text-lg font-semibold text-[#1d1d1f] mt-0.5 block">{tierStat?.count ?? 0}</span>
                         </div>
-                        <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                          <span className="text-[10px] text-slate-400 uppercase font-bold block">Revenue</span>
-                          <span className="text-lg font-black text-emerald-400 mt-0.5 block">
+                        <div className="bg-[#f5f5f7] p-2.5 rounded-[16px] border border-[#e6e6e8]">
+                          <span className="text-[10px] text-[#707070] uppercase font-semibold block">Revenue</span>
+                          <span className="text-lg font-semibold text-[#1d1d1f] mt-0.5 block">
                             ₹{(tierStat?.revenue ?? 0).toLocaleString()}
                           </span>
                         </div>
                       </div>
 
                       {/* Action Buttons: Edit and Delete */}
-                      <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+                      <div className="flex items-center gap-2 pt-2 border-t border-[#e6e6e8]">
                         <button
                           onClick={() => handleOpenEdit(p)}
-                          className="flex-1 py-2 px-3 rounded-xl bg-purple-600/15 hover:bg-purple-600/25 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="flex-1 py-2 px-3 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                           <span>Edit Plan</span>
                         </button>
                         <button
                           onClick={() => setDeleteConfirmPlan(p)}
-                          className="py-2 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 hover:text-red-200 border border-red-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="py-2 px-3 rounded-full bg-[#f5f5f7] hover:bg-[#e6e6e8] text-[#b64400] border border-[#d6d6d6] text-xs font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
                           title="Delete or Deactivate Plan"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -507,25 +522,25 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
           </div>
 
           {/* Franchise Owners Directory */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 space-y-5 shadow-none">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-lg font-semibold text-[#1d1d1f] flex items-center space-x-2">
+                  <Users className="w-5 h-5 text-[#0071e3]" />
                   <span>Registered Franchise Owners Directory</span>
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#707070]">
                   Franchise owners manage and register workshops under their subscribed branch quotas.
                 </p>
               </div>
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
                 {subscriptionOverview?.franchise_owners?.length || 0} Owners Registered
               </span>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-800">
-              <table className="w-full text-left text-xs text-slate-300 min-w-[700px]">
-                <thead className="bg-slate-950/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider">
+            <div className="overflow-x-auto rounded-[20px] border border-[#e6e6e8]">
+              <table className="w-full text-left text-xs text-[#1d1d1f] min-w-[700px]">
+                <thead className="bg-[#f5f5f7] uppercase text-[10px] font-semibold text-[#707070] tracking-wider border-b border-[#e6e6e8]">
                   <tr>
                     <th className="p-3.5">Owner Name</th>
                     <th className="p-3.5">Email & Phone</th>
@@ -535,41 +550,41 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     <th className="p-3.5">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-[#e6e6e8]">
                   {(!subscriptionOverview?.franchise_owners || subscriptionOverview.franchise_owners.length === 0) ? (
                     <tr>
-                      <td colSpan={6} className="p-6 text-center text-slate-400">
+                      <td colSpan={6} className="p-6 text-center text-[#707070]">
                         No franchise owners registered yet.
                       </td>
                     </tr>
                   ) : (
                     subscriptionOverview.franchise_owners.map((fo: any) => (
-                      <tr key={fo.id} className="hover:bg-slate-800/40 transition">
-                        <td className="p-3.5 font-bold text-white">
+                      <tr key={fo.id} className="hover:bg-[#fafafc] transition">
+                        <td className="p-3.5 font-semibold text-[#1d1d1f]">
                           <div className="flex items-center space-x-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-300 font-bold flex items-center justify-center text-xs">
+                            <div className="w-7 h-7 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#1d1d1f] font-semibold flex items-center justify-center text-xs">
                               {fo.name?.charAt(0) || 'O'}
                             </div>
                             <span>{fo.name}</span>
                           </div>
                         </td>
                         <td className="p-3.5">
-                          <span className="font-mono text-slate-300 block">{fo.email}</span>
-                          <span className="text-[11px] text-slate-500">{fo.phone || 'No phone'}</span>
+                          <span className="font-mono text-[#1d1d1f] block">{fo.email}</span>
+                          <span className="text-[11px] text-[#707070]">{fo.phone || 'No phone'}</span>
                         </td>
-                        <td className="p-3.5 font-semibold text-slate-200">
+                        <td className="p-3.5 font-medium text-[#1d1d1f]">
                           {fo.franchise_name}
                         </td>
                         <td className="p-3.5">
-                          <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[11px]">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] font-medium text-[11px]">
                             {fo.plan_name}
                           </span>
                         </td>
-                        <td className="p-3.5 font-bold text-slate-200">
+                        <td className="p-3.5 font-medium text-[#1d1d1f]">
                           {fo.centers_count} of {fo.max_allowed_centers} branches
                         </td>
                         <td className="p-3.5">
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] text-[10px] font-medium">
                             {fo.status?.toUpperCase() || 'ACTIVE'}
                           </span>
                         </td>
@@ -582,22 +597,22 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
           </div>
 
           {/* Plan Purchases & Invoices Table */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 space-y-5 shadow-none">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                  <Receipt className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-lg font-semibold text-[#1d1d1f] flex items-center space-x-2">
+                  <Receipt className="w-5 h-5 text-[#0071e3]" />
                   <span>Recent Plan Purchases & Invoices</span>
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#707070]">
                   Real-time record of all subscription plan purchases, billing amounts, and transaction references.
                 </p>
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-800">
-              <table className="w-full text-left text-xs text-slate-300 min-w-[750px]">
-                <thead className="bg-slate-950/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider">
+            <div className="overflow-x-auto rounded-[20px] border border-[#e6e6e8]">
+              <table className="w-full text-left text-xs text-[#1d1d1f] min-w-[750px]">
+                <thead className="bg-[#f5f5f7] uppercase text-[10px] font-semibold text-[#707070] tracking-wider border-b border-[#e6e6e8]">
                   <tr>
                     <th className="p-3.5">Invoice #</th>
                     <th className="p-3.5">Purchaser</th>
@@ -608,30 +623,30 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     <th className="p-3.5">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-[#e6e6e8]">
                   {(!subscriptionOverview?.invoices || subscriptionOverview.invoices.length === 0) ? (
                     <tr>
-                      <td colSpan={7} className="p-6 text-center text-slate-400">
+                      <td colSpan={7} className="p-6 text-center text-[#707070]">
                         No purchase invoices recorded yet.
                       </td>
                     </tr>
                   ) : (
                     subscriptionOverview.invoices.map((inv: any) => (
-                      <tr key={inv.id} className="hover:bg-slate-800/40 transition">
-                        <td className="p-3.5 font-mono font-bold text-purple-400">{inv.invoice_number}</td>
+                      <tr key={inv.id} className="hover:bg-[#fafafc] transition">
+                        <td className="p-3.5 font-mono font-medium text-[#0066cc]">{inv.invoice_number}</td>
                         <td className="p-3.5">
-                          <span className="font-bold text-white block">{inv.customer_name}</span>
-                          <span className="text-[11px] text-slate-400 font-mono">{inv.customer_email}</span>
+                          <span className="font-semibold text-[#1d1d1f] block">{inv.customer_name}</span>
+                          <span className="text-[11px] text-[#707070] font-mono">{inv.customer_email}</span>
                         </td>
-                        <td className="p-3.5 font-semibold text-slate-200">{inv.plan_name}</td>
-                        <td className="p-3.5 capitalize text-slate-400">{inv.billing_period}</td>
-                        <td className="p-3.5 font-black text-emerald-400">
+                        <td className="p-3.5 font-medium text-[#1d1d1f]">{inv.plan_name}</td>
+                        <td className="p-3.5 capitalize text-[#707070]">{inv.billing_period}</td>
+                        <td className="p-3.5 font-semibold text-[#1d1d1f]">
                           ₹{inv.total_amount?.toLocaleString()}
                         </td>
-                        <td className="p-3.5 uppercase font-mono text-[11px] text-slate-400">
+                        <td className="p-3.5 uppercase font-mono text-[11px] text-[#707070]">
                           {inv.payment_method}
                         </td>
-                        <td className="p-3.5 text-slate-400">{inv.created_at}</td>
+                        <td className="p-3.5 text-[#707070]">{inv.created_at}</td>
                       </tr>
                     ))
                   )}
@@ -644,19 +659,19 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
       {/* TAB 2: WORKSHOPS DIRECTORY (MONITORING ONLY) */}
       {tab === 'centers' && (
-        <div className="bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
+        <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-[#d6d6d6] shadow-none space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-white">Service Centers Network ({centers.length} Centers)</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-lg font-semibold text-[#1d1d1f]">Service Centers Network ({centers.length} Centers)</h3>
+              <p className="text-xs text-[#707070]">
                 System-wide overview of active workshops, bays, mechanics, and live workload. (Service centers are registered and managed by Franchise Owners).
               </p>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-800">
-            <table className="w-full text-left text-xs text-slate-300 min-w-[800px]">
-              <thead className="bg-slate-950/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider">
+          <div className="overflow-x-auto rounded-[20px] border border-[#e6e6e8]">
+            <table className="w-full text-left text-xs text-[#1d1d1f] min-w-[800px]">
+              <thead className="bg-[#f5f5f7] uppercase text-[10px] font-semibold text-[#707070] tracking-wider border-b border-[#e6e6e8]">
                 <tr>
                   <th className="p-3.5">ID</th>
                   <th className="p-3.5">Center Name</th>
@@ -669,27 +684,27 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                   <th className="p-3.5">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-[#e6e6e8]">
                 {centers.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-3.5 font-mono font-bold text-purple-400">#{c.id}</td>
-                    <td className="p-3.5 font-bold text-white">{c.name}</td>
-                    <td className="p-3.5 text-slate-300">
+                  <tr key={c.id} className="hover:bg-[#fafafc] transition">
+                    <td className="p-3.5 font-mono font-medium text-[#1d1d1f]">#{c.id}</td>
+                    <td className="p-3.5 font-semibold text-[#1d1d1f]">{c.name}</td>
+                    <td className="p-3.5 text-[#707070]">
                       {c.area}, {c.city}
                     </td>
-                    <td className="p-3.5 text-slate-400">{c.phone}</td>
-                    <td className="p-3.5 font-medium text-slate-300">
+                    <td className="p-3.5 text-[#707070]">{c.phone}</td>
+                    <td className="p-3.5 font-medium text-[#1d1d1f]">
                       {c.available_bays} / {c.total_bays} bays
                     </td>
-                    <td className="p-3.5 font-medium text-slate-300">
+                    <td className="p-3.5 font-medium text-[#1d1d1f]">
                       {c.available_mechanics} / {c.total_mechanics} mechs
                     </td>
                     <td className="p-3.5">
-                      <span className="font-bold text-white">{Math.round(c.current_workload * 100)}%</span>
+                      <span className="font-semibold text-[#1d1d1f]">{Math.round(c.current_workload * 100)}%</span>
                     </td>
-                    <td className="p-3.5 font-bold text-amber-400">{c.active_queue_count} vehicles</td>
+                    <td className="p-3.5 font-semibold text-[#1d1d1f]">{c.active_queue_count} vehicles</td>
                     <td className="p-3.5">
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30 text-[10px]">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] font-medium border border-[#d6d6d6] text-[10px]">
                         {c.status?.toUpperCase() || 'ACTIVE'}
                       </span>
                     </td>
@@ -703,15 +718,15 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
       {/* TAB 3: AUDIT TRAIL */}
       {tab === 'audit' && (
-        <div className="bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
+        <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-[#d6d6d6] shadow-none space-y-4">
           <div>
-            <h3 className="text-lg font-bold text-white">Security & Operational Audit Trail</h3>
-            <p className="text-xs text-slate-400">Chronological ledger of security events, status updates, and administrative actions.</p>
+            <h3 className="text-lg font-semibold text-[#1d1d1f]">Security & Operational Audit Trail</h3>
+            <p className="text-xs text-[#707070]">Chronological ledger of security events, status updates, and administrative actions.</p>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-slate-800">
-            <table className="w-full text-left text-xs text-slate-300 min-w-[700px]">
-              <thead className="bg-slate-950/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider">
+          <div className="overflow-x-auto rounded-[20px] border border-[#e6e6e8]">
+            <table className="w-full text-left text-xs text-[#1d1d1f] min-w-[700px]">
+              <thead className="bg-[#f5f5f7] uppercase text-[10px] font-semibold text-[#707070] tracking-wider border-b border-[#e6e6e8]">
                 <tr>
                   <th className="p-3.5">Timestamp</th>
                   <th className="p-3.5">Action</th>
@@ -719,17 +734,17 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                   <th className="p-3.5">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-xs">
+              <tbody className="divide-y divide-[#e6e6e8] font-mono text-xs">
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-3.5 text-slate-400 text-[11px]">{log.timestamp.slice(0, 19)}</td>
+                  <tr key={log.id} className="hover:bg-[#fafafc] transition">
+                    <td className="p-3.5 text-[#707070] text-[11px]">{log.timestamp.slice(0, 19)}</td>
                     <td className="p-3.5">
-                      <span className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-bold text-[10px] border border-purple-500/30">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] font-medium text-[10px] border border-[#d6d6d6]">
                         {log.action}
                       </span>
                     </td>
-                    <td className="p-3.5 text-slate-300">{log.entity} #{log.entity_id}</td>
-                    <td className="p-3.5 text-slate-400 font-sans">{log.details}</td>
+                    <td className="p-3.5 text-[#1d1d1f] font-medium">{log.entity} #{log.entity_id}</td>
+                    <td className="p-3.5 text-[#707070] font-sans">{log.details}</td>
                   </tr>
                 ))}
               </tbody>
@@ -740,21 +755,21 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
       {/* MODAL 1: EDIT PLAN */}
       {editingPlan && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-2xl w-full text-white shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center">
-                  <Edit3 className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] flex items-center justify-center">
+                  <Edit3 className="w-5 h-5 text-[#0071e3]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Edit Subscription Plan</h3>
-                  <span className="text-xs font-mono text-purple-400">ID: {editingPlan.id}</span>
+                  <h3 className="text-lg font-semibold text-[#1d1d1f]">Edit Subscription Plan</h3>
+                  <span className="text-xs font-mono text-[#707070]">ID: {editingPlan.id}</span>
                 </div>
               </div>
               <button
                 onClick={() => setEditingPlan(null)}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 text-[#707070] hover:text-[#1d1d1f] rounded-full hover:bg-[#f5f5f7] transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -763,23 +778,23 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Display Name *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Plan Display Name *</label>
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                     placeholder="e.g. Single Hub Starter"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Badge Tag</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Badge Tag</label>
                   <input
                     type="text"
                     value={formBadge}
                     onChange={(e) => setFormBadge(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                     placeholder="e.g. Most Popular, Single Workshop"
                   />
                 </div>
@@ -787,7 +802,7 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Monthly Price (₹) *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Monthly Price (₹) *</label>
                   <input
                     type="number"
                     required
@@ -795,11 +810,11 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     step={1}
                     value={formPriceMonthly}
                     onChange={(e) => setFormPriceMonthly(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Yearly Price (₹) *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Yearly Price (₹) *</label>
                   <input
                     type="number"
                     required
@@ -807,68 +822,68 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     step={1}
                     value={formPriceYearly}
                     onChange={(e) => setFormPriceYearly(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Centers</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Centers</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxCenters}
                     onChange={(e) => setFormMaxCenters(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Bays / Center</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Bays / Center</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxBays}
                     onChange={(e) => setFormMaxBays(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Managers</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Managers</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxManagers}
                     onChange={(e) => setFormMaxManagers(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Plan Description</label>
+                <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Plan Description</label>
                 <textarea
                   rows={2}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs focus:outline-none focus:border-[#0071e3] leading-relaxed"
                   placeholder="Summary of who this plan is tailored for..."
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-300">Features List</label>
-                  <span className="text-[10px] text-slate-400">One feature per line</span>
+                  <label className="text-xs font-medium text-[#1d1d1f]">Features List</label>
+                  <span className="text-[10px] text-[#707070]">One feature per line</span>
                 </div>
                 <textarea
                   rows={5}
                   value={formFeaturesText}
                   onChange={(e) => setFormFeaturesText(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500 leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-mono focus:outline-none focus:border-[#0071e3] leading-relaxed"
                   placeholder="1 Service Center&#10;Up to 8 Bays&#10;Dynamic Waiting Time Prediction"
                 />
               </div>
@@ -879,25 +894,25 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                   id="formIsActiveEdit"
                   checked={formIsActive}
                   onChange={(e) => setFormIsActive(e.target.checked)}
-                  className="w-4 h-4 rounded text-purple-600 bg-slate-950 border-slate-700 cursor-pointer"
+                  className="w-4 h-4 rounded text-[#0071e3] bg-white border-[#d6d6d6] cursor-pointer"
                 />
-                <label htmlFor="formIsActiveEdit" className="text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                <label htmlFor="formIsActiveEdit" className="text-xs font-medium text-[#1d1d1f] cursor-pointer select-none">
                   Plan is Active (Visible to franchise owners during purchase/upgrade)
                 </label>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[#e6e6e8]">
                 <button
                   type="button"
                   onClick={() => setEditingPlan(null)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                  className="px-4 py-2.5 rounded-full text-[#707070] hover:text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={planActionLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-purple-500/25 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-medium transition flex items-center space-x-2 shadow-none cursor-pointer disabled:opacity-50"
                 >
                   {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   <span>Save Plan Changes</span>
@@ -910,21 +925,21 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
       {/* MODAL 2: CREATE PLAN */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-2xl w-full text-white shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-500/30">
-                  <Plus className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-[#0071e3]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Create New Subscription Plan</h3>
-                  <span className="text-xs text-slate-400">Add a custom franchise tier with bespoke quotas & pricing</span>
+                  <h3 className="text-lg font-semibold text-[#1d1d1f]">Create New Subscription Plan</h3>
+                  <span className="text-xs text-[#707070]">Add a custom franchise tier with bespoke quotas & pricing</span>
                 </div>
               </div>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition cursor-pointer"
+                className="p-2 text-[#707070] hover:text-[#1d1d1f] rounded-full hover:bg-[#f5f5f7] transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -933,25 +948,25 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
             <form onSubmit={handleSaveCreate} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Identifier (Slug) *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Plan Identifier (Slug) *</label>
                   <input
                     type="text"
                     required
                     value={formId}
                     onChange={(e) => setFormId(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-mono focus:outline-none focus:border-[#0071e3]"
                     placeholder="e.g. regional_tier"
                   />
-                  <span className="text-[10px] text-slate-500 mt-0.5 block">Lowercase key used internally & by payment gateway</span>
+                  <span className="text-[10px] text-[#707070] mt-0.5 block">Lowercase key used internally & by payment gateway</span>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Plan Display Name *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Plan Display Name *</label>
                   <input
                     type="text"
                     required
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                     placeholder="e.g. Regional Fleet Pro"
                   />
                 </div>
@@ -959,17 +974,17 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Badge Tag</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Badge Tag</label>
                   <input
                     type="text"
                     value={formBadge}
                     onChange={(e) => setFormBadge(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                     placeholder="e.g. Custom Hub"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Monthly Price (₹) *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Monthly Price (₹) *</label>
                   <input
                     type="number"
                     required
@@ -977,11 +992,11 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     step={1}
                     value={formPriceMonthly}
                     onChange={(e) => setFormPriceMonthly(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Yearly Price (₹) *</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Yearly Price (₹) *</label>
                   <input
                     type="number"
                     required
@@ -989,84 +1004,84 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                     step={1}
                     value={formPriceYearly}
                     onChange={(e) => setFormPriceYearly(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Centers</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Centers</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxCenters}
                     onChange={(e) => setFormMaxCenters(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Bays / Center</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Bays / Center</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxBays}
                     onChange={(e) => setFormMaxBays(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Max Managers</label>
+                  <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Max Managers</label>
                   <input
                     type="number"
                     required
                     min={1}
                     value={formMaxManagers}
                     onChange={(e) => setFormMaxManagers(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-purple-500 text-center"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium focus:outline-none focus:border-[#0071e3] text-center"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Plan Description</label>
+                <label className="text-xs font-medium text-[#1d1d1f] block mb-1">Plan Description</label>
                 <textarea
                   rows={2}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs focus:outline-none focus:border-[#0071e3] leading-relaxed"
                   placeholder="Short overview of the plan..."
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-slate-300">Features List</label>
-                  <span className="text-[10px] text-slate-400">One feature per line</span>
+                  <label className="text-xs font-medium text-[#1d1d1f]">Features List</label>
+                  <span className="text-[10px] text-[#707070]">One feature per line</span>
                 </div>
                 <textarea
                   rows={4}
                   value={formFeaturesText}
                   onChange={(e) => setFormFeaturesText(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-purple-500 leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#d6d6d6] text-[#1d1d1f] text-xs font-mono focus:outline-none focus:border-[#0071e3] leading-relaxed"
                   placeholder="2 Workshop Centers&#10;Up to 10 Service Bays&#10;Dynamic Waiting Time Prediction"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[#e6e6e8]">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                  className="px-4 py-2.5 rounded-full text-[#707070] hover:text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={planActionLoading}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-purple-500/25 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-medium transition flex items-center space-x-2 shadow-none cursor-pointer disabled:opacity-50"
                 >
                   {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   <span>Create Plan</span>
@@ -1079,27 +1094,27 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
 
       {/* MODAL 3: DELETE CONFIRMATION */}
       {deleteConfirmPlan && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-red-500/40 rounded-3xl p-6 sm:p-7 max-w-md w-full text-white shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center space-x-3 text-red-400">
-              <div className="w-10 h-10 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-7 max-w-md w-full text-[#1d1d1f] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center space-x-3 text-[#b64400]">
+              <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-[#b64400]" />
               </div>
-              <h3 className="text-base font-bold text-white">Delete Subscription Plan?</h3>
+              <h3 className="text-base font-semibold text-[#1d1d1f]">Delete Subscription Plan?</h3>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Are you sure you want to remove <strong className="text-white">{deleteConfirmPlan.name}</strong> (<code className="text-red-300">{deleteConfirmPlan.id}</code>)?
+            <p className="text-xs text-[#707070] leading-relaxed">
+              Are you sure you want to remove <strong className="text-[#1d1d1f]">{deleteConfirmPlan.name}</strong> (<code className="text-[#b64400]">{deleteConfirmPlan.id}</code>)?
             </p>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
-              💡 <strong>Safe Deactivation Policy:</strong> If any franchise owner has an active subscription under this tier, SQMS will safely deactivate the plan so their operations continue uninterrupted while removing it from checkout. If unused, it is permanently deleted.
+            <div className="p-3 rounded-2xl bg-[#f5f5f7] border border-[#e6e6e8] text-[11px] text-[#707070] leading-relaxed">
+              <strong>Safe Deactivation Policy:</strong> If any franchise owner has an active subscription under this tier, SQMS will safely deactivate the plan so their operations continue uninterrupted while removing it from checkout. If unused, it is permanently deleted.
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#e6e6e8]">
               <button
                 type="button"
                 onClick={() => setDeleteConfirmPlan(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                className="px-4 py-2 rounded-full text-[#707070] hover:text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -1107,7 +1122,7 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
                 type="button"
                 disabled={planActionLoading}
                 onClick={handleExecuteDelete}
-                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition flex items-center space-x-2 shadow-lg shadow-red-500/25 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 rounded-full bg-[#b64400] hover:bg-[#963700] text-white text-xs font-medium transition flex items-center space-x-2 shadow-none cursor-pointer disabled:opacity-50"
               >
                 {planActionLoading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                 <span>Yes, Delete / Deactivate</span>

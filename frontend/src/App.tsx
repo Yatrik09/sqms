@@ -29,8 +29,8 @@ if (typeof window !== 'undefined') {
 
 const PageLoader: React.FC = () => (
   <div className="min-h-[50vh] flex flex-col items-center justify-center space-y-3">
-    <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    <span className="text-xs font-semibold tracking-wider text-slate-400">Loading Workspace...</span>
+    <div className="w-7 h-7 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
+    <span className="text-xs font-medium tracking-tight text-[#86868b]">Loading Workspace...</span>
   </div>
 );
 
@@ -58,10 +58,10 @@ const MainLayout: React.FC = () => {
   // Loading state (only while verifying an existing stored session)
   if (isLoading && !user && localStorage.getItem('sqms_token')) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center text-[#1d1d1f]">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-semibold tracking-wider text-slate-400">Loading Smart Q Session...</span>
+          <div className="w-8 h-8 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm font-medium tracking-tight text-[#86868b]">Loading Smart Q Session...</span>
         </div>
       </div>
     );
@@ -132,11 +132,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col font-sans selection:bg-indigo-600 selection:text-white relative overflow-x-hidden">
-      {/* Background ambient lighting */}
-      <div className="fixed top-0 left-1/4 w-[50rem] h-[50rem] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none -z-10" />
-      <div className="fixed bottom-0 right-1/4 w-[40rem] h-[40rem] bg-blue-600/5 rounded-full blur-[140px] pointer-events-none -z-10" />
-
+    <div className="min-h-screen bg-white text-[#1d1d1f] flex flex-col font-sans selection:bg-[#0071e3] selection:text-white relative overflow-x-hidden">
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}

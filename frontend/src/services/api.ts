@@ -940,6 +940,7 @@ export const api = {
     description?: string;
     features?: string[];
     badge?: string;
+    is_active?: boolean;
   }) {
     const res = await fetch(`${API_BASE_URL}/subscription/plans`, {
       method: 'POST',

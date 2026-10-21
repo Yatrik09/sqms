@@ -50,39 +50,39 @@ export const AccidentRepairPortal: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#1d1d1f]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-red-900/50">
+      <div className="bg-white rounded-[28px] p-6 sm:p-8 text-[#1d1d1f] shadow-none flex flex-col md:flex-row md:items-center justify-between gap-6 border border-[#d6d6d6]">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+          <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
             Accident Repair Assistance
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold mt-2 text-white">
+          <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-[#1d1d1f] tracking-tight">
             AI-Assisted Damage Assessment & Center Routing
           </h1>
-          <p className="text-slate-300 text-xs mt-1 max-w-xl">
+          <p className="text-[#707070] text-xs sm:text-sm mt-1 max-w-xl leading-relaxed">
             Upload incident photos for preliminary damage classification and intelligent routing to service centers with specialized body-repair bays.
           </p>
         </div>
 
-        <div className="bg-red-900/40 border border-red-500/30 px-4 py-2.5 rounded-2xl text-xs text-red-200">
-          <span className="font-bold block">Important Notice:</span>
+        <div className="bg-[#f5f5f7] border border-[#d6d6d6] px-4 py-2.5 rounded-[20px] text-xs text-[#707070]">
+          <span className="font-semibold text-[#1d1d1f] block">Important Notice:</span>
           <span>Preliminary decision support only. Final inspection performed on-site.</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Form & Upload */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg space-y-5">
+        <div className="lg:col-span-5 bg-white rounded-[28px] p-6 sm:p-8 border border-[#d6d6d6] shadow-none space-y-5">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Incident & Damage Assessment</h3>
-            <p className="text-xs text-slate-500">Provide photos and damage description for specialized bay allocation.</p>
+            <h3 className="text-lg font-semibold text-[#1d1d1f]">Incident & Damage Assessment</h3>
+            <p className="text-xs text-[#707070]">Provide photos and damage description for specialized bay allocation.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Presets */}
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#707070] block mb-1.5">
                 Quick Demonstration Scenarios
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -94,10 +94,10 @@ export const AccidentRepairPortal: React.FC = () => {
                       'Minor frontal impact, bumper displaced, headlights intact, no chassis damage.'
                     )
                   }
-                  className="p-2 border rounded-xl text-left bg-slate-50 hover:bg-slate-100 transition"
+                  className="p-3 border rounded-[16px] text-left bg-[#f5f5f7] hover:bg-[#e6e6e8] transition border-[#d6d6d6] cursor-pointer"
                 >
-                  <span className="font-bold block text-slate-800">Scenario 1: Minor</span>
-                  <span className="text-[10px] text-slate-500">Bumper dent / scratch</span>
+                  <span className="font-semibold block text-[#1d1d1f]">Scenario 1: Minor</span>
+                  <span className="text-[11px] text-[#707070]">Bumper dent / scratch</span>
                 </button>
                 <button
                   type="button"
@@ -107,32 +107,32 @@ export const AccidentRepairPortal: React.FC = () => {
                       'Major collision, radiator leaking, airbag deployed, heavy frame misalignment.'
                     )
                   }
-                  className="p-2 border rounded-xl text-left bg-red-50/50 hover:bg-red-50 transition border-red-200"
+                  className="p-3 border rounded-[16px] text-left bg-[#f5f5f7] hover:bg-[#e6e6e8] transition border-[#d6d6d6] cursor-pointer"
                 >
-                  <span className="font-bold block text-red-800">Scenario 2: Major</span>
-                  <span className="text-[10px] text-red-600">Structural collision</span>
+                  <span className="font-semibold block text-[#b64400]">Scenario 2: Major</span>
+                  <span className="text-[11px] text-[#707070]">Structural collision</span>
                 </button>
               </div>
             </div>
 
             {/* Photo Upload */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label className="block text-xs font-medium text-[#1d1d1f] mb-1.5">
                 Upload Vehicle Damage Photo
               </label>
-              <div className="border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center hover:bg-slate-50 transition cursor-pointer relative">
+              <div className="border border-dashed border-[#d6d6d6] rounded-[20px] p-4 text-center hover:bg-[#f5f5f7] transition cursor-pointer relative">
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleFileChange}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
-                <UploadCloud className="w-8 h-8 text-slate-400 mx-auto mb-1" />
-                <span className="text-xs font-semibold text-slate-700 block">Click to upload photo</span>
-                <span className="text-[10px] text-slate-400">PNG, JPG, WebP up to 10MB</span>
+                <UploadCloud className="w-8 h-8 text-[#86868b] mx-auto mb-1" />
+                <span className="text-xs font-medium text-[#1d1d1f] block">Click to upload photo</span>
+                <span className="text-[10px] text-[#86868b]">PNG, JPG, WebP up to 10MB</span>
                 {previewUrl && (
                   <div className="mt-3">
-                    <img src={previewUrl} alt="Damage preview" className="h-28 mx-auto rounded-lg object-cover shadow" />
+                    <img src={previewUrl} alt="Damage preview" className="h-28 mx-auto rounded-[12px] object-cover shadow-none border border-[#d6d6d6]" />
                   </div>
                 )}
               </div>
@@ -140,13 +140,13 @@ export const AccidentRepairPortal: React.FC = () => {
 
             {/* Visible Damage Area */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label className="block text-xs font-medium text-[#1d1d1f] mb-1.5">
                 Visible Damage Area
               </label>
               <select
                 value={damageArea}
                 onChange={(e) => setDamageArea(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
               >
                 <option value="Front Bumper & Grille">Front Bumper & Grille</option>
                 <option value="Side Doors & Panels">Side Doors & Panels</option>
@@ -158,7 +158,7 @@ export const AccidentRepairPortal: React.FC = () => {
 
             {/* Description */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label className="block text-xs font-medium text-[#1d1d1f] mb-1.5">
                 Damage Description
               </label>
               <textarea
@@ -166,13 +166,13 @@ export const AccidentRepairPortal: React.FC = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe visible damage, fluid leaks, or airbag deployment..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3]"
               />
             </div>
 
             {/* Required Completion Time */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              <label className="block text-xs font-medium text-[#1d1d1f] mb-1.5">
                 Preferred Completion Deadline
               </label>
               <input
@@ -180,14 +180,14 @@ export const AccidentRepairPortal: React.FC = () => {
                 value={requiredTime}
                 onChange={(e) => setRequiredTime(e.target.value)}
                 placeholder="e.g. 06:00 PM"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3]"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-2xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold text-sm shadow-lg shadow-red-500/25 transition flex items-center justify-center space-x-2"
+              className="w-full py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-xs shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
               <span>{loading ? 'Evaluating Damage & Centers...' : 'Analyze & Find Eligible Centers'}</span>
@@ -200,41 +200,41 @@ export const AccidentRepairPortal: React.FC = () => {
           {result ? (
             <div className="space-y-6">
               {/* Classification Badge Card */}
-              <div className="bg-white rounded-3xl p-6 border-2 border-red-500/30 shadow-lg space-y-3">
+              <div className="bg-white rounded-[28px] p-6 border border-[#d6d6d6] shadow-none space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#707070]">
                     Preliminary AI Classification
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-black uppercase ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium uppercase border ${
                       result.preliminary_category === 'Major Damage'
-                        ? 'bg-red-100 text-red-800 border border-red-300'
+                        ? 'bg-[#f5f5f7] text-[#b64400] border-[#d6d6d6]'
                         : result.preliminary_category === 'Moderate Damage'
-                        ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                        : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] border-[#d6d6d6]'
+                        : 'bg-[#f5f5f7] text-emerald-700 border-[#d6d6d6]'
                     }`}
                   >
                     {result.preliminary_category}
                   </span>
                 </div>
 
-                <h3 className="text-xl font-black text-slate-900">
+                <h3 className="text-xl font-semibold text-[#1d1d1f]">
                   Assigned Workflow: {result.service_type_assigned}
                 </h3>
 
-                <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-xs text-amber-900 space-y-1">
-                  <div className="font-bold flex items-center space-x-1.5">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="bg-[#f5f5f7] border border-[#e6e6e8] p-4 rounded-[20px] text-xs text-[#1d1d1f] space-y-1">
+                  <div className="font-semibold flex items-center space-x-1.5">
+                    <AlertCircle className="w-4 h-4 text-[#707070] shrink-0" />
                     <span>University Research & Engineering Disclaimer</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed">{result.disclaimer}</p>
+                  <p className="text-[11px] text-[#707070] leading-relaxed">{result.disclaimer}</p>
                 </div>
               </div>
 
               {/* Recommended Centers for Accident Repair */}
               {result.recommendations && result.recommendations.recommended_center && (
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-[#707070] mb-3">
                     Capable Service Centers with Body & Accident Repair Capacity
                   </h4>
                   <RecommendationCard
@@ -247,12 +247,12 @@ export const AccidentRepairPortal: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center shadow-sm">
-              <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-                <ShieldAlert className="w-8 h-8" />
+            <div className="bg-white rounded-[28px] p-12 border border-[#d6d6d6] text-center shadow-none">
+              <div className="w-16 h-16 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#1d1d1f] flex items-center justify-center mx-auto mb-4">
+                <ShieldAlert className="w-8 h-8 text-[#0071e3]" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">No Assessment Submitted Yet</h3>
-              <p className="text-slate-500 text-xs mt-1 max-w-sm mx-auto">
+              <h3 className="text-lg font-semibold text-[#1d1d1f]">No Assessment Submitted Yet</h3>
+              <p className="text-[#707070] text-xs mt-1 max-w-sm mx-auto leading-relaxed">
                 Submit damage photos or select one of the demonstration scenarios on the left to receive preliminary AI classification and tailored center recommendations.
               </p>
             </div>

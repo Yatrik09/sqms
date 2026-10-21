@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import type { UserRole, NotificationItem } from '../types';
+import type { NotificationItem } from '../types';
 import { api } from '../services/api';
 import { ProfileModal } from './ProfileModal';
 import { FranchisePlansModal } from './FranchisePlansModal';
@@ -16,7 +16,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => {
   const { user, wsConnected, logout, lastWsEvent } = useAuth();
-  // Mutually exclusive dropdown state: only one popover can ever be open at a time
+  // Mutually exclusive dropdown state
   const [openDropdown, setOpenDropdown] = useState<'notifications' | 'user' | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -95,14 +95,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 text-white shadow-2xl">
+    <header className="sticky top-0 z-50 bg-white/92 backdrop-blur-xl border-b border-[#d6d6d6] text-[#1d1d1f] shadow-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Brand Logo & Navigation Links */}
           <div className="flex items-center">
             {/* Logo & Brand */}
             <div
-              className="flex items-center space-x-3 cursor-pointer select-none mr-8 lg:mr-10 shrink-0"
+              className="flex items-center space-x-2.5 cursor-pointer select-none mr-6 lg:mr-8 shrink-0"
               onClick={() => {
                 if (user?.role === 'customer') switchTab('active-service');
                 else if (user?.role === 'branch_manager') switchTab('manager-queue');
@@ -110,47 +110,55 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 else if (user?.role === 'super_admin') switchTab('admin-dashboard');
               }}
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30">
-                <Car className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center">
+                <Car className="w-4 h-4 text-[#0071e3]" />
               </div>
-              <div className="flex items-center">
-                <span className="text-2xl font-black tracking-tight text-white">Smart</span>
-                <span className="text-2xl font-black tracking-tight text-blue-500 ml-1">Q</span>
+              <div className="flex items-center tracking-tight">
+                <span className="text-lg sm:text-xl font-semibold text-[#1d1d1f]">Smart</span>
+                <span className="text-lg sm:text-xl font-semibold text-[#0071e3] ml-0.5">Q</span>
               </div>
             </div>
 
             {/* Navigation Links per Authenticated Role */}
-            <nav className="hidden md:flex items-center space-x-1.5">
+            <nav className="hidden md:flex items-center space-x-1">
               {user?.role === 'customer' && (
                 <>
                   <button
                     onClick={() => switchTab('active-service')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      currentTab === 'active-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'active-service'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Live Service Queue Tracking
+                    Live Queue
                   </button>
                   <button
                     onClick={() => switchTab('book-service')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      currentTab === 'book-service' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'book-service'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Book Service & AI Recommendation
+                    Book Service & AI Wait Times
                   </button>
                   <button
                     onClick={() => switchTab('my-vehicles')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      currentTab === 'my-vehicles' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'my-vehicles'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
                     My Vehicles
                   </button>
                   <button
                     onClick={() => switchTab('about-us')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'about-us'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
                     About Us
@@ -158,153 +166,176 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </>
               )}
 
-            {user?.role === 'technician' && (
-              <>
-                <button
-                  onClick={() => switchTab('floor-mobile')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-                    currentTab === 'floor-mobile'
-                      ? 'bg-amber-500 text-slate-950 shadow'
-                      : 'text-amber-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Workshop Floor Screen</span>
-                </button>
-                <button
-                  onClick={() => switchTab('about-us')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  About Us
-                </button>
-              </>
-            )}
+              {user?.role === 'technician' && (
+                <>
+                  <button
+                    onClick={() => switchTab('floor-mobile')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition flex items-center space-x-1.5 cursor-pointer ${
+                      currentTab === 'floor-mobile'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Workshop Floor</span>
+                  </button>
+                  <button
+                    onClick={() => switchTab('about-us')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'about-us'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
 
-            {user?.role === 'branch_manager' && (
-              <>
-                <button
-                  onClick={() => switchTab('manager-queue')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'manager-queue' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Live Workshop Queue
-                </button>
-                <button
-                  onClick={() => switchTab('floor-mobile')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-                    currentTab === 'floor-mobile'
-                      ? 'bg-amber-500 text-slate-950 shadow'
-                      : 'text-amber-400 hover:bg-slate-800 border border-amber-500/30'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>📱 Floor Screen</span>
-                </button>
-                <button
-                  onClick={() => switchTab('manager-analytics')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'manager-analytics' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Branch Analytics
-                </button>
-                <button
-                  onClick={() => switchTab('about-us')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  About Us
-                </button>
-              </>
-            )}
+              {user?.role === 'branch_manager' && (
+                <>
+                  <button
+                    onClick={() => switchTab('manager-queue')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'manager-queue'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Live Workshop Queue
+                  </button>
+                  <button
+                    onClick={() => switchTab('floor-mobile')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition flex items-center space-x-1.5 cursor-pointer ${
+                      currentTab === 'floor-mobile'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Floor View</span>
+                  </button>
+                  <button
+                    onClick={() => switchTab('manager-analytics')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'manager-analytics'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Branch Analytics
+                  </button>
+                  <button
+                    onClick={() => switchTab('about-us')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'about-us'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
 
-            {user?.role === 'franchise_owner' && (
-              <>
-                <button
-                  onClick={() => switchTab('owner-overview')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'owner-overview' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Multi-Branch Overview
-                </button>
-                <button
-                  onClick={() => switchTab('owner-analytics')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'owner-analytics' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Network Analytics
-                </button>
-                <button
-                  onClick={() => switchTab('about-us')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  About Us
-                </button>
-              </>
-            )}
+              {user?.role === 'franchise_owner' && (
+                <>
+                  <button
+                    onClick={() => switchTab('owner-overview')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'owner-overview'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Multi-Branch Overview
+                  </button>
+                  <button
+                    onClick={() => switchTab('owner-analytics')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'owner-analytics'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Network Analytics
+                  </button>
+                  <button
+                    onClick={() => switchTab('about-us')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'about-us'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
 
-            {user?.role === 'super_admin' && (
-              <>
-                <button
-                  onClick={() => switchTab('admin-dashboard')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'admin-dashboard' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Admin System
-                </button>
-                <button
-                  onClick={() => switchTab('admin-centers')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'admin-centers' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Workshops & Centers
-                </button>
-                <button
-                  onClick={() => switchTab('admin-ml')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'admin-ml' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  ML Models & Retraining
-                </button>
-                <button
-                  onClick={() => switchTab('admin-audit')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'admin-audit' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  Audit Trail
-                </button>
-                <button
-                  onClick={() => switchTab('about-us')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  About Us
-                </button>
-              </>
-            )}
-          </nav>
-        </div>
+              {user?.role === 'super_admin' && (
+                <>
+                  <button
+                    onClick={() => switchTab('admin-dashboard')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'admin-dashboard'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Platform Operations
+                  </button>
+                  <button
+                    onClick={() => switchTab('admin-centers')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'admin-centers'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Workshops & Centers
+                  </button>
+                  <button
+                    onClick={() => switchTab('admin-ml')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'admin-ml'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    ML Retraining
+                  </button>
+                  <button
+                    onClick={() => switchTab('admin-audit')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'admin-audit'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Audit Trail
+                  </button>
+                  <button
+                    onClick={() => switchTab('about-us')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'about-us'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    About Us
+                  </button>
+                </>
+              )}
+            </nav>
+          </div>
 
           {/* Right Controls: User Profile, Notifications, Direct Log Out */}
-          <div className="flex items-center space-x-3 sm:space-x-4 pl-4 border-l border-slate-800">
-
+          <div className="flex items-center space-x-2 sm:space-x-3 pl-3 border-l border-[#e6e6e8]">
             {/* Mobile Backdrop Overlay for Dropdowns */}
             {openDropdown && (
               <div
-                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs sm:hidden"
+                className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs sm:hidden"
                 onClick={() => setOpenDropdown(null)}
               />
             )}
@@ -313,54 +344,55 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setOpenDropdown(prev => prev === 'notifications' ? null : 'notifications')}
-                className={`p-2 rounded-xl relative transition cursor-pointer ${
+                className={`p-2 rounded-full relative transition cursor-pointer ${
                   openDropdown === 'notifications'
-                    ? 'bg-slate-800 text-white ring-1 ring-blue-500/50'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'bg-[#f5f5f7] text-[#1d1d1f] ring-1 ring-[#d6d6d6]'
+                    : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
                 }`}
                 title="Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#0071e3]" />
                 )}
               </button>
 
               {openDropdown === 'notifications' && (
-                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl py-2 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700">
+                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-[#fafafc] border border-[#d6d6d6] rounded-[20px] shadow-lg py-2 z-50 text-[#1d1d1f] animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#e6e6e8]">
                     <div className="flex items-center space-x-1.5">
-                      <Bell className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-xs font-bold text-white">Notifications ({unreadCount})</span>
+                      <Bell className="w-3.5 h-3.5 text-[#0071e3]" />
+                      <span className="text-xs font-semibold text-[#1d1d1f]">Notifications ({unreadCount})</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       {unreadCount > 0 && (
-                        <button onClick={handleMarkAllRead} className="text-[11px] text-blue-400 hover:underline cursor-pointer">
+                        <button onClick={handleMarkAllRead} className="text-[11px] text-[#0066cc] hover:underline cursor-pointer">
                           Mark all read
                         </button>
                       )}
                       <button
                         onClick={() => setOpenDropdown(null)}
-                        className="p-1 text-slate-400 hover:text-white sm:hidden cursor-pointer rounded-lg"
+                        className="p-1 text-[#707070] hover:text-[#1d1d1f] sm:hidden cursor-pointer rounded-lg"
                         title="Close notifications"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-700/50">
+
+                  <div className="max-h-72 overflow-y-auto divide-y divide-[#e6e6e8]">
                     {notifications.length === 0 ? (
-                      <div className="p-6 text-center text-xs text-slate-400 space-y-1">
-                        <Bell className="w-6 h-6 text-slate-600 mx-auto mb-2 opacity-60" />
-                        <div className="font-semibold text-slate-300">No notifications yet</div>
-                        <div className="text-[11px] text-slate-500">Live service stage and bay updates will arrive here.</div>
+                      <div className="p-6 text-center text-xs text-[#707070] space-y-1">
+                        <Bell className="w-6 h-6 text-[#86868b] mx-auto mb-2 opacity-50" />
+                        <div className="font-medium text-[#1d1d1f]">No notifications yet</div>
+                        <div className="text-[11px] text-[#86868b]">Live service stage and bay updates will appear here.</div>
                       </div>
                     ) : (
                       notifications.map((n) => (
-                        <div key={n.id} className={`p-3 text-xs ${n.read_status ? 'opacity-60' : 'bg-slate-700/30'}`}>
-                          <div className="font-semibold text-slate-200">{n.title}</div>
-                          <div className="text-slate-300 mt-0.5 text-[11px] leading-relaxed break-words">{n.message}</div>
-                          <div className="text-[10px] text-slate-500 mt-1 font-mono">{n.created_at ? n.created_at.slice(0, 16).replace('T', ' ') : ''}</div>
+                        <div key={n.id} className={`p-3 text-xs ${n.read_status ? 'opacity-60' : 'bg-white'}`}>
+                          <div className="font-semibold text-[#1d1d1f]">{n.title}</div>
+                          <div className="text-[#707070] mt-0.5 text-[11px] leading-relaxed break-words">{n.message}</div>
+                          <div className="text-[10px] text-[#86868b] mt-1 font-mono">{n.created_at ? n.created_at.slice(0, 16).replace('T', ' ') : ''}</div>
                         </div>
                       ))
                     )}
@@ -373,93 +405,90 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setOpenDropdown(prev => prev === 'user' ? null : 'user')}
-                className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border transition cursor-pointer ${
+                className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-full border transition cursor-pointer ${
                   openDropdown === 'user'
-                    ? 'bg-slate-750 border-blue-500/50 ring-1 ring-blue-500/30 shadow-md'
-                    : 'bg-slate-800 hover:bg-slate-750 border-slate-700 hover:border-slate-600'
+                    ? 'bg-[#f5f5f7] border-[#d6d6d6]'
+                    : 'bg-white hover:bg-[#f5f5f7] border-[#d6d6d6]'
                 }`}
                 title="Account Details"
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                <div className="w-5 h-5 rounded-full bg-[#1d1d1f] text-white font-semibold text-[10px] flex items-center justify-center">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="text-left hidden sm:block">
-                  <div className="text-xs font-bold text-slate-200 leading-tight">{cleanDisplayName(user?.name)}</div>
+                  <div className="text-xs font-medium text-[#1d1d1f] leading-tight">{cleanDisplayName(user?.name)}</div>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${openDropdown === 'user' ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-[#707070] transition-transform duration-200 ${openDropdown === 'user' ? 'rotate-180' : ''}`} />
               </button>
 
               {/* User Account Popover */}
               {openDropdown === 'user' && (
-                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-72 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-4 z-50 text-slate-200 animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-700">
+                <div className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-72 bg-[#fafafc] border border-[#d6d6d6] rounded-[20px] shadow-lg p-4 z-50 text-[#1d1d1f] animate-in fade-in slide-in-from-top-1 duration-150 max-w-sm sm:max-w-none mx-auto sm:mx-0">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#e6e6e8]">
                     <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-[#1d1d1f] text-white font-semibold text-xs flex items-center justify-center">
                         {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">{cleanDisplayName(user?.name)}</div>
-                        <div className="text-[11px] text-slate-400 truncate max-w-[150px]">{user?.email}</div>
+                        <div className="text-xs font-semibold text-[#1d1d1f]">{cleanDisplayName(user?.name)}</div>
+                        <div className="text-[11px] text-[#707070] truncate max-w-[150px]">{user?.email}</div>
                       </div>
                     </div>
                     <button
                       onClick={() => setOpenDropdown(null)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+                      className="p-1 rounded-full text-[#707070] hover:text-[#1d1d1f] cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-700 space-y-2">
+                  <div className="pt-3 space-y-2">
                     {/* 1. Edit Profile */}
                     <button
                       onClick={() => {
                         setOpenDropdown(null);
                         setShowProfileModal(true);
                       }}
-                      className="w-full py-2.5 px-3 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-300 hover:text-blue-200 border border-blue-500/30 text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer shadow-sm text-left"
+                      className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[#f5f5f7] border border-[#d6d6d6] text-xs font-medium text-[#1d1d1f] transition flex items-center space-x-2.5 cursor-pointer text-left"
                     >
-                      <UserCog className="w-4 h-4 text-blue-400 shrink-0" />
+                      <UserCog className="w-4 h-4 text-[#0071e3] shrink-0" />
                       <div className="flex-1">
-                        <div className="leading-tight">Edit Profile</div>
-                        <div className="text-[10px] text-slate-400 font-normal">Account details & password</div>
+                        <div className="leading-tight font-semibold">Edit Profile</div>
+                        <div className="text-[10px] text-[#707070]">Account details & credentials</div>
                       </div>
                     </button>
 
-                    {/* 2. Your Plans (Only visible to Franchise Owners who actually subscribe to branch tiers) */}
+                    {/* 2. Your Plans (Franchise Owners) */}
                     {user?.role === 'franchise_owner' && (
                       <button
                         onClick={() => {
                           setOpenDropdown(null);
                           setShowPlansModal(true);
                         }}
-                        className="w-full py-2.5 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer shadow-sm text-left"
+                        className="w-full py-2 px-3 rounded-xl bg-white hover:bg-[#f5f5f7] border border-[#d6d6d6] text-xs font-medium text-[#1d1d1f] transition flex items-center space-x-2.5 cursor-pointer text-left"
                       >
-                        <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                        <Sparkles className="w-4 h-4 text-[#0071e3] shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="leading-tight">Your Plans</span>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 font-semibold border border-indigo-400/30">
+                            <span className="leading-tight font-semibold">Your Plans</span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]">
                               {user?.plan_name && user.plan_name !== 'None' ? user.plan_name : 'Multi-Branch'}
                             </span>
                           </div>
-                          <div className="text-[10px] text-indigo-300/80 font-normal">Subscription tier & center quota</div>
+                          <div className="text-[10px] text-[#707070]">Subscription tier & center quota</div>
                         </div>
                       </button>
                     )}
 
-
-
-
                     {/* 3. Log Out */}
                     <button
                       onClick={handleLogout}
-                      className="w-full py-2.5 px-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 hover:text-red-200 border border-red-500/30 text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer shadow-sm text-left"
+                      className="w-full py-2 px-3 rounded-xl hover:bg-rose-50 border border-transparent hover:border-rose-200 text-xs font-medium text-rose-600 transition flex items-center space-x-2.5 cursor-pointer text-left"
                     >
-                      <LogOut className="w-4 h-4 text-red-400 shrink-0" />
+                      <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
                       <div className="flex-1">
-                        <div className="leading-tight">Log Out</div>
-                        <div className="text-[10px] text-red-400/70 font-normal">Sign out of your session</div>
+                        <div className="leading-tight font-semibold">Log Out</div>
+                        <div className="text-[10px] text-[#707070]">Sign out of your session</div>
                       </div>
                     </button>
                   </div>
@@ -467,66 +496,66 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               )}
             </div>
 
-            {/* Direct Prominent Log Out Button */}
+            {/* Direct Prominent Outlined Log Out Pill */}
             <button
               onClick={handleLogout}
               title="Sign out of SQMS platform"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 text-xs font-bold transition shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-3.5 h-3.5 text-[#707070]" />
               <span className="hidden sm:inline">Log Out</span>
             </button>
 
             {/* Mobile Menu Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
-              className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-700/60 transition cursor-pointer"
+              className="md:hidden p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] border border-[#d6d6d6] transition cursor-pointer"
               aria-label="Toggle navigation"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5 text-amber-400" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Responsive Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-slate-800/80 space-y-2 animate-fadeIn bg-slate-900/90 rounded-b-2xl px-2">
+          <div className="md:hidden py-3 border-t border-[#e6e6e8] space-y-1 bg-[#fafafc] rounded-b-[20px] px-2">
             {user?.role === 'customer' && (
               <>
                 <button
                   onClick={() => { switchTab('active-service'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'active-service' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'active-service' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Car className="w-4 h-4 text-blue-400" />
-                  <span>Live Service Queue Tracking</span>
+                  <Car className="w-4 h-4 text-[#0071e3]" />
+                  <span>Live Queue</span>
                 </button>
                 <button
                   onClick={() => { switchTab('book-service'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'book-service' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'book-service' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sparkles className="w-4 h-4 text-yellow-300" />
-                  <span>Book Service & AI Recommendation</span>
+                  <Sparkles className="w-4 h-4 text-[#0071e3]" />
+                  <span>Book Service & AI Wait Times</span>
                 </button>
                 <button
                   onClick={() => { switchTab('my-vehicles'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'my-vehicles' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'my-vehicles' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Car className="w-4 h-4 text-blue-400" />
+                  <Car className="w-4 h-4 text-[#707070]" />
                   <span>My Vehicles</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'about-us' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-slate-400" />
+                  <Building2 className="w-4 h-4 text-[#707070]" />
                   <span>About Us</span>
                 </button>
               </>
@@ -536,8 +565,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <>
                 <button
                   onClick={() => { switchTab('floor-mobile'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-black flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'floor-mobile' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-amber-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'floor-mobile' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
                   <Smartphone className="w-4 h-4" />
@@ -545,11 +574,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'about-us' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-slate-400" />
+                  <Building2 className="w-4 h-4 text-[#707070]" />
                   <span>About Us</span>
                 </button>
               </>
@@ -559,17 +588,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <>
                 <button
                   onClick={() => { switchTab('manager-queue'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'manager-queue' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'manager-queue' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-blue-400" />
+                  <Building2 className="w-4 h-4 text-[#0071e3]" />
                   <span>Live Operations & Queue</span>
                 </button>
                 <button
                   onClick={() => { switchTab('floor-mobile'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-black flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'floor-mobile' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-amber-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'floor-mobile' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
                   <Smartphone className="w-4 h-4" />
@@ -577,20 +606,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </button>
                 <button
                   onClick={() => { switchTab('manager-analytics'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'manager-analytics' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'manager-analytics' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sliders className="w-4 h-4 text-blue-400" />
+                  <Sliders className="w-4 h-4 text-[#0071e3]" />
                   <span>Branch Analytics</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'about-us' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-slate-400" />
+                  <Building2 className="w-4 h-4 text-[#707070]" />
                   <span>About Us</span>
                 </button>
               </>
@@ -600,38 +629,38 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <>
                 <button
                   onClick={() => { switchTab('owner-overview'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'owner-overview' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'owner-overview' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-blue-400" />
+                  <Building2 className="w-4 h-4 text-[#0071e3]" />
                   <span>Multi-Branch Overview</span>
                 </button>
                 <button
                   onClick={() => { switchTab('manager-queue'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'manager-queue' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'manager-queue' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sliders className="w-4 h-4 text-blue-400" />
+                  <Sliders className="w-4 h-4 text-[#0071e3]" />
                   <span>Workshop Floor Operations</span>
                 </button>
                 <button
                   onClick={() => { switchTab('owner-analytics'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'owner-analytics' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'owner-analytics' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sliders className="w-4 h-4 text-blue-400" />
+                  <Sliders className="w-4 h-4 text-[#0071e3]" />
                   <span>Network Analytics</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'about-us' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-slate-400" />
+                  <Building2 className="w-4 h-4 text-[#707070]" />
                   <span>About Us</span>
                 </button>
               </>
@@ -641,47 +670,47 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <>
                 <button
                   onClick={() => { switchTab('admin-dashboard'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'admin-dashboard' ? 'bg-purple-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'admin-dashboard' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4 text-purple-400" />
+                  <ShieldCheck className="w-4 h-4 text-[#0071e3]" />
                   <span>Platform Operations</span>
                 </button>
                 <button
                   onClick={() => { switchTab('admin-centers'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'admin-centers' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'admin-centers' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-blue-400" />
+                  <Building2 className="w-4 h-4 text-[#0071e3]" />
                   <span>Workshops & Centers</span>
                 </button>
                 <button
                   onClick={() => { switchTab('admin-ml'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'admin-ml' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'admin-ml' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sliders className="w-4 h-4 text-blue-400" />
+                  <Sliders className="w-4 h-4 text-[#0071e3]" />
                   <span>ML Retraining & Models</span>
                 </button>
                 <button
                   onClick={() => { switchTab('admin-audit'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'admin-audit' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'admin-audit' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <ShieldCheck className="w-4 h-4 text-blue-400" />
+                  <ShieldCheck className="w-4 h-4 text-[#0071e3]" />
                   <span>Audit Trail</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'about-us' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'about-us' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 text-slate-400" />
+                  <Building2 className="w-4 h-4 text-[#707070]" />
                   <span>About Us</span>
                 </button>
               </>

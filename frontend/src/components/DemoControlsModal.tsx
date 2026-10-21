@@ -68,51 +68,51 @@ export const DemoControlsModal: React.FC<DemoControlsModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden text-white relative z-[10000]">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#d6d6d6] w-full max-w-xl rounded-[28px] shadow-2xl overflow-hidden text-[#1d1d1f] relative z-[10000]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div className="px-6 py-5 border-b border-[#e6e6e8] flex items-center justify-between bg-white">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
-              <Sliders className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-[#f5f5f7] text-[#1d1d1f] flex items-center justify-center border border-[#d6d6d6]">
+              <Sliders className="w-4 h-4 text-[#0071e3]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Live Demonstration & Scenario Controls</h2>
-              <p className="text-xs text-slate-400">Trigger live workshop workload surges and queue recalculations</p>
+              <h2 className="text-base font-semibold text-[#1d1d1f]">Live Demonstration & Scenario Controls</h2>
+              <p className="text-xs text-[#707070]">Trigger live workshop workload surges and queue recalculations</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 sm:p-8 space-y-6">
           {message && (
             <div
-              className={`p-3 rounded-xl text-xs font-medium border flex items-center space-x-2 ${
+              className={`p-3.5 rounded-[20px] text-xs font-medium border flex items-center space-x-2 ${
                 message.type === 'success'
-                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                  : 'bg-red-950/60 border-red-500/40 text-red-300'
+                  ? 'bg-[#f5f5f7] border-[#d6d6d6] text-[#1d1d1f]'
+                  : 'bg-[#f5f5f7] border-[#b64400] text-[#b64400]'
               }`}
             >
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
               <span>{message.text}</span>
             </div>
           )}
 
           {/* Select Target Service Center */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-[#707070] mb-1.5 uppercase tracking-wider">
               Target Service Center for Simulation
             </label>
             <select
               value={centerId}
               onChange={(e) => setCenterId(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+              className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
             >
               <option value={1}>Center 01 — Apex Central Hub (Ahmedabad Navrangpura)</option>
               <option value={2}>Center 02 — Apex West Express (Bodakdev)</option>
@@ -125,77 +125,77 @@ export const DemoControlsModal: React.FC<DemoControlsModalProps> = ({
 
           {/* Section 1: Workload Simulation */}
           <div className="space-y-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-[#707070] uppercase tracking-wider block">
               Workload & Traffic Simulation
             </span>
             <div className="grid grid-cols-3 gap-2.5">
               <button
                 disabled={loading}
                 onClick={() => handleSetWorkload('normal')}
-                className="flex flex-col items-center p-3 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 transition text-center group"
+                className="flex flex-col items-center p-3.5 rounded-[20px] border border-[#d6d6d6] bg-[#f5f5f7] hover:bg-[#e6e6e8] transition text-center cursor-pointer"
               >
-                <Zap className="w-5 h-5 text-emerald-400 mb-1 group-hover:scale-110 transition" />
-                <span className="text-xs font-bold text-slate-200">Normal</span>
-                <span className="text-[10px] text-slate-400">~40% load / bays open</span>
+                <Zap className="w-5 h-5 text-emerald-600 mb-1" />
+                <span className="text-xs font-semibold text-[#1d1d1f]">Normal</span>
+                <span className="text-[10px] text-[#707070]">~40% load / bays open</span>
               </button>
 
               <button
                 disabled={loading}
                 onClick={() => handleSetWorkload('high')}
-                className="flex flex-col items-center p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition text-center group"
+                className="flex flex-col items-center p-3.5 rounded-[20px] border border-[#d6d6d6] bg-[#f5f5f7] hover:bg-[#e6e6e8] transition text-center cursor-pointer"
               >
-                <Flame className="w-5 h-5 text-amber-400 mb-1 group-hover:scale-110 transition" />
-                <span className="text-xs font-bold text-amber-300">High Workload</span>
-                <span className="text-[10px] text-amber-200/70">~75% load / queue delay</span>
+                <Flame className="w-5 h-5 text-[#b64400] mb-1" />
+                <span className="text-xs font-semibold text-[#1d1d1f]">High Workload</span>
+                <span className="text-[10px] text-[#707070]">~75% load / queue delay</span>
               </button>
 
               <button
                 disabled={loading}
                 onClick={() => handleSetWorkload('peak')}
-                className="flex flex-col items-center p-3 rounded-xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 transition text-center group"
+                className="flex flex-col items-center p-3.5 rounded-[20px] border border-[#d6d6d6] bg-[#f5f5f7] hover:bg-[#e6e6e8] transition text-center cursor-pointer"
               >
-                <ShieldAlert className="w-5 h-5 text-red-400 mb-1 group-hover:scale-110 transition" />
-                <span className="text-xs font-bold text-red-300">Peak Surge</span>
-                <span className="text-[10px] text-red-200/70">~92% load / bays full</span>
+                <ShieldAlert className="w-5 h-5 text-[#b64400] mb-1" />
+                <span className="text-xs font-semibold text-[#b64400]">Peak Surge</span>
+                <span className="text-[10px] text-[#707070]">~92% load / bays full</span>
               </button>
             </div>
           </div>
 
           {/* Section 2: Queue Dynamics & Fast Forward */}
           <div className="space-y-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-[#707070] uppercase tracking-wider block">
               Live Queue Ingestion & Progression
             </span>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 disabled={loading}
                 onClick={() => handleAddBatch(3)}
-                className="flex items-center justify-center space-x-2 p-3 rounded-xl border border-blue-500/30 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-semibold transition"
+                className="flex items-center justify-center space-x-2 py-2.5 px-4 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium transition cursor-pointer"
               >
-                <PlusCircle className="w-4 h-4" />
+                <PlusCircle className="w-4 h-4 text-[#0071e3]" />
                 <span>Inject 3 Walk-in Vehicles</span>
               </button>
 
               <button
                 disabled={loading}
                 onClick={handleAdvanceStatus}
-                className="flex items-center justify-center space-x-2 p-3 rounded-xl border border-purple-500/30 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-semibold transition"
+                className="flex items-center justify-center space-x-2 py-2.5 px-4 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-medium transition shadow-none cursor-pointer"
               >
                 <Play className="w-4 h-4" />
                 <span>Advance Vehicle Stage</span>
               </button>
             </div>
-            <p className="text-[11px] text-slate-400 italic">
-              Demonstrates real-time update: When a technician advances a vehicle (e.g. Washing → Completed), subsequent waiting vehicles immediately receive recalculations over WebSockets without a page refresh!
+            <p className="text-[11px] text-[#707070] pt-1">
+              Demonstrates real-time update: When a technician advances a vehicle, subsequent waiting vehicles immediately receive recalculations over WebSockets without a page refresh.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-950 flex justify-end">
+        <div className="px-6 py-4 border-t border-[#e6e6e8] bg-white flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition"
+            className="px-5 py-2 rounded-full border border-[#d6d6d6] hover:bg-[#f5f5f7] text-xs font-medium text-[#707070] hover:text-[#1d1d1f] transition cursor-pointer"
           >
             Close Panel
           </button>
