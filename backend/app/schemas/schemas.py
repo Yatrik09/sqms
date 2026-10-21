@@ -458,3 +458,11 @@ class RazorpayPaymentVerifyResponse(BaseModel):
     primary_center_id: Optional[int] = None
     primary_center_name: Optional[str] = None
     user_role: Optional[str] = None
+
+
+class ReallocateTechnicianRequest(BaseModel):
+    technician_id: int
+    from_center_id: int
+    to_center_id: int
+    reason: Optional[str] = "AI Workload Rebalance"
+

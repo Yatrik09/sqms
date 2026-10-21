@@ -444,6 +444,24 @@ export const api = {
     return res.json();
   },
 
+  async reallocateTechnician(data: {
+    technician_id: number;
+    from_center_id: number;
+    to_center_id: number;
+    reason?: string;
+  }) {
+    const res = await fetch(`${API_BASE_URL}/analytics/reallocate-technician`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to reallocate technician' }));
+      throw new Error(err.detail || 'Failed to reallocate technician');
+    }
+    return res.json();
+  },
+
   async getAdminAnalytics() {
     const res = await fetch(`${API_BASE_URL}/analytics/admin`);
     return res.json();
