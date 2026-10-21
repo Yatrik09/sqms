@@ -10,16 +10,19 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',
+        target: 'https://sqms-backend-gd00.onrender.com',
         changeOrigin: true,
+        secure: false,
       },
       '/ws': {
-        target: 'ws://localhost:8001',
+        target: 'wss://sqms-backend-gd00.onrender.com',
         ws: true,
+        changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:8001',
+        target: 'https://sqms-backend-gd00.onrender.com',
         changeOrigin: true,
+        secure: false,
       },
     },
   },
