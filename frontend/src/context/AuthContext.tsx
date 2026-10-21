@@ -47,17 +47,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => clearInterval(keepalive);
   }, []);
 
-  // Initialize or revalidate profile in background
+  // Initialize or revalidate profile once on app mount
   useEffect(() => {
+    let isMounted = true;
     async function loadUser() {
-      if (token) {
+      const storedToken = localStorage.getItem('sqms_token');
+      if (storedToken) {
         try {
           const profile = await api.getMe();
-          if (profile) saveUser(profile);
+          if (isMounted && profile) saveUser(profile);
         } catch (err: any) {
-          // CRITICAL: Only reset session if server explicitly returned 401 Unauthorized!
-          // If server is waking up, sleeping, or network blipped (502, 503, timeout),
-          // preserve cached user session so website NEVER auto-refreshes or logs out!
+          // Only reset session if server explicitly returned 401 Unauthorized
           if (err?.status === 401 || err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
             localStorage.removeItem('sqms_token');
             setToken(null);
@@ -67,10 +67,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } else {
         saveUser(null);
       }
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     }
     loadUser();
-  }, [token]);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // WebSocket Connection for real-time updates
   useEffect(() => {

@@ -362,100 +362,6 @@ export const DEFAULT_SERVICE_CENTERS: any[] = [
   }
 ];
 
-export const DEMO_FALLBACK_USERS: Record<string, any> = {
-  'owner@demo.local': {
-    access_token: 'demo_token_owner',
-    token_type: 'bearer',
-    user: {
-      id: 2,
-      name: 'Amitabh Patel (Franchise HQ)',
-      email: 'owner@demo.local',
-      role: 'franchise_owner',
-      status: 'active',
-      phone: '+91 98200 11223',
-      city: 'Mumbai',
-      area: 'Andheri East',
-      latitude: 19.1136,
-      longitude: 72.8697,
-      plan_name: 'Multi-Branch Growth Plan',
-      max_allowed_centers: 5,
-      created_at: new Date().toISOString()
-    }
-  },
-  'admin@demo.local': {
-    access_token: 'demo_token_admin',
-    token_type: 'bearer',
-    user: {
-      id: 1,
-      name: 'Super Administrator',
-      email: 'admin@demo.local',
-      role: 'super_admin',
-      status: 'active',
-      phone: '+91 98000 00001',
-      city: 'Mumbai',
-      area: 'Bandra',
-      latitude: 19.0596,
-      longitude: 72.8295,
-      created_at: new Date().toISOString()
-    }
-  },
-  'manager@demo.local': {
-    access_token: 'demo_token_manager',
-    token_type: 'bearer',
-    user: {
-      id: 3,
-      name: 'Ramesh Patel',
-      email: 'manager@demo.local',
-      role: 'branch_manager',
-      status: 'active',
-      phone: '+91 98201 12345',
-      city: 'Mumbai',
-      area: 'Andheri East',
-      service_center_id: 1,
-      service_center_name: 'Apex Auto Express - Central Hub',
-      latitude: 19.1136,
-      longitude: 72.8697,
-      created_at: new Date().toISOString()
-    }
-  },
-  'customer@demo.local': {
-    access_token: 'demo_token_customer',
-    token_type: 'bearer',
-    user: {
-      id: 4,
-      name: 'Rahul Sharma',
-      email: 'customer@demo.local',
-      role: 'customer',
-      status: 'active',
-      phone: '+91 98111 22334',
-      city: 'Mumbai',
-      area: 'Andheri East',
-      latitude: 19.1136,
-      longitude: 72.8697,
-      created_at: new Date().toISOString()
-    }
-  },
-  'tech@demo.local': {
-    access_token: 'demo_token_tech',
-    token_type: 'bearer',
-    user: {
-      id: 5,
-      name: 'Vikram Patel',
-      email: 'tech@demo.local',
-      role: 'technician',
-      status: 'active',
-      phone: '+91 98222 33445',
-      city: 'Mumbai',
-      area: 'Andheri East',
-      service_center_id: 1,
-      service_center_name: 'Apex Auto Express - Central Hub',
-      latitude: 19.1136,
-      longitude: 72.8697,
-      created_at: new Date().toISOString()
-    }
-  }
-};
-
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('sqms_token');
   const headers: Record<string, string> = {
@@ -480,42 +386,16 @@ export const api = {
 
   // --- AUTH ---
   async login(email: string, password: string) {
-    const cleanEmail = email.trim().toLowerCase();
-    const demoPayload = DEMO_FALLBACK_USERS[cleanEmail];
-
-    const fetchPromise = (async () => {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
-        throw new Error(err.detail || 'Login failed');
-      }
-      return res.json();
-    })();
-
-    if (demoPayload) {
-      // Fast race 1.5s so demo persona presentation NEVER blocks on sleeping server
-      let timer: any;
-      const timeoutPromise = new Promise<any>((resolve) => {
-        timer = setTimeout(() => {
-          resolve(demoPayload);
-        }, 1500);
-      });
-
-      try {
-        const result = await Promise.race([fetchPromise, timeoutPromise]);
-        clearTimeout(timer);
-        return result;
-      } catch {
-        clearTimeout(timer);
-        return demoPayload;
-      }
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
+      throw new Error(err.detail || 'Login failed');
     }
-
-    return await fetchPromise;
+    return res.json();
   },
 
   async register(
@@ -611,7 +491,7 @@ export const api = {
 
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 4000);
+      const timer = setTimeout(() => controller.abort(), 12000);
       const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: getAuthHeaders(),
         signal: controller.signal,
