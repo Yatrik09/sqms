@@ -45,7 +45,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [activeService, setActiveService] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [showPlansModal, setShowPlansModal] = useState<boolean>(false);
 
   // Booking Form State
@@ -84,7 +84,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
     setLoadingCenters(true);
     try {
       const list = await api.getServiceCenters(userCity, lat ?? userLat, lon ?? userLon);
-      setNearbyCenters(Array.isArray(list) ? list : []);
+      setNearbyCenters(Array.isArray(list) ? (list as any) : []);
     } catch (e) {
       console.error('Failed to load nearby centers', e);
       setNearbyCenters([]);
@@ -274,7 +274,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
     return 'upcoming';
   };
 
-  if (loading) {
+  if (loading && !activeService && vehicles.length === 0 && history.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="flex items-center space-x-3 text-slate-500">

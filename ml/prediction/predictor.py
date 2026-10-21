@@ -42,7 +42,13 @@ class SQMSPredictor:
         self.waiting_model = None
         self.duration_model = None
         self.metadata = {}
-        self.load_models()
+        self._models_loaded = False
+        # Note: Models are loaded lazily on first prediction request to keep boot time < 1s and RAM < 100MB
+
+    def _ensure_models_loaded(self):
+        if not self._models_loaded:
+            self._models_loaded = True
+            self.load_models()
         
     def load_models(self):
         w_path = os.path.join(self.artifacts_dir, 'waiting_time_model.joblib')
@@ -112,6 +118,7 @@ class SQMSPredictor:
         # ---------------------------------------------------------------------
         # PREDICTION LOGIC: ML OR BASELINE FALLBACK
         # ---------------------------------------------------------------------
+        self._ensure_models_loaded()
         if self.waiting_model is not None and self.duration_model is not None:
             # 1. ML-Based Prediction
             prediction_source = "Production ML Model"

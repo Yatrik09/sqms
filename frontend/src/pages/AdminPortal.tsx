@@ -46,7 +46,7 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
         api.getAdminSubscriptionOverview().catch(() => null),
         api.getAdminSubscriptionPlans().catch(() => []),
       ]);
-      setCenters(cList);
+      setCenters(cList as any);
       setAnalytics(aData);
       setAuditLogs(logs);
       setSubscriptionOverview(subData);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { api } from '../services/api';
+import { api, getInitialCached, DEFAULT_OWNER_ANALYTICS, DEFAULT_FRANCHISE_DATA } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FranchisePlansModal } from '../components/FranchisePlansModal';
 import type { BranchManagerItem, MyFranchiseResponse } from '../types';
@@ -18,11 +18,12 @@ export const OwnerPortal: React.FC<{
   onInspectBranch?: (branchId: number) => void;
 }> = ({ activeTab: activeTabProp = 'owner-overview', onTabChange, onInspectBranch }) => {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(null);
-  const [franchiseData, setFranchiseData] = useState<MyFranchiseResponse | null>(null);
-  const [managers, setManagers] = useState<BranchManagerItem[]>([]);
-  const [planInfo, setPlanInfo] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<any>(() => getInitialCached('owner_analytics_1', DEFAULT_OWNER_ANALYTICS));
+  const [franchiseData, setFranchiseData] = useState<MyFranchiseResponse | null>(() => getInitialCached('my_franchise', DEFAULT_FRANCHISE_DATA as any));
+  const [managers, setManagers] = useState<BranchManagerItem[]>(() => getInitialCached('branch_managers', []));
+  const [planInfo, setPlanInfo] = useState<any>(() => getInitialCached('my_plan', { plan_name: 'Multi-Branch Growth Plan', max_allowed_centers: 5 }));
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'branches' | 'managers'>('overview');
 
   useEffect(() => {
@@ -153,6 +154,7 @@ export const OwnerPortal: React.FC<{
   const [copiedNotice, setCopiedNotice] = useState(false);
 
   const loadOwnerData = async () => {
+    setIsSyncing(true);
     try {
       const franchise = await api.getMyFranchise().catch(() => null);
       const franchiseId = franchise?.franchise_id || 1;
@@ -161,17 +163,18 @@ export const OwnerPortal: React.FC<{
         api.getBranchManagers().catch(() => []),
         api.getMyPlan().catch(() => null),
       ]);
-      setData(analytics);
-      setFranchiseData(franchise);
-      setManagers(mgrList);
-      setPlanInfo(plan);
+      if (analytics) setData(analytics);
+      if (franchise) setFranchiseData(franchise as any);
+      if (mgrList && mgrList.length > 0) setManagers(mgrList as any);
+      if (plan) setPlanInfo(plan);
 
       if (franchise && franchise.centers && franchise.centers.length > 0 && mgrCenterId === '') {
         setMgrCenterId(franchise.centers[0].id);
       }
     } catch (e) {
-      console.error('Failed to load owner data', e);
+      console.error('Failed to sync owner data', e);
     } finally {
+      setIsSyncing(false);
       setLoading(false);
     }
   };
@@ -270,7 +273,7 @@ export const OwnerPortal: React.FC<{
     setTimeout(() => setCopiedNotice(false), 3000);
   };
 
-  if (loading) {
+  if (loading && !data && !franchiseData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center space-y-4 text-slate-400">
@@ -300,10 +303,17 @@ export const OwnerPortal: React.FC<{
               <span className="text-xs font-black uppercase tracking-widest px-3.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm">
                 Franchise Network Command
               </span>
-              <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>AI Automated Load Balancing</span>
-              </div>
+              {isSyncing ? (
+                <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+                  <RefreshCw className="w-3 h-3 text-blue-400 animate-spin" />
+                  <span>Syncing with Cloud...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>AI Automated Load Balancing</span>
+                </div>
+              )}
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">

@@ -75,7 +75,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
   const [createdTechNotice, setCreatedTechNotice] = useState<{ email: string; pass: string; center: string; name: string } | null>(null);
   const [copiedTechNotice, setCopiedTechNotice] = useState<boolean>(false);
   const [analytics, setAnalytics] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [showPlansModal, setShowPlansModal] = useState<boolean>(false);
 
   // Sync tab with props
@@ -566,7 +566,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     }
   };
 
-  if (loading) {
+  if (loading && !centerInfo && queue.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="flex items-center space-x-3 text-slate-500">
