@@ -5,8 +5,8 @@ import { useAuth } from '../context/AuthContext';
 import type { SubscriptionPlan } from '../types';
 import {
   ShieldCheck, Check, Sparkles, Building2, Layers, Cpu,
-  CreditCard, ArrowRight, X, AlertCircle, RefreshCw, CheckCircle2,
-  QrCode, Smartphone, Landmark, Download, FileText, CheckCircle, Info
+  ArrowRight, X, AlertCircle, RefreshCw, CheckCircle2,
+  Download, FileText, CheckCircle, Info
 } from 'lucide-react';
 import { RazorpayCheckoutButton } from './RazorpayCheckoutButton';
 
@@ -40,17 +40,6 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   const [totalBays, setTotalBays] = useState(6);
   const [totalMechanics, setTotalMechanics] = useState(6);
 
-  // Form Fields - Payment Gateway
-  const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'card' | 'upi' | 'netbanking'>('razorpay');
-  const [cardNumber, setCardNumber] = useState('4532 8819 9201 3491');
-  const [cardName, setCardName] = useState('Rajesh Patel');
-  const [cardExpiry, setCardExpiry] = useState('08/28');
-  const [cardCvv, setCardCvv] = useState('883');
-  const [upiId, setUpiId] = useState('rajesh.auto@okaxis');
-  const [upiVerified, setUpiVerified] = useState(true);
-  const [selectedBank, setSelectedBank] = useState('HDFC Bank');
-
-  const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [purchasedInfo, setPurchasedInfo] = useState<any>(null);
 
@@ -112,27 +101,6 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
     if (!primaryCenterName) {
       setPrimaryCenterName(`${baseName} Car Care - Central Hub`);
     }
-    if (!cardName) {
-      setCardName(user?.name || 'Workshop Owner');
-    }
-    if (!upiId) {
-      setUpiId(`${user?.email ? user.email.split('@')[0] : 'owner'}@okaxis`);
-    }
-  };
-
-  const handleCardNumberChange = (val: string) => {
-    const raw = val.replace(/\D/g, '').slice(0, 16);
-    const formatted = raw.replace(/(\d{4})/g, '$1 ').trim();
-    setCardNumber(formatted);
-  };
-
-  const handleCardExpiryChange = (val: string) => {
-    const raw = val.replace(/\D/g, '').slice(0, 4);
-    if (raw.length >= 2) {
-      setCardExpiry(`${raw.slice(0, 2)}/${raw.slice(2)}`);
-    } else {
-      setCardExpiry(raw);
-    }
   };
 
   // Pricing calculations
@@ -150,49 +118,6 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   const basePrice = isUpgrade ? upgradeDifference : targetPlanPrice;
   const gstAmount = Math.round(basePrice * 0.18);
   const totalAmount = basePrice + gstAmount;
-
-  const handleCompletePurchase = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPlan) return;
-
-    setSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await api.purchaseSubscription({
-        plan_id: selectedPlan.id,
-        franchise_name: franchiseName.trim(),
-        primary_center_name: primaryCenterName.trim(),
-        city: city.trim(),
-        area: area.trim(),
-        address: address.trim(),
-        phone: phone.trim(),
-        total_bays: Number(totalBays),
-        total_mechanics: Number(totalMechanics),
-        payment_method: paymentMethod,
-        billing_period: billingPeriod,
-        card_number: paymentMethod === 'card' ? cardNumber : undefined,
-        card_name: paymentMethod === 'card' ? cardName : undefined,
-        card_expiry: paymentMethod === 'card' ? cardExpiry : undefined,
-        upi_id: paymentMethod === 'upi' ? upiId : undefined,
-        bank_name: paymentMethod === 'netbanking' ? selectedBank : undefined,
-      });
-
-      setPurchasedInfo(res);
-      setCheckoutStep('success');
-
-      // Refresh current user profile in AuthContext
-      await refreshUser();
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Payment processing failed. Please verify credentials.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const handleRazorpaySuccess = async (verifyResult: any) => {
     if (!selectedPlan) return;
@@ -250,8 +175,8 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
             <p className="text-xs sm:text-sm text-[#707070] mt-1 max-w-2xl">
               {checkoutStep === 'details'
                 ? (isAlreadySubscribed
-                    ? 'Review your upgrade details and complete payment via Credit/Debit Card, UPI QR, or Net Banking.'
-                    : 'Configure your workshop details and complete payment via Credit/Debit Card, UPI QR, or Net Banking.')
+                    ? 'Review your upgrade details and complete payment securely via Razorpay Test Gateway.'
+                    : 'Configure your workshop details and complete payment securely via Razorpay Test Gateway.')
                 : checkoutStep === 'success'
                 ? 'Your tax invoice has been generated. Your workshop franchise has been updated with expanded quotas.'
                 : (isAlreadySubscribed
@@ -483,7 +408,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 
           {/* STEP 2: DETAILS & REALISTIC PAYMENT GATEWAY */}
           {checkoutStep === 'details' && selectedPlan && (
-            <form onSubmit={handleCompletePurchase} className="space-y-6 max-w-4xl mx-auto">
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-6 max-w-4xl mx-auto">
               {errorMessage && (
                 <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-[#b64400] text-xs flex items-center space-x-2.5 font-medium">
                   <AlertCircle className="w-4 h-4 shrink-0 text-[#b64400]" />
@@ -683,236 +608,54 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
                   </div>
                 )}
 
-                {/* Real-Time Payment Gateway Simulator (5 Cols) */}
+                {/* Official Razorpay Test Payment Gateway (5 Cols) */}
                 <div className="lg:col-span-5 bg-[#f5f5f7] border border-[#d6d6d6] rounded-[24px] p-6 space-y-4 flex flex-col justify-between shadow-none text-[#1d1d1f]">
                   <div>
                     <div className="flex items-center justify-between pb-3 border-b border-[#d6d6d6]">
                       <h4 className="text-xs font-medium uppercase tracking-wider text-[#707070] flex items-center space-x-2">
-                        <CreditCard className="w-4 h-4 text-[#0071e3]" />
-                        <span>Payment Gateway</span>
+                        <ShieldCheck className="w-4 h-4 text-[#0071e3]" />
+                        <span>Razorpay Payment Gateway</span>
                       </h4>
-                      <div className="flex items-center space-x-1 text-[10px] text-[#10b981] font-medium bg-white px-2 py-0.5 rounded-full border border-emerald-200">
-                        <ShieldCheck className="w-3 h-3" />
-                        <span>256-Bit SSL</span>
+                      <div className="flex items-center space-x-1 text-[10px] text-[#10b981] font-medium bg-white px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Official Test Mode</span>
                       </div>
                     </div>
 
-                    {/* Method Selector Tabs */}
-                    <div className="grid grid-cols-4 gap-1 mt-3 bg-white p-1 rounded-full border border-[#d6d6d6]">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('razorpay')}
-                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
-                          paymentMethod === 'razorpay'
-                            ? 'bg-[#0071e3] text-white shadow-none'
-                            : 'text-[#707070] hover:text-[#1d1d1f]'
-                        }`}
-                      >
-                        <ShieldCheck className="w-3.5 h-3.5 text-white" />
-                        <span>Razorpay</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('card')}
-                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
-                          paymentMethod === 'card'
-                            ? 'bg-[#0071e3] text-white shadow-none'
-                            : 'text-[#707070] hover:text-[#1d1d1f]'
-                        }`}
-                      >
-                        <CreditCard className="w-3 h-3" />
-                        <span>Card</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('upi')}
-                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
-                          paymentMethod === 'upi'
-                            ? 'bg-[#0071e3] text-white shadow-none'
-                            : 'text-[#707070] hover:text-[#1d1d1f]'
-                        }`}
-                      >
-                        <Smartphone className="w-3 h-3" />
-                        <span>UPI / QR</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('netbanking')}
-                        className={`py-1.5 rounded-full text-[11px] font-medium transition flex items-center justify-center space-x-1 cursor-pointer ${
-                          paymentMethod === 'netbanking'
-                            ? 'bg-[#0071e3] text-white shadow-none'
-                            : 'text-[#707070] hover:text-[#1d1d1f]'
-                        }`}
-                      >
-                        <Landmark className="w-3 h-3" />
-                        <span>NetBank</span>
-                      </button>
-                    </div>
-
-                    {/* Method Specific Form */}
-                    <div className="mt-4 space-y-3">
-                      {paymentMethod === 'razorpay' && (
-                        <div className="p-4 rounded-2xl bg-white border border-[#d6d6d6] space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-semibold text-[#1d1d1f] text-xs">Razorpay Standard Checkout</span>
-                              <span className="text-[10px] bg-[#f5f5f7] text-[#0071e3] px-2 py-0.5 rounded-full border border-[#d6d6d6] font-medium">
-                                Test Mode
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-[#707070] font-mono">rzp_test</span>
-                          </div>
-                          <p className="text-xs text-[#707070] leading-relaxed">
-                            Official Razorpay modal popup with live test environment support for Cards, UPI apps, QR codes, and Netbanking with HMAC-SHA256 signature verification.
-                          </p>
-                          <div className="flex flex-wrap gap-1.5 text-[10px] text-[#707070]">
-                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">All Cards</span>
-                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">Google Pay / PhonePe / Paytm</span>
-                            <span className="px-2 py-0.5 bg-[#f5f5f7] rounded-full border border-[#d6d6d6] font-medium">Netbanking</span>
-                          </div>
+                    {/* Razorpay Verified Test Gateway Card */}
+                    <div className="mt-4 p-4 rounded-2xl bg-white border border-[#d6d6d6] space-y-3 shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-[#1d1d1f] text-xs">Razorpay Standard Checkout</span>
+                          <span className="text-[10px] bg-blue-50 text-[#0071e3] px-2 py-0.5 rounded-full border border-blue-200 font-medium">
+                            Live Test Mode
+                          </span>
                         </div>
-                      )}
-                      {paymentMethod === 'card' && (
-                        <>
-                          <div>
-                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
-                              Card Number
-                            </label>
-                            <div className="relative">
-                              <input
-                                type="text"
-                                required
-                                value={cardNumber}
-                                onChange={(e) => handleCardNumberChange(e.target.value)}
-                                placeholder="4532 8819 9201 3491"
-                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                              />
-                              <span className="absolute right-3 top-2 text-[10px] font-semibold uppercase text-[#0071e3] bg-[#f5f5f7] px-1.5 py-0.5 rounded border border-[#d6d6d6]">
-                                VISA
-                              </span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
-                              Cardholder Name
-                            </label>
-                            <input
-                              type="text"
-                              required
-                              value={cardName}
-                              onChange={(e) => setCardName(e.target.value)}
-                              placeholder="e.g. Rajesh Patel"
-                              className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-[11px] font-medium text-[#707070] mb-1">
-                                Expiry (MM/YY)
-                              </label>
-                              <input
-                                type="text"
-                                required
-                                value={cardExpiry}
-                                onChange={(e) => handleCardExpiryChange(e.target.value)}
-                                placeholder="08/28"
-                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[11px] font-medium text-[#707070] mb-1">
-                                CVV
-                              </label>
-                              <input
-                                type="password"
-                                required
-                                maxLength={4}
-                                value={cardCvv}
-                                onChange={(e) => setCardCvv(e.target.value)}
-                                placeholder="•••"
-                                className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono text-center focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                              />
-                            </div>
-                          </div>
-                        </>
-                      )}
-
-                      {paymentMethod === 'upi' && (
-                        <div className="space-y-3">
-                          {/* Dynamic QR Code display */}
-                          <div className="bg-white p-4 rounded-2xl border border-[#d6d6d6] flex flex-col items-center justify-center text-[#1d1d1f] space-y-1.5">
-                            <div className="w-28 h-28 border border-[#d6d6d6] p-1 rounded-xl flex items-center justify-center bg-[#fafafc]">
-                              <QrCode className="w-24 h-24 text-[#1d1d1f]" />
-                            </div>
-                            <span className="text-[10px] font-mono text-[#707070] font-medium">
-                              merchant.driveops@okaxis
-                            </span>
-                            <span className="text-[11px] font-semibold text-[#0071e3]">
-                              Scan to pay ₹{totalAmount.toLocaleString('en-IN')}
-                            </span>
-                          </div>
-
-                          <div>
-                            <label className="block text-[11px] font-medium text-[#707070] mb-1">
-                              Or Enter Virtual Payment Address (UPI ID)
-                            </label>
-                            <div className="flex space-x-1.5">
-                              <input
-                                type="text"
-                                value={upiId}
-                                onChange={(e) => {
-                                  setUpiId(e.target.value);
-                                  setUpiVerified(true);
-                                }}
-                                placeholder="user@okhdfcbank"
-                                className="flex-1 px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] font-mono focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setUpiVerified(true)}
-                                className="px-3 py-1.5 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[11px] font-medium text-[#1d1d1f] cursor-pointer"
-                              >
-                                {upiVerified ? <Check className="w-4 h-4 text-[#10b981]" /> : 'Verify'}
-                              </button>
-                            </div>
-                            {upiVerified && (
-                              <span className="text-[10px] text-[#10b981] flex items-center space-x-1 mt-1 font-medium">
-                                <CheckCircle className="w-3 h-3" />
-                                <span>Verified Merchant / User UPI account</span>
-                              </span>
-                            )}
-                          </div>
+                        <span className="text-[10px] text-[#707070] font-mono">rzp_test</span>
+                      </div>
+                      <p className="text-xs text-[#707070] leading-relaxed">
+                        Official Razorpay modal popup with live test environment support for Cards, UPI apps, QR codes, and Netbanking with HMAC-SHA256 signature verification.
+                      </p>
+                      
+                      <div className="p-3 bg-[#f5f5f7] rounded-xl border border-[#e5e5ea] space-y-2">
+                        <div className="text-[11px] font-semibold text-[#1d1d1f] flex items-center space-x-1.5">
+                          <CheckCircle className="w-3.5 h-3.5 text-[#10b981]" />
+                          <span>Real Test Gateway Features</span>
                         </div>
-                      )}
-
-                      {paymentMethod === 'netbanking' && (
-                        <div className="space-y-3">
-                          <label className="block text-[11px] font-medium text-[#707070]">
-                            Select Your Bank
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra', 'Punjab National Bank'].map((b) => (
-                              <button
-                                key={b}
-                                type="button"
-                                onClick={() => setSelectedBank(b)}
-                                className={`p-2.5 rounded-xl border text-left text-xs font-medium transition cursor-pointer ${
-                                  selectedBank === b
-                                    ? 'bg-white border-[#0071e3] text-[#0071e3] shadow-sm'
-                                    : 'bg-white border-[#d6d6d6] text-[#707070] hover:text-[#1d1d1f]'
-                                }`}
-                              >
-                                <div className="truncate">{b}</div>
-                              </button>
-                            ))}
-                          </div>
+                        <div className="flex flex-wrap gap-1.5 text-[10px] text-[#707070]">
+                          <span className="px-2 py-0.5 bg-white rounded-full border border-[#d6d6d6] font-medium text-[#1d1d1f]">Test Cards (OTP 123456)</span>
+                          <span className="px-2 py-0.5 bg-white rounded-full border border-[#d6d6d6] font-medium text-[#1d1d1f]">Test UPI (success@razorpay)</span>
+                          <span className="px-2 py-0.5 bg-white rounded-full border border-[#d6d6d6] font-medium text-[#1d1d1f]">Test NetBanking (All Banks)</span>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] text-[#707070] pt-1">
+                        <span className="flex items-center space-x-1">
+                          <ShieldCheck className="w-3 h-3 text-[#10b981]" />
+                          <span>RBI Digital Sandbox Compliant</span>
+                        </span>
+                        <span className="text-[#0071e3] font-medium">Instant Activation</span>
+                      </div>
                     </div>
 
                     {/* Order Tax Breakdown */}
@@ -934,72 +677,48 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 
                   {/* Submit Button */}
                   <div className="pt-4">
-                    {paymentMethod === 'razorpay' ? (
-                      <RazorpayCheckoutButton
-                        amount={totalAmount}
-                        name="DriveOps Mobility Pvt. Ltd."
-                        description={`${selectedPlan.name} Subscription`}
-                        planId={selectedPlan.id}
-                        billingPeriod={billingPeriod}
-                        franchiseName={franchiseName}
-                        primaryCenterName={primaryCenterName}
-                        address={address}
-                        city={city}
-                        area={area}
-                        phone={phone}
-                        totalBays={totalBays}
-                        totalMechanics={totalMechanics}
-                        prefill={{
-                          name: user?.name || cardName,
-                          email: user?.email || '',
-                          contact: phone
-                        }}
-                        notes={{
-                          franchise_name: franchiseName,
-                          primary_center_name: primaryCenterName,
-                          plan_id: selectedPlan.id,
-                          billing_period: billingPeriod,
-                          address,
-                          city,
-                          area,
-                          phone,
-                          total_bays: totalBays,
-                          total_mechanics: totalMechanics
-                        }}
-                        buttonText={
-                          isAlreadySubscribed
-                            ? `Pay ₹${totalAmount.toLocaleString('en-IN')} with Razorpay & Upgrade`
-                            : `Pay ₹${totalAmount.toLocaleString('en-IN')} with Razorpay & Activate`
-                        }
-                        onSuccess={handleRazorpaySuccess}
-                        onError={(err) => setErrorMessage(err)}
-                        onCancel={() => setErrorMessage('Razorpay checkout was dismissed by user.')}
-                      />
-                    ) : (
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full py-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-xs sm:text-sm shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
-                      >
-                        {submitting ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 animate-spin" />
-                            <span>Verifying Payment & Provisioning...</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck className="w-4 h-4 text-white" />
-                            <span>
-                              {isAlreadySubscribed
-                                ? `Pay ₹${totalAmount.toLocaleString('en-IN')} & Complete Upgrade`
-                                : `Pay ₹${totalAmount.toLocaleString('en-IN')} & Activate Workshop`}
-                            </span>
-                          </>
-                        )}
-                      </button>
-                    )}
+                    <RazorpayCheckoutButton
+                      amount={totalAmount}
+                      name="DriveOps Mobility Pvt. Ltd."
+                      description={`${selectedPlan.name} Subscription`}
+                      planId={selectedPlan.id}
+                      billingPeriod={billingPeriod}
+                      franchiseName={franchiseName}
+                      primaryCenterName={primaryCenterName}
+                      address={address}
+                      city={city}
+                      area={area}
+                      phone={phone}
+                      totalBays={totalBays}
+                      totalMechanics={totalMechanics}
+                      prefill={{
+                        name: user?.name || franchiseName,
+                        email: user?.email || '',
+                        contact: phone
+                      }}
+                      notes={{
+                        franchise_name: franchiseName,
+                        primary_center_name: primaryCenterName,
+                        plan_id: selectedPlan.id,
+                        billing_period: billingPeriod,
+                        address,
+                        city,
+                        area,
+                        phone,
+                        total_bays: totalBays,
+                        total_mechanics: totalMechanics
+                      }}
+                      buttonText={
+                        isAlreadySubscribed
+                          ? `Pay ₹${totalAmount.toLocaleString('en-IN')} with Razorpay & Upgrade`
+                          : `Pay ₹${totalAmount.toLocaleString('en-IN')} with Razorpay & Activate`
+                      }
+                      onSuccess={handleRazorpaySuccess}
+                      onError={(err) => setErrorMessage(err)}
+                      onCancel={() => setErrorMessage('Razorpay checkout was dismissed by user.')}
+                    />
                     <span className="text-[10px] text-[#707070] text-center block mt-2">
-                      RBI Digital Sandbox Compliant • Instant Activation
+                      Official Razorpay Gateway • 256-Bit SSL Encrypted
                     </span>
                   </div>
                 </div>

@@ -206,7 +206,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
           sqms_user_id: user?.id ? String(user.id) : ''
         },
         theme: {
-          color: '#2563EB'
+          color: '#0071e3'
         },
         modal: {
           ondismiss: () => {
@@ -247,8 +247,8 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
   return (
     <div className="w-full space-y-2">
       {showErrorAlert && errorMessage && (
-        <div className="p-3 rounded-xl bg-red-950/80 border border-red-500/50 text-red-300 text-xs flex items-start space-x-2 animate-fadeIn">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start space-x-2 animate-fadeIn">
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-semibold block">Checkout Error</span>
             <span>{errorMessage}</span>
@@ -262,7 +262,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
         disabled={disabled || loading}
         className={
           className ||
-          'w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer'
+          'w-full py-3.5 px-4 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs sm:text-sm shadow-none transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer'
         }
       >
         {loading ? (
