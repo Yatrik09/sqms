@@ -6,7 +6,7 @@ import { ProfileModal } from './ProfileModal';
 import { FranchisePlansModal } from './FranchisePlansModal';
 import { cleanDisplayName } from '../utils/formatters';
 import {
-  Car, Bell, LogOut, Sliders, User, ShieldCheck, ChevronDown, Check, X, UserCog, Building2, Sparkles, Smartphone, Menu
+  Car, Bell, LogOut, Sliders, User, ShieldCheck, ChevronDown, Check, X, UserCog, Building2, Sparkles, Smartphone, Menu, TrendingUp, Users
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -259,6 +259,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                     Network Analytics
                   </button>
                   <button
+                    onClick={() => switchTab('owner-branches')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'owner-branches'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Workshop Branches
+                  </button>
+                  <button
+                    onClick={() => switchTab('owner-managers')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'owner-managers'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Branch Managers
+                  </button>
+                  <button
                     onClick={() => switchTab('about-us')}
                     className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
                       currentTab === 'about-us'
@@ -281,7 +301,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Platform Operations
+                    Plans & Revenue
                   </button>
                   <button
                     onClick={() => switchTab('admin-centers')}
@@ -291,7 +311,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Workshops & Centers
+                    Workshop Directory
                   </button>
                   <button
                     onClick={() => switchTab('admin-ml')}
@@ -301,7 +321,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    ML Retraining
+                    ML Retraining & Models
                   </button>
                   <button
                     onClick={() => switchTab('admin-audit')}
@@ -311,7 +331,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Audit Trail
+                    System Audit Trail
                   </button>
                   <button
                     onClick={() => switchTab('about-us')}
@@ -635,22 +655,31 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   <span>Multi-Branch Overview</span>
                 </button>
                 <button
-                  onClick={() => { switchTab('manager-queue'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
-                    currentTab === 'manager-queue' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
-                  }`}
-                >
-                  <Sliders className="w-4 h-4 text-[#0071e3]" />
-                  <span>Workshop Floor Operations</span>
-                </button>
-                <button
                   onClick={() => { switchTab('owner-analytics'); setMobileMenuOpen(false); }}
                   className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
                     currentTab === 'owner-analytics' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
                   }`}
                 >
-                  <Sliders className="w-4 h-4 text-[#0071e3]" />
+                  <TrendingUp className="w-4 h-4 text-[#0071e3]" />
                   <span>Network Analytics</span>
+                </button>
+                <button
+                  onClick={() => { switchTab('owner-branches'); setMobileMenuOpen(false); }}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'owner-branches' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4 text-[#707070]" />
+                  <span>Workshop Branches</span>
+                </button>
+                <button
+                  onClick={() => { switchTab('owner-managers'); setMobileMenuOpen(false); }}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'owner-managers' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
+                  }`}
+                >
+                  <Users className="w-4 h-4 text-[#707070]" />
+                  <span>Branch Managers</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}
@@ -673,7 +702,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   }`}
                 >
                   <ShieldCheck className="w-4 h-4 text-[#0071e3]" />
-                  <span>Platform Operations</span>
+                  <span>Plans & Revenue</span>
                 </button>
                 <button
                   onClick={() => { switchTab('admin-centers'); setMobileMenuOpen(false); }}
@@ -682,7 +711,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   }`}
                 >
                   <Building2 className="w-4 h-4 text-[#0071e3]" />
-                  <span>Workshops & Centers</span>
+                  <span>Workshop Directory</span>
                 </button>
                 <button
                   onClick={() => { switchTab('admin-ml'); setMobileMenuOpen(false); }}
@@ -700,7 +729,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   }`}
                 >
                   <ShieldCheck className="w-4 h-4 text-[#0071e3]" />
-                  <span>Audit Trail</span>
+                  <span>System Audit Trail</span>
                 </button>
                 <button
                   onClick={() => { switchTab('about-us'); setMobileMenuOpen(false); }}

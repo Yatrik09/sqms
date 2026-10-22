@@ -8,8 +8,19 @@ import {
   Eye, EyeOff, CheckCircle
 } from 'lucide-react';
 
-export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'overview' }) => {
-  const [tab, setTab] = useState<string>(initialTab === 'centers' || initialTab === 'audit' ? initialTab : 'overview');
+interface AdminPortalProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+  initialTab?: string;
+}
+
+export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-dashboard', onTabChange, initialTab }) => {
+  const [tab, setTab] = useState<string>(() => {
+    const t = activeTab || initialTab || 'overview';
+    if (t === 'admin-centers' || t === 'centers') return 'centers';
+    if (t === 'admin-audit' || t === 'audit') return 'audit';
+    return 'overview';
+  });
   const [centers, setCenters] = useState<ServiceCenter[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -187,8 +198,19 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'admin-centers' || activeTab === 'centers') {
+      setTab('centers');
+    } else if (activeTab === 'admin-audit' || activeTab === 'audit') {
+      setTab('audit');
+    } else if (activeTab === 'admin-dashboard' || activeTab === 'overview') {
+      setTab('overview');
+    }
+  }, [activeTab]);
 
   if (loading) {
     return (
@@ -219,12 +241,18 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
               Super Administrator Console
             </span>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#f5f5f7] text-[#707070] border border-[#d6d6d6] font-medium">
-              Platform Root
+              {tab === 'centers' ? 'Workshop Directory' : tab === 'audit' ? 'System Audit Trail' : 'Plans & Revenue Analytics'}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-[#1d1d1f] tracking-tight">System Architecture & Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-[#1d1d1f] tracking-tight">
+            {tab === 'centers' ? 'Workshop Centers Directory' : tab === 'audit' ? 'Security & System Audit Trail' : 'System Architecture & Plans Revenue'}
+          </h1>
           <p className="text-[#707070] text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-            Managing Multi-Tenant Franchises, Subscription Plan Revenue, Workshop Centers, and Live Queue Dispatch.
+            {tab === 'centers'
+              ? `Real-time directory of all ${centers.length} registered service centers, workshop capacities, and active queue counts.`
+              : tab === 'audit'
+              ? `Cryptographically logged audit events (${auditLogs.length} events), authorization records, and administrative actions.`
+              : 'Managing multi-tenant franchise networks, subscription plan revenue, pricing tiers, and quota limits.'}
           </p>
         </div>
 
@@ -290,45 +318,6 @@ export const AdminPortal: React.FC<{ initialTab?: string }> = ({ initialTab = 'o
             {subscriptionOverview?.total_plans_sold || 0} Plans Sold
           </span>
         </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-[#e6e6e8] pb-4 overflow-x-auto">
-        <button
-          onClick={() => setTab('overview')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
-            tab === 'overview'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>Plans & Revenue Analytics</span>
-        </button>
-
-        <button
-          onClick={() => setTab('centers')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
-            tab === 'centers'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          <span>Workshops Directory ({centers.length})</span>
-        </button>
-
-        <button
-          onClick={() => setTab('audit')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center space-x-2 whitespace-nowrap ${
-            tab === 'audit'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <Receipt className="w-4 h-4" />
-          <span>System Audit Trail ({auditLogs.length})</span>
-        </button>
       </div>
 
       {/* TAB 1: PLANS & REVENUE ANALYTICS */}

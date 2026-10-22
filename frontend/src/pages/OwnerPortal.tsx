@@ -29,7 +29,11 @@ export const OwnerPortal: React.FC<{
   useEffect(() => {
     if (activeTabProp === 'owner-analytics') {
       setActiveTab('analytics');
-    } else if (activeTabProp === 'owner-overview') {
+    } else if (activeTabProp === 'owner-branches') {
+      setActiveTab('branches');
+    } else if (activeTabProp === 'owner-managers') {
+      setActiveTab('managers');
+    } else {
       setActiveTab('overview');
     }
   }, [activeTabProp]);
@@ -39,6 +43,8 @@ export const OwnerPortal: React.FC<{
     if (onTabChange) {
       if (t === 'overview') onTabChange('owner-overview');
       else if (t === 'analytics') onTabChange('owner-analytics');
+      else if (t === 'branches') onTabChange('owner-branches');
+      else if (t === 'managers') onTabChange('owner-managers');
     }
   };
 
@@ -180,6 +186,7 @@ export const OwnerPortal: React.FC<{
   };
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     loadOwnerData();
   }, [user?.id]);
 
@@ -299,6 +306,12 @@ export const OwnerPortal: React.FC<{
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="text-xs font-semibold uppercase tracking-wider px-3.5 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
                 Franchise Network Command
+              </span>
+              <span className="text-xs font-medium px-3 py-1 rounded-full bg-[#0071e3]/10 text-[#0071e3] border border-[#0071e3]/20">
+                {activeTab === 'overview' && 'Multi-Branch Overview'}
+                {activeTab === 'analytics' && 'Network Analytics & Telematics'}
+                {activeTab === 'branches' && 'Workshop Branches'}
+                {activeTab === 'managers' && 'Branch Managers'}
               </span>
               {isSyncing ? (
                 <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#707070] text-xs font-medium">
@@ -480,56 +493,6 @@ export const OwnerPortal: React.FC<{
         </div>
       </div>
 
-      {/* Pill Tabs Navigation */}
-      <div className="flex items-center space-x-2 border-b border-[#e6e6e8] pb-4 overflow-x-auto">
-        <button
-          onClick={() => handleTabSwitch('overview')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition-all flex items-center space-x-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'overview'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <BarChart2 className="w-4 h-4" />
-          <span>Multi-Branch Overview</span>
-        </button>
-
-        <button
-          onClick={() => handleTabSwitch('analytics')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition-all flex items-center space-x-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'analytics'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>AI Service Analysis & Performance</span>
-        </button>
-
-        <button
-          onClick={() => handleTabSwitch('branches')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition-all flex items-center space-x-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'branches'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          <span>Workshop Branches ({centersList.length})</span>
-        </button>
-
-        <button
-          onClick={() => handleTabSwitch('managers')}
-          className={`px-5 py-2 rounded-full text-xs font-medium transition-all flex items-center space-x-2 cursor-pointer whitespace-nowrap ${
-            activeTab === 'managers'
-              ? 'bg-[#1d1d1f] text-white shadow-none'
-              : 'bg-transparent text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          <span>Branch Managers ({managers.length})</span>
-        </button>
-      </div>
 
       {/* TAB 1: BRANCH PERFORMANCE COMPARISON */}
       {activeTab === 'overview' && (

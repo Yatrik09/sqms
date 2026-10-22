@@ -39,8 +39,9 @@ const MainLayout: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('active-service');
   const [inspectedBranchId, setInspectedBranchId] = useState<number | undefined>(undefined);
 
-  // Sync default tab with authenticated user role
+  // Sync default tab with authenticated user role and scroll to top
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     if (!user) return;
     if (user.role === 'customer') {
       setCurrentTab('active-service');
@@ -54,6 +55,11 @@ const MainLayout: React.FC = () => {
       setCurrentTab('admin-dashboard');
     }
   }, [user?.id, user?.role]);
+
+  // Scroll to top whenever active tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [currentTab]);
 
   // Loading state (only while verifying an existing stored session)
   if (isLoading && !user && localStorage.getItem('sqms_token')) {
@@ -121,13 +127,8 @@ const MainLayout: React.FC = () => {
         }
         return (
           <AdminPortal
-            initialTab={
-              currentTab === 'admin-audit'
-                ? 'audit'
-                : currentTab === 'admin-centers'
-                ? 'centers'
-                : 'overview'
-            }
+            activeTab={currentTab}
+            onTabChange={setCurrentTab}
           />
         );
 
