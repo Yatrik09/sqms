@@ -382,15 +382,13 @@ export const OwnerPortal: React.FC<{
             </div>
           </div>
 
-          {(planInfo?.max_allowed_centers || 1) === 1 && (
-            <button
-              onClick={() => setShowPlansModal(true)}
-              className="px-4 py-1.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-medium transition flex items-center space-x-1.5 cursor-pointer shadow-none self-start md:self-center"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Upgrade to Multi-Branch</span>
-            </button>
-          )}
+          <button
+            onClick={() => setShowPlansModal(true)}
+            className="px-4 py-2 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-medium transition flex items-center space-x-1.5 cursor-pointer shadow-none self-start md:self-center shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{(planInfo?.max_allowed_centers || 1) === 1 ? 'Upgrade to Multi-Branch' : 'Manage Subscription / View Plans'}</span>
+          </button>
         </div>
       </div>
 

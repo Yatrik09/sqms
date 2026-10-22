@@ -41,9 +41,22 @@ const AVAILABLE_SERVICES = [
   'Major Accident Repair',
 ];
 
-export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = 'active-service' }) => {
+interface CustomerPortalProps {
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
+}
+
+export const CustomerPortal: React.FC<CustomerPortalProps> = ({
+  activeTab = 'active-service',
+  onTabChange,
+}) => {
   const { user, lastWsEvent } = useAuth();
   const [tab, setTab] = useState<string>(activeTab);
+
+  const handleTabSwitch = (newTab: string) => {
+    setTab(newTab);
+    onTabChange?.(newTab);
+  };
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [activeService, setActiveService] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
@@ -306,20 +319,17 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           </p>
         </div>
 
-        <div className="flex items-center space-x-3 shrink-0 flex-wrap gap-2">
-          <button
-            onClick={() => setTab('book-service')}
-            className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] shadow-none transition flex items-center space-x-1.5 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Book New Service</span>
-          </button>
-          <button
-            onClick={() => setTab('my-vehicles')}
-            className="px-5 py-2.5 rounded-full bg-white hover:bg-[#f5f5f7] border border-[#86868b] text-[#1d1d1f] font-normal text-[13px] shadow-none transition cursor-pointer"
-          >
-            <span>My Vehicles ({Array.isArray(vehicles) ? vehicles.length : 0})</span>
-          </button>
+        <div className="flex items-center space-x-2.5 shrink-0 flex-wrap">
+          <div className="px-4 py-2 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[13px] text-[#1d1d1f] flex items-center space-x-2">
+            <Car className="w-4 h-4 text-[#0071e3]" />
+            <span>{Array.isArray(vehicles) ? vehicles.length : 0} Registered Vehicle{vehicles.length !== 1 ? 's' : ''}</span>
+          </div>
+          {activeService && activeService.has_active && (
+            <div className="px-3.5 py-2 rounded-full bg-[#f0f9eb] border border-[#c2e7b0] text-[12px] font-medium text-[#2b641e] flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Token #{activeService.token_number} Live</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -380,7 +390,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
       {/* Navigation Sub-Tabs — Restrained Apple Navigation */}
       <div className="flex border-b border-[#d6d6d6] space-x-4 sm:space-x-8 text-[14px] overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 sm:mx-0 sm:px-0">
         <button
-          onClick={() => setTab('active-service')}
+          onClick={() => handleTabSwitch('active-service')}
           className={`pb-3 border-b-2 transition whitespace-nowrap cursor-pointer ${
             tab === 'active-service' ? 'border-[#1d1d1f] text-[#1d1d1f] font-semibold' : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
           }`}
@@ -388,7 +398,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           Live Service Tracking
         </button>
         <button
-          onClick={() => setTab('book-service')}
+          onClick={() => handleTabSwitch('book-service')}
           className={`pb-3 border-b-2 transition whitespace-nowrap cursor-pointer ${
             tab === 'book-service' ? 'border-[#1d1d1f] text-[#1d1d1f] font-semibold' : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
           }`}
@@ -396,7 +406,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           Book Service & Recommendation
         </button>
         <button
-          onClick={() => setTab('nearby-centers')}
+          onClick={() => handleTabSwitch('nearby-centers')}
           className={`pb-3 border-b-2 transition whitespace-nowrap flex items-center space-x-1.5 cursor-pointer ${
             tab === 'nearby-centers' ? 'border-[#1d1d1f] text-[#1d1d1f] font-semibold' : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
           }`}
@@ -405,7 +415,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           <span>Nearby Workshops ({nearbyCenters.length})</span>
         </button>
         <button
-          onClick={() => setTab('my-vehicles')}
+          onClick={() => handleTabSwitch('my-vehicles')}
           className={`pb-3 border-b-2 transition whitespace-nowrap cursor-pointer ${
             tab === 'my-vehicles' ? 'border-[#1d1d1f] text-[#1d1d1f] font-semibold' : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
           }`}
@@ -413,7 +423,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
           My Vehicles ({vehicles.length})
         </button>
         <button
-          onClick={() => setTab('history')}
+          onClick={() => handleTabSwitch('history')}
           className={`pb-3 border-b-2 transition whitespace-nowrap cursor-pointer ${
             tab === 'history' ? 'border-[#1d1d1f] text-[#1d1d1f] font-semibold' : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
           }`}
@@ -576,7 +586,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                 You do not currently have a vehicle queued at any service center. Book a service to receive a digital token and real-time AI predictions.
               </p>
               <button
-                onClick={() => setTab('book-service')}
+                onClick={() => handleTabSwitch('book-service')}
                 className="mt-6 px-6 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] transition shadow-none cursor-pointer"
               >
                 Book a Service Now
@@ -606,7 +616,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                 <button
                   onClick={() => {
                     setBookingSuccess(null);
-                    setTab('active-service');
+                    handleTabSwitch('active-service');
                   }}
                   className="px-6 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-[13px] font-normal transition shadow-none cursor-pointer"
                 >
@@ -668,7 +678,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                 </div>
 
                 {/* 3. Customer Required Completion Time */}
-                <div className="bg-[#f5f5f7] p-4.5 rounded-[20px] border border-[#d6d6d6] space-y-1.5">
+                <div className="bg-[#f5f5f7] p-4 sm:p-5 rounded-[20px] border border-[#d6d6d6] space-y-1.5">
                   <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] flex items-center">
                     <Clock className="w-3.5 h-3.5 mr-1.5 text-[#0071e3]" />
                     Required Completion Time (Optional)
@@ -727,16 +737,16 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
               <div className="lg:col-span-7 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
-                      <Building2 className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-[18px] font-semibold text-[#1d1d1f] tracking-tight flex items-center space-x-2">
+                      <Building2 className="w-5 h-5 text-[#0071e3]" />
                       <span>Recommended Service Centers</span>
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[13px] text-[#707070]">
                       Comparing nearby centers by live workload, mechanics, bays, and required completion feasibility.
                     </p>
                   </div>
                   {isSearching && (
-                    <div className="flex items-center space-x-1.5 text-xs text-blue-600">
+                    <div className="flex items-center space-x-1.5 text-xs text-[#0071e3]">
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       <span>Evaluating...</span>
                     </div>
@@ -751,9 +761,9 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                     selectedCenterId={selectedCenterId}
                   />
                 ) : (
-                  <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center">
-                    <RefreshCw className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-slate-600">Calculating recommendations...</span>
+                  <div className="bg-white rounded-[28px] p-12 border border-[#d6d6d6] text-center shadow-none">
+                    <RefreshCw className="w-6 h-6 animate-spin text-[#0071e3] mx-auto mb-2" />
+                    <span className="text-[14px] font-medium text-[#707070]">Calculating recommendations...</span>
                   </div>
                 )}
               </div>
@@ -767,32 +777,32 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-black text-slate-900 flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-emerald-600" />
+              <h3 className="text-[20px] font-semibold text-[#1d1d1f] flex items-center space-x-2">
+                <MapPin className="w-5 h-5 text-[#0071e3]" />
                 <span>Nearby Workshop Branches (Sorted by Distance)</span>
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-[13px] text-[#707070] mt-0.5">
                 Displaying all active service centers from closest to furthest from <strong>{userArea}, {userCity}</strong>.
               </p>
             </div>
 
             <button
-              onClick={() => setTab('book-service')}
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-center"
+              onClick={() => handleTabSwitch('book-service')}
+              className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] shadow-none transition flex items-center space-x-1.5 cursor-pointer self-start sm:self-center"
             >
-              <Sparkles className="w-4 h-4 text-amber-300" />
+              <Sparkles className="w-4 h-4 text-white" />
               <span>AI Multi-Center Recommendation</span>
             </button>
           </div>
 
           {loadingCenters ? (
-            <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center">
-              <RefreshCw className="w-6 h-6 animate-spin text-blue-600 mx-auto mb-2" />
-              <span className="text-sm font-medium text-slate-600">Calculating workshop distances & live workloads...</span>
+            <div className="bg-white rounded-[28px] p-12 border border-[#d6d6d6] text-center shadow-none">
+              <RefreshCw className="w-6 h-6 animate-spin text-[#0071e3] mx-auto mb-2" />
+              <span className="text-[14px] font-medium text-[#707070]">Calculating workshop distances & live workloads...</span>
             </div>
           ) : nearbyCenters.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 border border-slate-200 text-center">
-              <p className="text-sm text-slate-500">No active service centers found for {userCity}.</p>
+            <div className="bg-white rounded-[28px] p-12 border border-[#d6d6d6] text-center shadow-none">
+              <p className="text-[14px] text-[#707070]">No active service centers found for {userCity}.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -870,7 +880,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                       <button
                         onClick={() => {
                           setSelectedCenterId(c.id);
-                          setTab('book-service');
+                          handleTabSwitch('book-service');
                         }}
                         className={`w-full py-2.5 px-5 rounded-full font-normal text-[13px] transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-none ${
                           isClosest
@@ -956,7 +966,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                     <button
                       onClick={() => {
                         setSelectedVehicleId(v.id);
-                        setTab('book-service');
+                        handleTabSwitch('book-service');
                       }}
                       className="text-[#0066cc] font-medium hover:underline flex items-center cursor-pointer"
                     >
@@ -1058,51 +1068,148 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
         </div>
       )}
 
-      {/* TAB 4: SERVICE HISTORY */}
+      {/* TAB 4: SERVICE HISTORY & RECORDS */}
       {tab === 'history' && (
-        <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-[#d6d6d6] shadow-none space-y-4">
-          <div>
-            <h3 className="text-[18px] font-semibold text-[#1d1d1f] tracking-tight">Service Records & Past Bookings</h3>
-            <p className="text-[13px] text-[#707070]">History of your service tickets and completion records.</p>
+        <div className="space-y-6">
+          {/* KPI Summary Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white rounded-[24px] p-5 border border-[#d6d6d6] shadow-none">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#707070] block">Total Records</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">{history.length}</span>
+              <span className="text-[12px] text-[#707070] mt-0.5 block">Lifetime service bookings</span>
+            </div>
+            <div className="bg-white rounded-[24px] p-5 border border-[#d6d6d6] shadow-none">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#707070] block">Completed Services</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-emerald-700 mt-1 block">
+                {history.filter((h) => h.status === 'Completed').length}
+              </span>
+              <span className="text-[12px] text-[#707070] mt-0.5 block">Successfully serviced</span>
+            </div>
+            <div className="bg-white rounded-[24px] p-5 border border-[#d6d6d6] shadow-none">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#707070] block">In Progress / Active</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-[#0071e3] mt-1 block">
+                {history.filter((h) => h.status !== 'Completed' && h.status !== 'Cancelled').length}
+              </span>
+              <span className="text-[12px] text-[#707070] mt-0.5 block">Currently in queue/bays</span>
+            </div>
+            <div className="bg-white rounded-[24px] p-5 border border-[#d6d6d6] shadow-none">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[#707070] block">Vehicles Serviced</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-[#1d1d1f] mt-1 block">
+                {new Set(history.map((h) => h.vehicle_reg).filter(Boolean)).size}
+              </span>
+              <span className="text-[12px] text-[#707070] mt-0.5 block">Unique registrations</span>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-[13px] text-[#707070]">
-              <thead className="bg-[#f5f5f7] uppercase text-[11px] font-semibold text-[#1d1d1f] tracking-wider border-b border-[#d6d6d6]">
-                <tr>
-                  <th className="p-3.5">Token</th>
-                  <th className="p-3.5">Vehicle</th>
-                  <th className="p-3.5">Service</th>
-                  <th className="p-3.5">Center</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5">Requested Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#d6d6d6]">
-                {history.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-[#707070]">
-                      No past service history found.
-                    </td>
-                  </tr>
-                ) : (
-                  history.map((h) => (
-                    <tr key={h.id} className="hover:bg-[#fafafc]">
-                      <td className="p-3.5 font-semibold text-[#0066cc]">{h.token_number}</td>
-                      <td className="p-3.5 font-medium text-[#1d1d1f]">{h.vehicle_reg}</td>
-                      <td className="p-3.5">{h.service_type}</td>
-                      <td className="p-3.5 text-[#707070]">{h.service_center}</td>
-                      <td className="p-3.5">
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#1d1d1f] font-medium text-[12px]">
-                          {h.status}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-[#86868b]">{h.requested_date}</td>
+          {/* Records Table Card */}
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 border border-[#d6d6d6] shadow-none space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#f0f0f2] pb-4">
+              <div>
+                <h3 className="text-[18px] font-semibold text-[#1d1d1f] tracking-tight">Service Records & Past Bookings</h3>
+                <p className="text-[13px] text-[#707070] mt-0.5">Comprehensive audit logs of all your service appointments and completions.</p>
+              </div>
+              <button
+                onClick={() => handleTabSwitch('book-service')}
+                className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] transition flex items-center space-x-1.5 cursor-pointer shadow-none self-start sm:self-center"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Book New Service</span>
+              </button>
+            </div>
+
+            {history.length === 0 ? (
+              <div className="py-16 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3] flex items-center justify-center mx-auto mb-3">
+                  <Wrench className="w-7 h-7" />
+                </div>
+                <h4 className="text-[17px] font-semibold text-[#1d1d1f]">No Past Service Records Found</h4>
+                <p className="text-[13px] text-[#707070] mt-1 max-w-sm mx-auto">
+                  When you book a vehicle service and complete visits at DriveOps workshops, your digital records and receipts will appear here.
+                </p>
+                <button
+                  onClick={() => handleTabSwitch('book-service')}
+                  className="mt-5 px-6 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-[13px] font-normal transition shadow-none cursor-pointer"
+                >
+                  Book Your First Service
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[13px] text-[#1d1d1f]">
+                  <thead className="bg-[#f5f5f7] uppercase text-[11px] font-semibold text-[#707070] tracking-wider border-b border-[#d6d6d6]">
+                    <tr>
+                      <th className="py-3 px-4 rounded-l-xl">Token</th>
+                      <th className="py-3 px-4">Vehicle</th>
+                      <th className="py-3 px-4">Service Type</th>
+                      <th className="py-3 px-4">Service Center</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 rounded-r-xl">Requested Date</th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-[#f0f0f2]">
+                    {history.map((h) => {
+                      const isCompleted = h.status === 'Completed';
+                      const isInProgress = ['Service In Progress', 'Washing', 'Repair In Progress', 'Quality Check'].includes(h.status);
+                      const isCancelled = h.status === 'Cancelled';
+                      const isPending = ['Booking Confirmed', 'Vehicle Received', 'Waiting'].includes(h.status);
+
+                      return (
+                        <tr key={h.id} className="hover:bg-[#fafafc] transition">
+                          <td className="py-3.5 px-4 font-mono font-semibold text-[#0071e3]">
+                            <span className="px-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[12px]">
+                              {h.token_number}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-semibold text-[#1d1d1f]">
+                            {h.vehicle_reg}
+                          </td>
+                          <td className="py-3.5 px-4 font-normal text-[#1d1d1f]">
+                            {h.service_type}
+                          </td>
+                          <td className="py-3.5 px-4 text-[#707070]">
+                            <div className="flex items-center">
+                              <MapPin className="w-3.5 h-3.5 mr-1 text-[#86868b] shrink-0" />
+                              <span>{h.service_center}</span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                                isCompleted
+                                  ? 'bg-[#f0f9eb] border-[#c2e7b0] text-[#2b641e]'
+                                  : isInProgress
+                                  ? 'bg-[#f0f7ff] border-[#b9daf9] text-[#0066cc]'
+                                  : isCancelled
+                                  ? 'bg-[#fff1f0] border-[#ffccc7] text-[#cf1322]'
+                                  : isPending
+                                  ? 'bg-[#fff8e6] border-[#ffd591] text-[#b64400]'
+                                  : 'bg-[#f5f5f7] border-[#d6d6d6] text-[#707070]'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                  isCompleted
+                                    ? 'bg-emerald-600'
+                                    : isInProgress
+                                    ? 'bg-blue-600'
+                                    : isCancelled
+                                    ? 'bg-red-600'
+                                    : 'bg-amber-600'
+                                }`}
+                              />
+                              {h.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-[#707070] font-normal">
+                            {h.requested_date}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

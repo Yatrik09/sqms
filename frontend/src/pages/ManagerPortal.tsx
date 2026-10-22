@@ -5,7 +5,7 @@ import { api } from '../services/api';
 import type { QueueEntry, ServiceBay, Mechanic, TechnicianItem } from '../types';
 import {
   Users, CheckCircle2, Clock, Play, Plus, PlusCircle, Wrench, Shield, AlertCircle, RefreshCw, Layers, Gauge, Sparkles,
-  TrendingUp, BarChart3, Award, FileText, ArrowUpRight, Activity, Calendar, Zap, CheckCircle, PieChart as PieIcon,
+  TrendingUp, BarChart3, Award, FileText, ArrowUpRight, ArrowRight, Activity, Calendar, Zap, CheckCircle, PieChart as PieIcon,
   User, Phone, Car, Ticket, X, Building2, Bell, UserPlus, Copy, Check, Trash2
 } from 'lucide-react';
 import { FranchisePlansModal } from '../components/FranchisePlansModal';
@@ -165,6 +165,9 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
   const [targetBayId, setTargetBayId] = useState<number | ''>('');
   const [targetMechId, setTargetMechId] = useState<number | ''>('');
   const [statusNotes, setStatusNotes] = useState<string>('');
+  const [isConfirmingStage, setIsConfirmingStage] = useState<boolean>(false);
+  const [isSubmittingStageUpdate, setIsSubmittingStageUpdate] = useState<boolean>(false);
+  const [stageToast, setStageToast] = useState<string | null>(null);
 
   // Add Bay & Add Mechanic Modal States
   const [showAddBayModal, setShowAddBayModal] = useState<boolean>(false);
@@ -358,16 +361,14 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     }
   };
 
-  // 1-Click Complete & Free Resources
-  const handleQuickCompleteService = async (entry: QueueEntry) => {
-    try {
-      await api.updateQueueStatus(entry.id, {
-        new_status: 'Completed',
-      });
-      await loadCenterData();
-    } catch (e: any) {
-      alert(e.message || 'Failed to complete service');
-    }
+  // 1-Click Complete & Free Resources (routes to explicit Confirmation dialog)
+  const handleQuickCompleteService = (entry: QueueEntry) => {
+    setSelectedEntry(entry);
+    setTargetStatus('Completed');
+    setTargetBayId(entry.assigned_bay_id || '');
+    setTargetMechId(entry.assigned_mechanic_id || '');
+    setStatusNotes('Service completed, final quality inspection passed, and bay released.');
+    setIsConfirmingStage(true);
   };
 
   // Manual Resource Reconciliation
@@ -381,8 +382,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     }
   };
 
-  // Handle status update with bay capacity check
-  const handleUpdateStatusSubmit = async (e: React.FormEvent) => {
+  // Validate and proceed to confirmation step
+  const handleUpdateStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEntry) return;
 
@@ -396,6 +397,13 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
       }
     }
 
+    setIsConfirmingStage(true);
+  };
+
+  // Execute confirmed stage update and broadcast over WebSockets
+  const handleExecuteStageUpdate = async () => {
+    if (!selectedEntry) return;
+    setIsSubmittingStageUpdate(true);
     try {
       await api.updateQueueStatus(selectedEntry.id, {
         new_status: targetStatus,
@@ -403,10 +411,18 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
         assigned_mechanic_id: targetMechId === '' ? undefined : Number(targetMechId),
         notes: statusNotes,
       });
+      const reg = selectedEntry.vehicle_registration;
+      const tok = selectedEntry.token_number;
+      const updatedStatus = targetStatus;
       setSelectedEntry(null);
+      setIsConfirmingStage(false);
       await loadCenterData();
+      setStageToast(`Vehicle ${reg} (Token #${tok}) confirmed and transitioned to "${updatedStatus}".`);
+      setTimeout(() => setStageToast(null), 4000);
     } catch (e: any) {
       alert(e.message || 'Status update failed');
+    } finally {
+      setIsSubmittingStageUpdate(false);
     }
   };
 
@@ -1273,6 +1289,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                           <button
                             onClick={() => {
                               setSelectedEntry(entry);
+                              setIsConfirmingStage(false);
+                              setStatusNotes('');
                               const nextSt =
                                 entry.status === 'Waiting'
                                 ? 'Service In Progress'
@@ -1688,123 +1706,271 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
         renderLiveQueueView()
       )}
 
-      {/* UPDATE STATUS MODAL */}
+      {/* UPDATE STATUS MODAL & CONFIRMATION FLOW */}
       {selectedEntry && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#f0f0f2] pb-4">
               <div>
-                <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight">Update Service Stage</h3>
+                <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight">
+                  {isConfirmingStage ? 'Confirm Stage Transition' : 'Update Vehicle Stage'}
+                </h3>
                 <p className="text-xs text-[#707070] mt-0.5">
-                  Token: <strong className="text-[#0071e3] font-mono">{selectedEntry.token_number}</strong> • <span className="font-semibold text-[#1d1d1f]">{selectedEntry.vehicle_registration}</span>
+                  Token: <strong className="text-[#0071e3] font-mono">{selectedEntry.token_number}</strong> • <span className="font-semibold text-[#1d1d1f]">{selectedEntry.vehicle_registration}</span> ({selectedEntry.service_type})
                 </p>
               </div>
               <button
-                onClick={() => setSelectedEntry(null)}
+                onClick={() => {
+                  setSelectedEntry(null);
+                  setIsConfirmingStage(false);
+                }}
                 className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleUpdateStatusSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
-                  New Status
-                </label>
-                <SelectDropdown
-                  value={targetStatus}
-                  onChange={(val) => setTargetStatus(val)}
-                  options={STATUS_OPTIONS}
-                  size="md"
-                />
-              </div>
-
-              {/* AI Auto-allocation badge */}
-              {['Service In Progress', 'Repair In Progress', 'Washing', 'Quality Check', 'Inspection'].includes(targetStatus) && (
-                <div className="p-3.5 bg-[#f5f5f7] border border-[#d6d6d6] rounded-2xl text-xs text-[#1d1d1f] space-y-1">
-                  <div className="font-semibold flex items-center space-x-1.5 text-[#1d1d1f]">
-                    <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
-                    <span>AI Automated Allocation Active</span>
+            {isConfirmingStage ? (
+              <div className="space-y-5 animate-in fade-in duration-150">
+                <div className="p-4 rounded-2xl bg-[#f5f5f7] border border-[#d6d6d6] space-y-3">
+                  <div className="flex items-center space-x-2 text-[#1d1d1f] font-semibold text-xs uppercase tracking-wider">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Stage Action Confirmation Summary</span>
                   </div>
-                  <p className="text-[#707070] leading-relaxed">
-                    Leaving bay or technician on "Auto" will dynamically assign the next free matching resource: <strong className="text-[#1d1d1f]">{getSuggestedBay(selectedEntry.service_type)?.bay_number || 'Next Free Bay'}</strong> & <strong className="text-[#1d1d1f]">{getSuggestedMechanic(selectedEntry.service_type)?.name || 'Next Free Tech'}</strong>.
-                  </p>
-                </div>
-              )}
 
-              <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between py-1 border-b border-[#e6e6e8]">
+                      <span className="text-[#707070]">Vehicle / Token:</span>
+                      <span className="font-semibold text-[#1d1d1f]">{selectedEntry.vehicle_registration} (#{selectedEntry.token_number})</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-[#e6e6e8]">
+                      <span className="text-[#707070]">Stage Transition:</span>
+                      <span className="font-semibold text-[#1d1d1f]">
+                        <span className="text-[#707070]">{selectedEntry.status}</span> → <strong className="text-[#0071e3]">{targetStatus}</strong>
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-[#e6e6e8]">
+                      <span className="text-[#707070]">Bay Action:</span>
+                      <span className="font-semibold text-[#1d1d1f]">
+                        {targetStatus === 'Completed' || targetStatus === 'Cancelled' ? (
+                          <span className="text-emerald-700">Release & Free Bay {selectedEntry.bay_number || ''}</span>
+                        ) : targetBayId ? (
+                          bays.find(b => b.id === Number(targetBayId))?.bay_number || 'Assigned Bay'
+                        ) : (
+                          'Auto-allocate next available bay'
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-[#e6e6e8]">
+                      <span className="text-[#707070]">Technician Action:</span>
+                      <span className="font-semibold text-[#1d1d1f]">
+                        {targetStatus === 'Completed' || targetStatus === 'Cancelled' ? (
+                          <span className="text-emerald-700">Free Technician {selectedEntry.mechanic_name || ''}</span>
+                        ) : targetMechId ? (
+                          mechanics.find(m => m.id === Number(targetMechId))?.name || 'Assigned Tech'
+                        ) : (
+                          'Auto-assign next available tech'
+                        )}
+                      </span>
+                    </div>
+                    {statusNotes && (
+                      <div className="py-1">
+                        <span className="text-[#707070] block">Notes:</span>
+                        <span className="text-[#1d1d1f] font-medium italic mt-0.5 block">{statusNotes}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-white border border-[#d6d6d6] text-[11px] text-[#707070] leading-relaxed">
+                    {targetStatus === 'Completed' ? (
+                      <p>
+                        Marking this vehicle as <strong className="text-[#1d1d1f]">Completed</strong> will release all workshop resources immediately back into available capacity and notify the customer that the vehicle is ready for pickup.
+                      </p>
+                    ) : (
+                      <p>
+                        Confirming will immediately broadcast the stage update to customer live queue screens and trigger AI turnaround recalculation across the branch.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end space-x-2.5 pt-1">
+                  <button
+                    type="button"
+                    disabled={isSubmittingStageUpdate}
+                    onClick={() => setIsConfirmingStage(false)}
+                    className="px-4 py-2 border border-[#86868b] rounded-full text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] cursor-pointer transition"
+                  >
+                    Back to Edit
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmittingStageUpdate}
+                    onClick={handleExecuteStageUpdate}
+                    className="px-5 py-2 bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white rounded-full text-xs font-medium shadow-none transition flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    {isSubmittingStageUpdate ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Confirming & Broadcasting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Confirm & {targetStatus === 'Completed' ? 'Complete Service' : 'Broadcast Update'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleUpdateStatusSubmit} className="space-y-4">
+                {/* Quick Action Stage Presets */}
                 <div>
-                  <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
-                    Assign Service Bay
+                  <label className="block text-[11px] font-medium text-[#707070] uppercase tracking-wider mb-1.5">
+                    Quick Stage Actions
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: 'Start Service', status: 'Service In Progress' },
+                      { label: 'Washing', status: 'Washing' },
+                      { label: 'Quality Check', status: 'Quality Check' },
+                      { label: 'Ready for Pickup', status: 'Ready for Pickup' },
+                      { label: 'Complete & Free Bay', status: 'Completed' },
+                    ].map((preset) => (
+                      <button
+                        key={preset.status}
+                        type="button"
+                        onClick={() => {
+                          setTargetStatus(preset.status);
+                          if (preset.status === 'Completed') {
+                            setStatusNotes('Service completed, vehicle inspected and ready for release.');
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer font-medium ${
+                          targetStatus === preset.status
+                            ? preset.status === 'Completed'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-[#0071e3] text-white'
+                            : 'bg-[#f5f5f7] hover:bg-[#e6e6e8] text-[#1d1d1f] border border-[#d6d6d6]'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
+                    New Status
                   </label>
                   <SelectDropdown
-                    value={targetBayId}
-                    onChange={(val) => setTargetBayId(val === '' ? '' : Number(val))}
-                    options={[
-                      { value: '', label: 'Auto / None' },
-                      ...bays.map((b) => ({
-                        value: b.id,
-                        label: b.bay_number,
-                        badge: b.status,
-                      })),
-                    ]}
+                    value={targetStatus}
+                    onChange={(val) => setTargetStatus(val)}
+                    options={STATUS_OPTIONS}
                     size="md"
                   />
                 </div>
 
+                {/* AI Auto-allocation badge */}
+                {['Service In Progress', 'Repair In Progress', 'Washing', 'Quality Check', 'Inspection'].includes(targetStatus) && (
+                  <div className="p-3.5 bg-[#f5f5f7] border border-[#d6d6d6] rounded-2xl text-xs text-[#1d1d1f] space-y-1">
+                    <div className="font-semibold flex items-center space-x-1.5 text-[#1d1d1f]">
+                      <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
+                      <span>AI Automated Allocation Active</span>
+                    </div>
+                    <p className="text-[#707070] leading-relaxed">
+                      Leaving bay or technician on "Auto" will dynamically assign the next free matching resource: <strong className="text-[#1d1d1f]">{getSuggestedBay(selectedEntry.service_type)?.bay_number || 'Next Free Bay'}</strong> & <strong className="text-[#1d1d1f]">{getSuggestedMechanic(selectedEntry.service_type)?.name || 'Next Free Tech'}</strong>.
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
+                      Assign Service Bay
+                    </label>
+                    <SelectDropdown
+                      value={targetBayId}
+                      onChange={(val) => setTargetBayId(val === '' ? '' : Number(val))}
+                      options={[
+                        { value: '', label: 'Auto / None' },
+                        ...bays.map((b) => ({
+                          value: b.id,
+                          label: b.bay_number,
+                          badge: b.status,
+                        })),
+                      ]}
+                      size="md"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
+                      Assign Technician
+                    </label>
+                    <SelectDropdown
+                      value={targetMechId}
+                      onChange={(val) => setTargetMechId(val === '' ? '' : Number(val))}
+                      options={[
+                        { value: '', label: 'Auto / None' },
+                        ...mechanics.map((m) => ({
+                          value: m.id,
+                          label: m.name,
+                          badge: m.availability,
+                        })),
+                      ]}
+                      size="md"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
-                    Assign Technician
+                    Technician Notes
                   </label>
-                  <SelectDropdown
-                    value={targetMechId}
-                    onChange={(val) => setTargetMechId(val === '' ? '' : Number(val))}
-                    options={[
-                      { value: '', label: 'Auto / None' },
-                      ...mechanics.map((m) => ({
-                        value: m.id,
-                        label: m.name,
-                        badge: m.availability,
-                      })),
-                    ]}
-                    size="md"
+                  <textarea
+                    rows={2}
+                    value={statusNotes}
+                    onChange={(e) => setStatusNotes(e.target.value)}
+                    placeholder="e.g. Washing completed, moved to bay for inspection"
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] placeholder:text-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 shadow-none transition"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
-                  Technician Notes
-                </label>
-                <textarea
-                  rows={2}
-                  value={statusNotes}
-                  onChange={(e) => setStatusNotes(e.target.value)}
-                  placeholder="e.g. Washing completed, moved to bay for inspection"
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] placeholder:text-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 shadow-none transition"
-                />
-              </div>
-
-              <div className="pt-2 flex justify-end space-x-2.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedEntry(null)}
-                  className="px-4 py-2 border border-[#86868b] rounded-full text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] cursor-pointer transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full text-xs font-medium shadow-none transition cursor-pointer"
-                >
-                  Save & Broadcast Update
-                </button>
-              </div>
-            </form>
+                <div className="pt-2 flex justify-end space-x-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedEntry(null);
+                      setIsConfirmingStage(false);
+                    }}
+                    className="px-4 py-2 border border-[#86868b] rounded-full text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] cursor-pointer transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full text-xs font-medium shadow-none transition flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <span>{targetStatus === 'Completed' ? 'Review & Complete' : 'Review & Confirm Stage'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>,
         document.body
+      )}
+
+      {/* Floating Toast Notification for Stage Confirmations */}
+      {stageToast && (
+        <div className="fixed bottom-6 right-6 z-[9999] bg-[#1d1d1f] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs animate-in fade-in slide-in-from-bottom-2 duration-200 border border-white/10">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{stageToast}</span>
+        </div>
       )}
 
       {/* CREATE WALK-IN TOKEN MODAL */}

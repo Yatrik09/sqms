@@ -39,9 +39,21 @@ const MainLayout: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('active-service');
   const [inspectedBranchId, setInspectedBranchId] = useState<number | undefined>(undefined);
 
-  // Sync default tab with authenticated user role and scroll to top
-  useEffect(() => {
+  // Scroll strictly to top of viewport
+  const resetScrollPosition = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    });
+  };
+
+  // Sync default tab with authenticated user role and scroll strictly to top
+  useEffect(() => {
+    resetScrollPosition();
     if (!user) return;
     if (user.role === 'customer') {
       setCurrentTab('active-service');
@@ -58,7 +70,7 @@ const MainLayout: React.FC = () => {
 
   // Scroll to top whenever active tab changes
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    resetScrollPosition();
   }, [currentTab]);
 
   // Loading state (only while verifying an existing stored session)
@@ -95,7 +107,7 @@ const MainLayout: React.FC = () => {
 
     switch (user.role) {
       case 'customer':
-        return <CustomerPortal activeTab={currentTab} />;
+        return <CustomerPortal activeTab={currentTab} onTabChange={setCurrentTab} />;
 
       case 'branch_manager':
         return <ManagerPortal activeTab={currentTab} onTabChange={setCurrentTab} />;
@@ -133,7 +145,12 @@ const MainLayout: React.FC = () => {
         );
 
       default:
-        return <CustomerPortal activeTab="active-service" />;
+        return (
+          <CustomerPortal
+            activeTab={currentTab}
+            onTabChange={setCurrentTab}
+          />
+        );
     }
   };
 

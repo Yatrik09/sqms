@@ -70,6 +70,13 @@ export const AuthPage: React.FC = () => {
     }
   }, [resendCooldown]);
 
+  // Ensure login/registration opens strictly at the top
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+  }, [authMode]);
+
   // Password rules evaluation
   const hasMinLength = password.length >= 6;
   const hasUpper = /[A-Z]/.test(password);

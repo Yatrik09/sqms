@@ -6,7 +6,7 @@ import { ProfileModal } from './ProfileModal';
 import { FranchisePlansModal } from './FranchisePlansModal';
 import { cleanDisplayName } from '../utils/formatters';
 import {
-  Car, Bell, LogOut, Sliders, User, ShieldCheck, ChevronDown, Check, X, UserCog, Building2, Sparkles, Smartphone, Menu, TrendingUp, Users
+  Car, Bell, LogOut, Sliders, User, ShieldCheck, ChevronDown, Check, X, UserCog, Building2, Sparkles, Smartphone, Menu, TrendingUp, Users, Clock, MapPin
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -139,7 +139,27 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
                     }`}
                   >
-                    Book Service & AI Wait Times
+                    Book Service
+                  </button>
+                  <button
+                    onClick={() => switchTab('history')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'history'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Service Records
+                  </button>
+                  <button
+                    onClick={() => switchTab('nearby-centers')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition cursor-pointer ${
+                      currentTab === 'nearby-centers'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]'
+                        : 'text-[#707070] hover:text-[#1d1d1f] hover:bg-[#fafafc] font-normal'
+                    }`}
+                  >
+                    Nearby Workshops
                   </button>
                   <button
                     onClick={() => switchTab('my-vehicles')}
@@ -556,7 +576,25 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   }`}
                 >
                   <Sparkles className="w-4 h-4 text-[#0071e3]" />
-                  <span>Book Service & AI Wait Times</span>
+                  <span>Book Service</span>
+                </button>
+                <button
+                  onClick={() => { switchTab('history'); setMobileMenuOpen(false); }}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'history' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
+                  }`}
+                >
+                  <Clock className="w-4 h-4 text-[#0071e3]" />
+                  <span>Service Records</span>
+                </button>
+                <button
+                  onClick={() => { switchTab('nearby-centers'); setMobileMenuOpen(false); }}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center space-x-2.5 cursor-pointer ${
+                    currentTab === 'nearby-centers' ? 'bg-[#f5f5f7] text-[#1d1d1f] font-semibold border border-[#d6d6d6]' : 'text-[#707070] hover:bg-white'
+                  }`}
+                >
+                  <MapPin className="w-4 h-4 text-[#0071e3]" />
+                  <span>Nearby Workshops</span>
                 </button>
                 <button
                   onClick={() => { switchTab('my-vehicles'); setMobileMenuOpen(false); }}

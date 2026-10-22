@@ -17,6 +17,68 @@ interface FranchisePlansModalProps {
   onSuccess?: () => void;
 }
 
+const DEFAULT_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  {
+    id: 'starter',
+    name: 'Single Hub Starter',
+    price_monthly: 4999,
+    price_yearly: 49990,
+    max_centers: 1,
+    max_bays_per_center: 6,
+    max_managers: 2,
+    description: 'Perfect for independent workshops and single-branch service hubs.',
+    features: [
+      '1 Workshop Center Location',
+      'Up to 6 Workshop Bays',
+      'Real-time Queue & Turnaround Timers',
+      'Basic Customer Tracking Portal',
+      'Standard Email & Chat Support',
+    ],
+    badge: 'Starter Tier',
+    is_active: true,
+  },
+  {
+    id: 'growth',
+    name: 'Multi-Branch Growth',
+    price_monthly: 12999,
+    price_yearly: 129990,
+    max_centers: 5,
+    max_bays_per_center: 12,
+    max_managers: 10,
+    description: 'Ideal for expanding mobility groups and multi-location workshop networks.',
+    features: [
+      'Up to 5 Service Centers Across Cities',
+      'Up to 12 Bays Per Workshop',
+      'AI Cross-Center Smart Dispatch & Load Balancing',
+      'Predictive Parts & Technician Allocation',
+      'Priority Phone & 24/7 SLA Support',
+      'Complete White-Label Notifications',
+    ],
+    badge: 'Popular',
+    is_active: true,
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise Franchise',
+    price_monthly: 24999,
+    price_yearly: 249990,
+    max_centers: 999,
+    max_bays_per_center: 30,
+    max_managers: 100,
+    description: 'Designed for nationwide dealer networks and large automotive franchise operations.',
+    features: [
+      'Unlimited Workshop Locations',
+      'Unlimited Bays & Dedicated Service Managers',
+      'Custom Machine Learning Retraining Pipeline',
+      'Dedicated Customer Success & Solutions Architect',
+      '99.99% Uptime Guarantee & Custom ERP Sync',
+      'Bespoke Telematics & OBD-II Integration',
+    ],
+    badge: 'Enterprise',
+    is_active: true,
+  },
+];
+
 export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   isOpen,
   onClose,
@@ -24,12 +86,12 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
 }) => {
   useLockBodyScroll(isOpen);
   const { user, refreshUser } = useAuth();
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [loadingPlans, setLoadingPlans] = useState<boolean>(true);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(DEFAULT_SUBSCRIPTION_PLANS);
+  const [loadingPlans, setLoadingPlans] = useState<boolean>(false);
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
 
   // Checkout state
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(DEFAULT_SUBSCRIPTION_PLANS[1]);
   const [checkoutStep, setCheckoutStep] = useState<'select' | 'details' | 'success'>('select');
 
   // Form Fields - Workshop Info
@@ -57,12 +119,14 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
     setLoadingPlans(true);
     try {
       const data = await api.getSubscriptionPlans();
-      setPlans(data);
-      if (data.length > 0) {
-        setSelectedPlan(data[0]); // Default to Starter or popular
+      if (Array.isArray(data) && data.length > 0) {
+        setPlans(data);
+        if (!selectedPlan) {
+          setSelectedPlan(data[0]);
+        }
       }
     } catch (e) {
-      console.error('Failed to load subscription plans', e);
+      console.warn('Failed to load dynamic subscription plans, using default plans', e);
     } finally {
       setLoadingPlans(false);
     }
@@ -255,7 +319,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
               </div>
 
               {/* Plans Grid */}
-              {loadingPlans ? (
+              {loadingPlans && plans.length === 0 ? (
                 <div className="flex items-center justify-center py-16">
                   <RefreshCw className="w-8 h-8 text-[#0071e3] animate-spin" />
                 </div>
