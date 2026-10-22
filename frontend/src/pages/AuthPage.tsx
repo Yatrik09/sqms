@@ -28,6 +28,8 @@ export const AuthPage: React.FC = () => {
     setAuthMode('login');
     setEmail(p.email);
     setPassword(p.pass);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setGlobalError(null);
     setServerErrorField(null);
     setFieldErrors({});
@@ -401,11 +403,11 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex flex-col justify-center py-4 sm:py-6 lg:py-4 px-4 sm:px-6 lg:px-8 font-sans selection:bg-[#0071e3] selection:text-white relative">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-[#f5f5f7] flex flex-col justify-center py-2 sm:py-3 lg:py-0 px-4 sm:px-6 lg:px-8 font-sans selection:bg-[#0071e3] selection:text-white relative">
       {/* Main Container */}
       <div className="max-w-7xl mx-auto w-full z-10">
         {/* Mobile Brand Header */}
-        <div className="lg:hidden flex items-center justify-between mb-4 px-1">
+        <div className="lg:hidden flex items-center justify-between mb-3 px-1">
           <div className="flex items-center space-x-2.5">
             <img
               src="/logo.png"
@@ -425,7 +427,7 @@ export const AuthPage: React.FC = () => {
 
         {/* Logout Banner */}
         {logoutNotice && (
-          <div className="mb-4 p-3 rounded-[18px] bg-white border border-emerald-500/40 text-emerald-800 text-[13px] flex items-center justify-between shadow-none">
+          <div className="mb-3 p-3 rounded-[18px] bg-white border border-emerald-500/40 text-emerald-800 text-[13px] flex items-center justify-between shadow-none">
             <div className="flex items-center space-x-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{logoutNotice}</span>
@@ -441,49 +443,49 @@ export const AuthPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           {/* Left Column: Brand & Features Overview (Desktop only) */}
-          <div className="hidden lg:block lg:col-span-5 text-left space-y-4 px-2 sm:px-4">
+          <div className="hidden lg:block lg:col-span-5 text-left space-y-3.5 px-2 sm:px-4">
             <div>
               <img
                 src="/logo.png"
                 alt="DriveOps"
-                className="h-10 w-auto object-contain mb-2"
+                className="h-9 w-auto object-contain mb-1.5"
               />
             </div>
 
             <div>
-              <div className="inline-flex items-center space-x-2 px-3 py-0.5 rounded-full bg-white border border-[#d6d6d6] text-[#1d1d1f] text-[11px] font-medium mb-2 shadow-none">
+              <div className="inline-flex items-center space-x-2 px-3 py-0.5 rounded-full bg-white border border-[#d6d6d6] text-[#1d1d1f] text-[11px] font-medium mb-1.5 shadow-none">
                 <Sparkles className="w-3 h-3 text-[#0071e3]" />
                 <span>Automotive Intelligence</span>
               </div>
-              <h1 className="text-3xl lg:text-[38px] font-semibold tracking-tight text-[#1d1d1f] leading-[1.1]">
+              <h1 className="text-2xl lg:text-[34px] font-semibold tracking-tight text-[#1d1d1f] leading-[1.15]">
                 DriveOps
               </h1>
-              <p className="mt-0.5 text-[15px] font-semibold text-[#0071e3]">
+              <p className="mt-0.5 text-[14px] font-semibold text-[#0071e3]">
                 Book Today. Drive Tomorrow.
               </p>
-              <p className="mt-2 text-[15px] text-[#707070] leading-[1.45]">
+              <p className="mt-1.5 text-[13.5px] text-[#707070] leading-[1.4]">
                 Real-time queue tracking, predictive machine learning turnaround estimations, automated workshop bay allocation, and multi-service-center workload balancing.
               </p>
             </div>
 
             {/* Feature Highlights - Apple cards */}
-            <div className="space-y-2.5 pt-1">
-              <div className="p-3.5 rounded-[18px] bg-white border border-[#d6d6d6] flex items-start space-x-3 text-[13px] text-[#707070] shadow-none">
-                <div className="w-7 h-7 rounded-full bg-[#f5f5f7] text-[#0071e3] flex items-center justify-center shrink-0 mt-0.5 border border-[#d6d6d6]">
+            <div className="space-y-2 pt-0.5">
+              <div className="p-2.5 rounded-[16px] bg-white border border-[#d6d6d6] flex items-start space-x-3 text-[12.5px] text-[#707070] shadow-none">
+                <div className="w-6.5 h-6.5 rounded-full bg-[#f5f5f7] text-[#0071e3] flex items-center justify-center shrink-0 mt-0.5 border border-[#d6d6d6]">
                   <Activity className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <span className="font-semibold text-[#1d1d1f] block text-[14px]">Predictive ML Turnaround</span>
+                  <span className="font-semibold text-[#1d1d1f] block text-[13px]">Predictive ML Turnaround</span>
                   <span className="text-[#707070]">Gradient Boosting ML estimates waiting time and service duration dynamically.</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-[18px] bg-white border border-[#d6d6d6] flex items-start space-x-3 text-[13px] text-[#707070] shadow-none">
-                <div className="w-7 h-7 rounded-full bg-[#f5f5f7] text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 border border-[#d6d6d6]">
+              <div className="p-2.5 rounded-[16px] bg-white border border-[#d6d6d6] flex items-start space-x-3 text-[12.5px] text-[#707070] shadow-none">
+                <div className="w-6.5 h-6.5 rounded-full bg-[#f5f5f7] text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 border border-[#d6d6d6]">
                   <MapPin className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <span className="font-semibold text-[#1d1d1f] block text-[14px]">Proximity Workload Balancing</span>
+                  <span className="font-semibold text-[#1d1d1f] block text-[13px]">Proximity Workload Balancing</span>
                   <span className="text-[#707070]">Directs drivers to nearby branches first, minimizing wait times and bay congestion.</span>
                 </div>
               </div>
@@ -491,22 +493,22 @@ export const AuthPage: React.FC = () => {
           </div>
 
           {/* Right Column: Apple White Card Form */}
-          <div className="w-full lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[28px] p-5 sm:p-7 lg:p-7 shadow-none">
+          <div className="w-full lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[24px] p-4 sm:p-6 lg:py-5 lg:px-6 shadow-none max-h-[96vh] overflow-y-auto lg:overflow-visible">
             {/* Mobile Brand Logo */}
-            <div className="flex justify-center mb-4 lg:hidden">
+            <div className="flex justify-center mb-3 lg:hidden">
               <img
                 src="/logo.png"
                 alt="DriveOps"
-                className="h-9 w-auto object-contain"
+                className="h-8 w-auto object-contain"
               />
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-[#d6d6d6] mb-4">
+            <div className="flex border-b border-[#d6d6d6] mb-3">
               <button
                 type="button"
                 onClick={() => switchMode('login')}
-                className={`pb-2.5 text-[14px] font-semibold border-b-2 transition flex-1 text-center cursor-pointer ${
+                className={`pb-2 text-[13.5px] font-semibold border-b-2 transition flex-1 text-center cursor-pointer ${
                   authMode === 'login'
                     ? 'border-[#1d1d1f] text-[#1d1d1f]'
                     : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
@@ -517,7 +519,7 @@ export const AuthPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => switchMode('register')}
-                className={`pb-2.5 text-[14px] font-semibold border-b-2 transition flex-1 text-center cursor-pointer ${
+                className={`pb-2 text-[13.5px] font-semibold border-b-2 transition flex-1 text-center cursor-pointer ${
                   authMode === 'register'
                     ? 'border-[#1d1d1f] text-[#1d1d1f]'
                     : 'border-transparent text-[#707070] hover:text-[#1d1d1f]'
@@ -528,7 +530,7 @@ export const AuthPage: React.FC = () => {
               {authMode === 'reset' && (
                 <button
                   type="button"
-                  className="pb-2.5 text-[14px] font-semibold border-b-2 border-[#0071e3] text-[#0071e3] flex-1 text-center cursor-pointer"
+                  className="pb-2 text-[13.5px] font-semibold border-b-2 border-[#0071e3] text-[#0071e3] flex-1 text-center cursor-pointer"
                 >
                   Reset Password
                 </button>
@@ -537,33 +539,37 @@ export const AuthPage: React.FC = () => {
 
             {/* 1-Tap Demo Quick Fill Section */}
             {authMode === 'login' && (
-              <div className="mb-3.5 p-3 sm:p-3.5 rounded-[18px] bg-[#f5f5f7] border border-[#d6d6d6]">
-                <div className="flex items-center justify-between mb-2">
+              <div className="mb-3 p-2 sm:p-2.5 rounded-[16px] bg-[#f5f5f7] border border-[#d6d6d6]">
+                <div className="flex items-center justify-between mb-1.5 px-0.5">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-[#1d1d1f] flex items-center space-x-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
                     <span>1-Tap Demo Login</span>
                   </span>
-                  <span className="text-[10px] text-[#707070]">Tap to auto-fill persona</span>
+                  <span className="text-[10px] text-[#707070]">Tap to auto-fill</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
                   {DEMO_PERSONAS.map((p) => {
                     const isSelected = email === p.email;
+                    const shortName = p.label
+                      .replace('Super ', '')
+                      .replace('Franchise ', '')
+                      .replace('Branch ', '')
+                      .replace('Technician', 'Tech');
                     return (
                       <button
                         key={p.label}
                         type="button"
                         onClick={() => handleSelectPersona(p)}
-                        className={`p-2 rounded-[12px] text-left border transition flex items-center space-x-1.5 cursor-pointer active:scale-95 ${
+                        title={`${p.label} (${p.role})`}
+                        className={`py-1.5 px-1 rounded-[10px] text-center border transition flex flex-col items-center justify-center cursor-pointer active:scale-95 ${
                           isSelected
-                            ? 'bg-white border-[#0071e3] text-[#1d1d1f] shadow-none ring-1 ring-[#0071e3]'
+                            ? 'bg-white border-[#0071e3] text-[#1d1d1f] shadow-none ring-1.5 ring-[#0071e3]'
                             : 'bg-white hover:bg-[#fafafc] border-[#d6d6d6] text-[#1d1d1f]'
                         }`}
                       >
-                        <span className="text-sm shrink-0">{p.icon}</span>
-                        <div className="min-w-0 flex-1">
-                          <span className="text-[11px] font-semibold block truncate text-[#1d1d1f]">{p.label}</span>
-                          <span className="text-[9.5px] text-[#707070] block truncate">{p.role}</span>
-                        </div>
+                        <span className="text-sm leading-none shrink-0 mb-0.5">{p.icon}</span>
+                        <span className="text-[10px] sm:text-[10.5px] font-semibold block truncate w-full text-[#1d1d1f]">{shortName}</span>
+                        <span className="text-[8px] sm:text-[8.5px] text-[#707070] block truncate w-full">{p.role.split(' ')[0]}</span>
                       </button>
                     );
                   })}
@@ -573,28 +579,18 @@ export const AuthPage: React.FC = () => {
 
             {/* Success Notice */}
             {successNotice && (
-              <div className="mb-4 p-3.5 rounded-[18px] bg-[#f0f9eb] border border-[#c2e7b0] text-[#2b641e] text-[13px] flex items-center space-x-2.5">
+              <div className="mb-3 p-3 rounded-[16px] bg-[#f0f9eb] border border-[#c2e7b0] text-[#2b641e] text-[12.5px] flex items-center space-x-2.5">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-[#389e0d]" />
                 <span>{successNotice}</span>
               </div>
             )}
 
-            {/* Form Mode Notice */}
-            {authMode === 'login' ? (
-              <div className="mb-3.5 py-2 px-3 rounded-[14px] bg-[#fafafc] border border-[#d6d6d6] flex items-center justify-between">
+            {/* Form Mode Notice (Register & Reset only) */}
+            {authMode === 'register' ? (
+              <div className="mb-3 py-2 px-3 rounded-[14px] bg-[#fafafc] border border-[#d6d6d6] text-[12.5px] flex items-center justify-between">
                 <div>
-                  <span className="text-[12.5px] font-semibold text-[#1d1d1f] block leading-tight">Sign in to your account</span>
-                  <span className="text-[11px] text-[#707070]">Enter your credentials to access your dashboard</span>
-                </div>
-                <div className="w-6 h-6 rounded-full bg-white text-[#1d1d1f] flex items-center justify-center border border-[#d6d6d6] shrink-0">
-                  <Lock className="w-3 h-3" />
-                </div>
-              </div>
-            ) : authMode === 'register' ? (
-              <div className="mb-4 py-2.5 px-3.5 rounded-[16px] bg-[#fafafc] border border-[#d6d6d6] text-[13px] flex items-center justify-between">
-                <div>
-                  <span className="font-semibold text-[#1d1d1f] block">Registering New Account</span>
-                  <span className="text-[#707070]">Select your home area for automated nearby workshop recommendations.</span>
+                  <span className="font-semibold text-[#1d1d1f] block leading-tight">Registering New Account</span>
+                  <span className="text-[11px] text-[#707070]">Select your home area for automated workshop routing.</span>
                 </div>
                 <button
                   type="button"
@@ -604,13 +600,13 @@ export const AuthPage: React.FC = () => {
                   Sign In
                 </button>
               </div>
-            ) : (
-              <div className="mb-6 p-4 rounded-[20px] bg-[#fafafc] border border-[#d6d6d6] text-[13px] flex items-center justify-between">
+            ) : authMode === 'reset' ? (
+              <div className="mb-3.5 p-3.5 rounded-[16px] bg-[#fafafc] border border-[#d6d6d6] text-[12.5px] flex items-center justify-between">
                 <div>
-                  <span className="font-semibold text-[#1d1d1f] block">
+                  <span className="font-semibold text-[#1d1d1f] block leading-tight">
                     {resetStep === 'request_otp' ? 'Step 1: Authenticate Identity' : 'Step 2: Enter Verification Code'}
                   </span>
-                  <span className="text-[#707070]">
+                  <span className="text-[11px] text-[#707070]">
                     {resetStep === 'request_otp'
                       ? 'Enter your registered email address to receive an authenticated 6-digit OTP.'
                       : `Enter the 6-digit verification code dispatched to ${email}`}
@@ -624,10 +620,10 @@ export const AuthPage: React.FC = () => {
                   Sign In
                 </button>
               </div>
-            )}
+            ) : null}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-3">
               {/* Register-only fields: Name & Phone & Area */}
               {authMode === 'register' && (
                 <>
@@ -636,7 +632,7 @@ export const AuthPage: React.FC = () => {
                       Full Name *
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-[#86868b] absolute left-4 top-3.5" />
+                      <User className="w-4 h-4 text-[#86868b] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <input
                         type="text"
                         value={name}
@@ -664,7 +660,7 @@ export const AuthPage: React.FC = () => {
                         Phone Number (Optional)
                       </label>
                       <div className="relative">
-                        <Phone className="w-4 h-4 text-[#86868b] absolute left-4 top-3.5" />
+                        <Phone className="w-4 h-4 text-[#86868b] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                           type="tel"
                           value={phone}
@@ -739,7 +735,7 @@ export const AuthPage: React.FC = () => {
                       </button>
                     </div>
                     <div className="relative">
-                      <Key className={`w-4 h-4 absolute left-4 top-3.5 transition-colors ${
+                      <Key className={`w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
                         isOtpError ? 'text-red-500' : 'text-[#86868b]'
                       }`} />
                       <input
@@ -784,7 +780,7 @@ export const AuthPage: React.FC = () => {
                     Email Address *
                   </label>
                   <div className="relative">
-                    <Mail className={`w-4 h-4 absolute left-4 top-3.5 transition-colors ${
+                    <Mail className={`w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
                       isEmailError ? 'text-red-500' : 'text-[#86868b]'
                     }`} />
                     <input
@@ -827,7 +823,7 @@ export const AuthPage: React.FC = () => {
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className={`w-4 h-4 absolute left-4 top-3.5 transition-colors ${
+                    <Lock className={`w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
                       isPasswordError ? 'text-red-500' : 'text-[#86868b]'
                     }`} />
                     <input
@@ -845,7 +841,7 @@ export const AuthPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-3.5 text-[#86868b] hover:text-[#1d1d1f] cursor-pointer"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#86868b] hover:text-[#1d1d1f] cursor-pointer p-1"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -903,7 +899,7 @@ export const AuthPage: React.FC = () => {
                     {authMode === 'reset' ? 'Confirm New Password *' : 'Confirm Password *'}
                   </label>
                   <div className="relative">
-                    <Lock className={`w-4 h-4 absolute left-4 top-3.5 ${
+                    <Lock className={`w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${
                       touched.confirmPassword && fieldErrors.confirmPassword ? 'text-red-500' : 'text-[#86868b]'
                     }`} />
                     <input
@@ -921,7 +917,7 @@ export const AuthPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 top-3.5 text-[#86868b] hover:text-[#1d1d1f] cursor-pointer"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#86868b] hover:text-[#1d1d1f] cursor-pointer p-1"
                       aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -937,7 +933,7 @@ export const AuthPage: React.FC = () => {
               )}
 
               {authMode === 'register' && (
-                <div className="p-3.5 rounded-[18px] bg-[#f5f5f7] border border-[#d6d6d6] text-[12px] text-[#707070] space-y-1">
+                <div className="p-3 rounded-[16px] bg-[#f5f5f7] border border-[#d6d6d6] text-[12px] text-[#707070] space-y-1">
                   <span className="font-semibold text-[#1d1d1f] block flex items-center space-x-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#0071e3]" />
                     <span>Customer Account Registration</span>
@@ -950,7 +946,7 @@ export const AuthPage: React.FC = () => {
 
               {/* Single Dedicated Form Error Alert */}
               {globalError && (
-                <div className="p-4 rounded-[20px] bg-[#fff1f0] border border-[#ffccc7] text-[#cf1322] text-[13px] shadow-none">
+                <div className="p-3.5 rounded-[18px] bg-[#fff1f0] border border-[#ffccc7] text-[#cf1322] text-[13px] shadow-none">
                   <div className="flex items-start space-x-3">
                     <AlertCircle className="w-5 h-5 shrink-0 text-[#cf1322] mt-0.5" />
                     <div className="flex-1 space-y-2">
@@ -997,7 +993,7 @@ export const AuthPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 mt-3 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-[14.5px] shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full h-11 mt-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-[14.5px] shadow-none transition flex items-center justify-center space-x-2 cursor-pointer"
               >
                 {authMode === 'reset' ? (
                   resetStep === 'request_otp' ? (
@@ -1024,7 +1020,7 @@ export const AuthPage: React.FC = () => {
             </form>
 
             {/* Bottom Switch Links */}
-            <div className="mt-4 pt-3 border-t border-[#d6d6d6] flex items-center justify-between text-[12.5px] text-[#707070]">
+            <div className="mt-3 pt-2.5 border-t border-[#d6d6d6] flex items-center justify-between text-[12.5px] text-[#707070]">
               <span>
                 {authMode === 'register'
                   ? 'Already have an account?'
