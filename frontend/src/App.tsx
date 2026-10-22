@@ -144,7 +144,7 @@ const MainLayout: React.FC = () => {
         setCurrentTab={setCurrentTab}
       />
 
-      <main className="flex-1 pb-16">
+      <main className="flex-1 pb-2 sm:pb-4">
         <Suspense fallback={<PageLoader />}>
           {renderContent()}
         </Suspense>

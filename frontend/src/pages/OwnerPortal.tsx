@@ -8,9 +8,11 @@ import {
   Building2, TrendingUp, Users, Clock, ArrowRight, BarChart2, Shield,
   RefreshCw, CheckCircle2, Plus, UserPlus, AlertCircle, Copy,
   Check, MapPin, Phone, Sparkles, Activity, Wrench, ShieldCheck, ChevronRight,
-  Zap, ArrowRightLeft, DollarSign, Star, AlertTriangle, Layers, Filter
+  Zap, ArrowRightLeft, DollarSign, Star, AlertTriangle, Layers, Filter, X
 } from 'lucide-react';
 import { POPULAR_AREAS } from '../utils/geo';
+import { SelectDropdown } from '../components/SelectDropdown';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 export const OwnerPortal: React.FC<{
   activeTab?: string;
@@ -57,6 +59,15 @@ export const OwnerPortal: React.FC<{
   // AI Service Analysis & Staff Reallocation State
   const [selectedBranchId, setSelectedBranchId] = useState<number | 'all'>('all');
   const [showReallocateModal, setShowReallocateModal] = useState<boolean>(false);
+
+  const isAnyModalOpen = Boolean(
+    showPlansModal ||
+    showAddBranchModal ||
+    showLimitAlertModal ||
+    showCreateManagerModal ||
+    showReallocateModal
+  );
+  useLockBodyScroll(isAnyModalOpen);
   const [reallocateFromId, setReallocateFromId] = useState<number | ''>('');
   const [reallocateToId, setReallocateToId] = useState<number | ''>('');
   const [reallocateTechId, setReallocateTechId] = useState<number | ''>('');
@@ -298,7 +309,7 @@ export const OwnerPortal: React.FC<{
   const totalTechsAcross = centersList.reduce((acc, c) => acc + (c.total_mechanics || 0), 0) || 20;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#1d1d1f]">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-4 space-y-6 sm:space-y-8 bg-white text-[#1d1d1f]">
       {/* Executive Command Header */}
       <div className="relative rounded-[28px] bg-white border border-[#d6d6d6] p-6 sm:p-10 shadow-none">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -1322,8 +1333,8 @@ export const OwnerPortal: React.FC<{
 
       {/* MODAL: ADD WORKSHOP BRANCH */}
       {showAddBranchModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-xl shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-xl shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#e6e6e8] pb-4">
               <div>
                 <h3 className="text-xl font-semibold text-[#1d1d1f]">Add New Service Center Branch</h3>
@@ -1333,9 +1344,9 @@ export const OwnerPortal: React.FC<{
               </div>
               <button
                 onClick={() => setShowAddBranchModal(false)}
-                className="text-[#707070] hover:text-[#1d1d1f] transition cursor-pointer"
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1489,8 +1500,8 @@ export const OwnerPortal: React.FC<{
 
       {/* MODAL: CREATE BRANCH MANAGER */}
       {showCreateManagerModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-lg shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-lg shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#e6e6e8] pb-4">
               <div>
                 <h3 className="text-xl font-semibold text-[#1d1d1f]">Create Branch Manager Account</h3>
@@ -1500,9 +1511,9 @@ export const OwnerPortal: React.FC<{
               </div>
               <button
                 onClick={() => setShowCreateManagerModal(false)}
-                className="text-[#707070] hover:text-[#1d1d1f] transition cursor-pointer"
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1574,19 +1585,17 @@ export const OwnerPortal: React.FC<{
                 <label className="block text-xs font-medium text-[#1d1d1f] mb-1">
                   Assign to Service Center Branch *
                 </label>
-                <select
-                  required
+                <SelectDropdown
                   value={mgrCenterId}
-                  onChange={(e) => setMgrCenterId(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                >
-                  <option value="">-- Select Service Center --</option>
-                  {centersList.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      Branch #{c.id}: {c.name} ({c.city})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setMgrCenterId(Number(val))}
+                  options={centersList.map((c) => ({
+                    value: c.id,
+                    label: `Branch #${c.id}: ${c.name}`,
+                    sublabel: c.city,
+                  }))}
+                  placeholder="-- Select Service Center --"
+                  size="md"
+                />
               </div>
 
               <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#e6e6e8]">
@@ -1620,8 +1629,8 @@ export const OwnerPortal: React.FC<{
 
       {/* MODAL: PLAN LIMIT REACHED NOTIFICATION */}
       {showLimitAlertModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-lg shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-lg shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center shrink-0">
                 <AlertCircle className="w-6 h-6 text-[#b64400]" />
@@ -1673,8 +1682,8 @@ export const OwnerPortal: React.FC<{
 
       {/* MODAL: AI CROSS-BRANCH STAFF DEPLOYMENT */}
       {showReallocateModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-xl shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-xl shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#e6e6e8] pb-4">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
@@ -1693,9 +1702,9 @@ export const OwnerPortal: React.FC<{
               </div>
               <button
                 onClick={() => setShowReallocateModal(false)}
-                className="text-[#707070] hover:text-[#1d1d1f] transition cursor-pointer text-lg p-1"
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1713,23 +1722,17 @@ export const OwnerPortal: React.FC<{
                   <label className="block text-xs font-medium text-[#1d1d1f] mb-1">
                     Source Branch (Donor Center) *
                   </label>
-                  <select
-                    required
+                  <SelectDropdown
                     value={reallocateFromId}
-                    onChange={(e) => handleSourceBranchChange(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                  >
-                    <option value="">-- Select Source Branch --</option>
-                    {(data?.branch_comparison || centersList).map((b: any) => {
-                      const bId = b.branch_id || b.id;
-                      const bName = b.branch_name || b.name;
-                      return (
-                        <option key={bId} value={bId}>
-                          Branch #{bId}: {bName} ({b.city})
-                        </option>
-                      );
-                    })}
-                  </select>
+                    onChange={(val) => handleSourceBranchChange(Number(val))}
+                    options={(data?.branch_comparison || centersList).map((b: any) => ({
+                      value: b.branch_id || b.id,
+                      label: `Branch #${b.branch_id || b.id}: ${b.branch_name || b.name}`,
+                      sublabel: b.city,
+                    }))}
+                    placeholder="-- Select Source Branch --"
+                    size="md"
+                  />
                 </div>
 
                 {/* Target Branch */}
@@ -1737,26 +1740,24 @@ export const OwnerPortal: React.FC<{
                   <label className="block text-xs font-medium text-[#1d1d1f] mb-1">
                     Target Branch (Surge Center) *
                   </label>
-                  <select
-                    required
+                  <SelectDropdown
                     value={reallocateToId}
-                    onChange={(e) => setReallocateToId(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                  >
-                    <option value="">-- Select Target Branch --</option>
-                    {(data?.branch_comparison || centersList)
+                    onChange={(val) => setReallocateToId(Number(val))}
+                    options={(data?.branch_comparison || centersList)
                       .filter((b: any) => (b.branch_id || b.id) !== Number(reallocateFromId))
                       .map((b: any) => {
                         const bId = b.branch_id || b.id;
                         const bName = b.branch_name || b.name;
                         const isSurge = b.ai_recommendation?.has_surge;
-                        return (
-                          <option key={bId} value={bId}>
-                            Branch #{bId}: {bName} {isSurge ? '🚨 [HIGH SURGE]' : ''}
-                          </option>
-                        );
+                        return {
+                          value: bId,
+                          label: `Branch #${bId}: ${bName}`,
+                          badge: isSurge ? 'HIGH SURGE' : undefined,
+                        };
                       })}
-                  </select>
+                    placeholder="-- Select Target Branch --"
+                    size="md"
+                  />
                 </div>
               </div>
 
@@ -1780,19 +1781,18 @@ export const OwnerPortal: React.FC<{
                   }
 
                   return (
-                    <select
-                      required
+                    <SelectDropdown
                       value={reallocateTechId}
-                      onChange={(e) => setReallocateTechId(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                    >
-                      <option value="">-- Select Technician --</option>
-                      {techs.map((m: any) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} — Specialization: {m.specialization} [{m.availability}]
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setReallocateTechId(Number(val))}
+                      options={techs.map((m: any) => ({
+                        value: m.id,
+                        label: m.name,
+                        sublabel: `Specialization: ${m.specialization}`,
+                        badge: m.availability,
+                      }))}
+                      placeholder="-- Select Technician --"
+                      size="md"
+                    />
                   );
                 })()}
               </div>
@@ -1826,7 +1826,7 @@ export const OwnerPortal: React.FC<{
                   <span className="text-emerald-600 font-semibold">+1 Technician</span>
                 </div>
                 <p className="text-[11px] text-[#707070] pt-1 border-t border-[#e6e6e8]">
-                  ⚡ Instantly recalculates dynamic workshop workload %, bay throughput, and projected queue wait times upon deployment.
+                  Instantly recalculates dynamic workshop workload %, bay throughput, and projected queue wait times upon deployment.
                 </p>
               </div>
 

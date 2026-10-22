@@ -7,6 +7,7 @@ import {
   DollarSign, Receipt, Award, Edit3, Trash2, Plus, X, AlertCircle, AlertTriangle,
   Eye, EyeOff, CheckCircle
 } from 'lucide-react';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 interface AdminPortalProps {
   activeTab?: string;
@@ -34,6 +35,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-das
   const [deleteConfirmPlan, setDeleteConfirmPlan] = useState<SubscriptionPlan | null>(null);
   const [planActionLoading, setPlanActionLoading] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Prevent background page scrolling when modal is open
+  const isAnyModalOpen = Boolean(editingPlan || isCreateModalOpen || deleteConfirmPlan);
+  useLockBodyScroll(isAnyModalOpen);
 
   // Plan Form State
   const [formId, setFormId] = useState('');
@@ -232,7 +237,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-das
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 bg-white text-[#1d1d1f]">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-4 space-y-6 sm:space-y-8 bg-white text-[#1d1d1f]">
       {/* Admin Header */}
       <div className="bg-white rounded-[28px] p-6 sm:p-8 text-[#1d1d1f] shadow-none flex flex-col md:flex-row md:items-center justify-between gap-6 border border-[#d6d6d6]">
         <div>
@@ -744,8 +749,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-das
 
       {/* MODAL 1: EDIT PLAN */}
       {editingPlan && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-auto max-h-[90vh] overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] flex items-center justify-center">
@@ -914,8 +919,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-das
 
       {/* MODAL 2: CREATE PLAN */}
       {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-8 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-8 max-w-2xl w-full text-[#1d1d1f] shadow-2xl space-y-6 my-auto max-h-[90vh] overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6] flex items-center justify-center">
@@ -1083,8 +1088,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ activeTab = 'admin-das
 
       {/* MODAL 3: DELETE CONFIRMATION */}
       {deleteConfirmPlan && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-7 max-w-md w-full text-[#1d1d1f] shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] p-6 sm:p-7 max-w-md w-full text-[#1d1d1f] shadow-2xl space-y-4 my-auto max-h-[90vh] overflow-y-auto overscroll-contain animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center space-x-3 text-[#b64400]">
               <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-[#b64400]" />

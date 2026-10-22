@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import type { SubscriptionPlan } from '../types';
 import {
   ShieldCheck, Check, Sparkles, Building2, Layers, Cpu,
@@ -21,6 +22,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  useLockBodyScroll(isOpen);
   const { user, refreshUser } = useAuth();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState<boolean>(true);
@@ -156,7 +158,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-3 sm:p-6 bg-black/40 backdrop-blur-sm overflow-y-auto py-8 sm:py-14 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-3 sm:p-6 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain py-8 sm:py-14 animate-in fade-in duration-200">
       <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-5xl shadow-2xl text-[#1d1d1f] my-auto overflow-hidden relative z-[10000]">
         {/* Header */}
         <div className="p-6 sm:p-8 flex items-start justify-between border-b border-[#f0f0f2]">
@@ -194,7 +196,7 @@ export const FranchisePlansModal: React.FC<FranchisePlansModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 sm:p-8 max-h-[78vh] overflow-y-auto">
+        <div className="p-6 sm:p-8 max-h-[78vh] overflow-y-auto overscroll-contain">
           {/* STEP 1: PLAN SELECTOR */}
           {checkoutStep === 'select' && (
             <div className="space-y-6">

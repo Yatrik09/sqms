@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import {
   X, User, Mail, Phone, Lock, CheckCircle2, AlertCircle, Save, KeyRound,
   Building2, Sparkles, MapPin, Navigation, Compass, RefreshCw, ArrowRight, CheckCircle
@@ -17,6 +18,7 @@ interface ProfileModalProps {
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onOpenPlans }) => {
+  useLockBodyScroll(isOpen);
   const { user, updateProfile } = useAuth();
 
   const [name, setName] = useState<string>(user?.name || '');
@@ -155,7 +157,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onO
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200 py-8 sm:py-14">
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 sm:p-6 overflow-y-auto overscroll-contain animate-in fade-in duration-200 py-8 sm:py-14">
       <div className="bg-white border border-[#d6d6d6] rounded-[28px] max-w-xl w-full shadow-2xl relative my-auto text-[#1d1d1f] z-[10000] max-h-[88vh] flex flex-col overflow-hidden">
         {/* Header - Fixed & Spaced */}
         <div className="p-5 sm:px-8 sm:py-6 border-b border-[#e6e6e8] shrink-0 flex items-center justify-between bg-white">
@@ -179,7 +181,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, onO
 
         {/* Modal Form with Scrollable Body and Fixed Footer */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 bg-white">
+          <div className="flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8 space-y-6 bg-white">
             {/* Identity Card */}
             <div className="p-4 rounded-2xl bg-[#fafafc] border border-[#e6e6e8] flex items-center space-x-4">
               <div className="w-12 h-12 rounded-2xl bg-[#0071e3] text-white font-semibold text-lg flex items-center justify-center shrink-0">

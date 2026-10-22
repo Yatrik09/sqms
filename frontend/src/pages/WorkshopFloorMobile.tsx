@@ -7,6 +7,8 @@ import {
   ArrowRight, ShieldCheck, Car, Phone, Filter, ChevronRight, X, Plus,
   Layers, Check, AlertCircle, Volume2, VolumeX, Eye, ArrowLeft, Building2, Lock
 } from 'lucide-react';
+import { SelectDropdown } from '../components/SelectDropdown';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 interface WorkshopFloorMobileProps {
   onSwitchToDesktop?: () => void;
@@ -119,6 +121,10 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
   const [showWalkInModal, setShowWalkInModal] = useState<boolean>(false);
   const [showBaysDrawer, setShowBaysDrawer] = useState<boolean>(false);
   const [editEntry, setEditEntry] = useState<QueueEntry | null>(null);
+
+  // Prevent background scrolling when modal or drawer is active
+  const isAnyModalOpen = Boolean(showWalkInModal || showBaysDrawer || editEntry);
+  useLockBodyScroll(isAnyModalOpen);
 
   // Walk-in form state
   const [walkinName, setWalkinName] = useState<string>('');
@@ -465,17 +471,18 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
           {/* Center Switcher + Quick Search Bar */}
           <div className="mt-3 flex items-center space-x-2">
             {!isTechnician && centers.length > 1 && (
-              <select
-                value={centerId}
-                onChange={(e) => setCenterId(Number(e.target.value))}
-                className="bg-white border border-[#d6d6d6] text-xs rounded-full px-3 py-2 text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] font-medium max-w-[140px] sm:max-w-[200px] truncate"
-              >
-                {centers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="w-[140px] sm:w-[200px] shrink-0">
+                <SelectDropdown
+                  value={String(centerId)}
+                  onChange={(val) => setCenterId(Number(val))}
+                  options={centers.map((c) => ({
+                    value: String(c.id),
+                    label: c.name,
+                  }))}
+                  placeholder="Select Hub"
+                  buttonClassName="h-9 py-1 px-3 text-xs bg-white rounded-full font-medium"
+                />
+              </div>
             )}
 
             {isTechnician && (
@@ -819,8 +826,8 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
 
       {/* 6. MODAL: WALK-IN TOKEN REGISTRATION */}
       {showWalkInModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-          <div className="bg-white border border-[#d6d6d6] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-2xl space-y-4 text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white border border-[#d6d6d6] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-2xl space-y-4 text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-2">
                 <div className="p-2 rounded-xl bg-[#f5f5f7] text-[#0071e3]">
@@ -886,36 +893,33 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
                   <label className="block text-[11px] font-semibold text-[#707070] uppercase tracking-wider mb-1">
                     Vehicle Type
                   </label>
-                  <select
+                  <SelectDropdown
                     value={walkinType}
-                    onChange={(e) => setWalkinType(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                  >
-                    <option value="Sedan">Sedan</option>
-                    <option value="SUV">SUV</option>
-                    <option value="Hatchback">Hatchback</option>
-                    <option value="Luxury">Luxury</option>
-                    <option value="EV">Electric (EV)</option>
-                    <option value="Bike">Bike / Two-Wheeler</option>
-                  </select>
+                    onChange={setWalkinType}
+                    options={['Sedan', 'SUV', 'Hatchback', 'Luxury', 'EV', 'Bike']}
+                    placeholder="Select type"
+                    buttonClassName="bg-white text-xs h-10 rounded-xl"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-semibold text-[#707070] uppercase tracking-wider mb-1">
                     Service Required
                   </label>
-                  <select
+                  <SelectDropdown
                     value={walkinService}
-                    onChange={(e) => setWalkinService(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
-                  >
-                    <option value="General Service">General Service (~60m)</option>
-                    <option value="Oil Change">Oil Change Fast (~30m)</option>
-                    <option value="Car Wash">Car Wash & Vacuum (~25m)</option>
-                    <option value="Brake Service">Brake Service (~45m)</option>
-                    <option value="AC Service">AC Service (~40m)</option>
-                    <option value="Minor Accident Repair">Minor Repair (~90m)</option>
-                  </select>
+                    onChange={setWalkinService}
+                    options={[
+                      { value: 'General Service', label: 'General Service (~60m)' },
+                      { value: 'Oil Change', label: 'Oil Change Fast (~30m)' },
+                      { value: 'Car Wash', label: 'Car Wash & Vacuum (~25m)' },
+                      { value: 'Brake Service', label: 'Brake Service (~45m)' },
+                      { value: 'AC Service', label: 'AC Service (~40m)' },
+                      { value: 'Minor Accident Repair', label: 'Minor Repair (~90m)' },
+                    ]}
+                    placeholder="Select service"
+                    buttonClassName="bg-white text-xs h-10 rounded-xl"
+                  />
                 </div>
               </div>
 
@@ -971,8 +975,8 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
 
       {/* 7. MODAL: STAGE OVERRIDE / CUSTOM REASSIGNMENT */}
       {editEntry && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn">
-          <div className="bg-white border border-[#d6d6d6] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-2xl space-y-4 text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white border border-[#d6d6d6] w-full max-w-md rounded-t-[28px] sm:rounded-[28px] p-6 shadow-2xl space-y-4 text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-[#e6e6e8]">
               <div>
                 <span className="text-xs font-mono font-semibold text-[#0071e3]">Token {editEntry.token_number}</span>
@@ -1026,8 +1030,8 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
 
       {/* 8. DRAWER: BAYS OVERVIEW */}
       {showBaysDrawer && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white border-t border-[#d6d6d6] w-full max-w-xl rounded-t-[28px] p-6 shadow-2xl space-y-4 max-h-[80vh] overflow-y-auto text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-end justify-center bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white border-t border-[#d6d6d6] w-full max-w-xl rounded-t-[28px] p-6 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto overscroll-contain text-[#1d1d1f]">
             <div className="flex items-center justify-between pb-3 border-b border-[#e6e6e8]">
               <div className="flex items-center space-x-2">
                 <Wrench className="w-5 h-5 text-[#0071e3]" />

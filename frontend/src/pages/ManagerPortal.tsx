@@ -9,6 +9,8 @@ import {
   User, Phone, Car, Ticket, X, Building2, Bell, UserPlus, Copy, Check, Trash2
 } from 'lucide-react';
 import { FranchisePlansModal } from '../components/FranchisePlansModal';
+import { SelectDropdown } from '../components/SelectDropdown';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Legend, PieChart, Pie, Cell
 } from 'recharts';
@@ -175,6 +177,24 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
   const [newMechSpec, setNewMechSpec] = useState<string>('General Service');
   const [isSubmittingMech, setIsSubmittingMech] = useState<boolean>(false);
 
+  // Remove Bay & Remove Technician Modal States
+  const [showRemoveBayModal, setShowRemoveBayModal] = useState<boolean>(false);
+  const [selectedRemoveBayId, setSelectedRemoveBayId] = useState<number | ''>('');
+  const [showRemoveTechModal, setShowRemoveTechModal] = useState<boolean>(false);
+  const [selectedRemoveTechId, setSelectedRemoveTechId] = useState<string>('');
+
+  const isAnyModalOpen = Boolean(
+    selectedEntry ||
+    showWalkInModal ||
+    showAddBayModal ||
+    showAddMechModal ||
+    showCreateTechModal ||
+    showRemoveBayModal ||
+    showRemoveTechModal ||
+    showPlansModal
+  );
+  useLockBodyScroll(isAnyModalOpen);
+
   const loadCenterData = async () => {
     if (!centerId) {
       setLoading(false);
@@ -324,7 +344,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
     const cap = getBayCapacityForService(entry.service_type);
     if (cap.isFull && !entry.assigned_bay_id) {
       alert(
-        `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${entry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${entry.service_type || 'General Service'}" until an active bay is completed and freed.`
+        `Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${entry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${entry.service_type || 'General Service'}" until an active bay is completed and freed.`
       );
       return;
     }
@@ -370,7 +390,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
       const cap = getBayCapacityForService(selectedEntry.service_type);
       if (cap.isFull && !selectedEntry.assigned_bay_id && targetBayId === '') {
         alert(
-          `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${selectedEntry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${selectedEntry.service_type || 'General Service'}" until an active bay is completed and freed.`
+          `Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${selectedEntry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${selectedEntry.service_type || 'General Service'}" until an active bay is completed and freed.`
         );
         return;
       }
@@ -1236,7 +1256,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                               className="px-3.5 py-1.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs shadow-none transition flex items-center space-x-1 cursor-pointer"
                               title="Auto-Assign best available Bay & Mechanic and start service"
                             >
-                              <span>⚡ Auto-Start</span>
+                              <Zap className="w-3.5 h-3.5" />
+                              <span>Auto-Start</span>
                             </button>
                           ) : entry.status !== 'Completed' && entry.status !== 'Cancelled' ? (
                             <button
@@ -1244,7 +1265,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                               className="px-3.5 py-1.5 rounded-full bg-[#1d1d1f] hover:bg-black text-white font-medium text-xs shadow-none transition flex items-center space-x-1 cursor-pointer"
                               title="Complete service and immediately free bay and mechanic"
                             >
-                              <span>✅ Complete & Free</span>
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>Complete & Free</span>
                             </button>
                           ) : null}
 
@@ -1498,7 +1520,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-4 space-y-5 sm:space-y-8">
       {/* Workshop Header & Switcher */}
       <div className="bg-white rounded-[28px] border border-[#d6d6d6] shadow-none p-6 sm:p-8 space-y-5 text-[#1d1d1f]">
         {/* Top Hub Selector & Primary Action Row */}
@@ -1508,18 +1530,21 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
               Branch Operations
             </span>
             {availableCenters.length > 1 && (
-              <div className="relative">
-                <select
+              <div className="min-w-[220px]">
+                <SelectDropdown
                   value={centerId || ''}
-                  onChange={(e) => setCenterId(Number(e.target.value))}
-                  className="bg-[#f5f5f7] border border-[#d6d6d6] text-xs text-[#1d1d1f] rounded-full px-4 py-1.5 focus:outline-none focus:border-[#0071e3] font-medium pr-8 cursor-pointer"
-                >
-                  {availableCenters.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      Branch #{c.id}: {c.name} ({c.city})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => {
+                    const cid = Number(val);
+                    setCenterId(cid);
+                    localStorage.setItem('manager_preferred_center', String(cid));
+                  }}
+                  options={availableCenters.map((c) => ({
+                    value: c.id,
+                    label: `Branch #${c.id}: ${c.name}`,
+                    sublabel: c.city,
+                  }))}
+                  size="sm"
+                />
               </div>
             )}
           </div>
@@ -1608,34 +1633,24 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
           </div>
         </div>
 
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full lg:w-auto shrink-0 items-center">
           {/* 1. Add Bay */}
           <button
             onClick={() => setShowAddBayModal(true)}
-            className="px-4 py-2 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs flex items-center space-x-1.5 transition shadow-none cursor-pointer"
+            className="h-9 px-4 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition shadow-none cursor-pointer whitespace-nowrap text-center"
             title="Provision a new service bay"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 shrink-0" />
             <span>Add Bay</span>
           </button>
 
           {/* 2. Remove Bay */}
           <button
-            onClick={() => {
-              if (bays.length === 0) {
-                alert('No service bays registered in this center.');
-                return;
-              }
-              const bayNum = prompt(`Enter Bay Number to remove (Available: ${bays.map(b => b.bay_number).join(', ')}):`);
-              if (!bayNum) return;
-              const target = bays.find(b => b.bay_number.toLowerCase() === bayNum.trim().toLowerCase());
-              if (target) handleDeleteBay(target.id, target.bay_number);
-              else alert(`Bay "${bayNum}" not found.`);
-            }}
-            className="px-4 py-2 rounded-full bg-white hover:bg-red-50 text-[#b64400] border border-[#d6d6d6] font-medium text-xs flex items-center space-x-1.5 transition cursor-pointer"
+            onClick={() => setShowRemoveBayModal(true)}
+            className="h-9 px-4 rounded-full bg-white hover:bg-[#fafafc] text-[#b64400] hover:text-[#903600] border border-[#d6d6d6] hover:border-[#b64400]/40 font-medium text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer whitespace-nowrap text-center"
             title="Remove an existing service bay"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5 shrink-0" />
             <span>Remove Bay</span>
           </button>
 
@@ -1645,37 +1660,20 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
               setShowCreateTechModal(true);
               setTechError(null);
             }}
-            className="px-4 py-2 rounded-full bg-[#1d1d1f] hover:bg-black text-white font-medium text-xs flex items-center space-x-1.5 transition shadow-none cursor-pointer"
+            className="h-9 px-4 rounded-full bg-[#1d1d1f] hover:bg-black text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition shadow-none cursor-pointer whitespace-nowrap text-center"
             title="Provision credentials for floor technician"
           >
-            <UserPlus className="w-3.5 h-3.5" />
+            <UserPlus className="w-3.5 h-3.5 shrink-0" />
             <span>Add Technician</span>
           </button>
 
           {/* 4. Remove Technician */}
           <button
-            onClick={() => {
-              const allNames = [...technicians.map(t => t.name), ...mechanics.map(m => m.name)].filter((v, i, a) => a.indexOf(v) === i);
-              if (allNames.length === 0) {
-                alert('No technicians registered in this center.');
-                return;
-              }
-              const name = prompt(`Enter Technician name to remove (Active: ${allNames.join(', ')}):`);
-              if (!name) return;
-              const targetTech = technicians.find(t => t.name.toLowerCase() === name.trim().toLowerCase());
-              const targetMech = mechanics.find(m => m.name.toLowerCase() === name.trim().toLowerCase());
-              if (targetTech) {
-                handleDeactivateTechnician(targetTech.id, targetTech.name);
-              } else if (targetMech) {
-                handleDeleteMechanic(targetMech.id, targetMech.name);
-              } else {
-                alert(`Technician "${name}" not found.`);
-              }
-            }}
-            className="px-4 py-2 rounded-full bg-white hover:bg-red-50 text-[#b64400] border border-[#d6d6d6] font-medium text-xs flex items-center space-x-1.5 transition cursor-pointer"
+            onClick={() => setShowRemoveTechModal(true)}
+            className="h-9 px-4 rounded-full bg-white hover:bg-[#fafafc] text-[#b64400] hover:text-[#903600] border border-[#d6d6d6] hover:border-[#b64400]/40 font-medium text-xs flex items-center justify-center space-x-1.5 transition cursor-pointer whitespace-nowrap text-center"
             title="Remove or deactivate floor technician"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5 shrink-0" />
             <span>Remove Technician</span>
           </button>
         </div>
@@ -1692,8 +1690,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
       {/* UPDATE STATUS MODAL */}
       {selectedEntry && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#f0f0f2] pb-4">
               <div>
                 <h3 className="text-base font-semibold text-[#1d1d1f] tracking-tight">Update Service Stage</h3>
@@ -1714,17 +1712,12 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                 <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
                   New Status
                 </label>
-                <select
+                <SelectDropdown
                   value={targetStatus}
-                  onChange={(e) => setTargetStatus(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-sm font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 shadow-none transition"
-                >
-                  {STATUS_OPTIONS.map((st) => (
-                    <option key={st} value={st} className="text-[#1d1d1f] bg-white">
-                      {st}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setTargetStatus(val)}
+                  options={STATUS_OPTIONS}
+                  size="md"
+                />
               </div>
 
               {/* AI Auto-allocation badge */}
@@ -1745,36 +1738,38 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                   <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
                     Assign Service Bay
                   </label>
-                  <select
+                  <SelectDropdown
                     value={targetBayId}
-                    onChange={(e) => setTargetBayId(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 shadow-none transition"
-                  >
-                    <option value="" className="text-[#1d1d1f] bg-white">Auto / None</option>
-                    {bays.map((b) => (
-                      <option key={b.id} value={b.id} className="text-[#1d1d1f] bg-white">
-                        {b.bay_number} ({b.status})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setTargetBayId(val === '' ? '' : Number(val))}
+                    options={[
+                      { value: '', label: 'Auto / None' },
+                      ...bays.map((b) => ({
+                        value: b.id,
+                        label: b.bay_number,
+                        badge: b.status,
+                      })),
+                    ]}
+                    size="md"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
                     Assign Technician
                   </label>
-                  <select
+                  <SelectDropdown
                     value={targetMechId}
-                    onChange={(e) => setTargetMechId(e.target.value === '' ? '' : Number(e.target.value))}
-                    className="w-full px-3 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 shadow-none transition"
-                  >
-                    <option value="" className="text-[#1d1d1f] bg-white">Auto / None</option>
-                    {mechanics.map((m) => (
-                      <option key={m.id} value={m.id} className="text-[#1d1d1f] bg-white">
-                        {m.name} ({m.availability})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setTargetMechId(val === '' ? '' : Number(val))}
+                    options={[
+                      { value: '', label: 'Auto / None' },
+                      ...mechanics.map((m) => ({
+                        value: m.id,
+                        label: m.name,
+                        badge: m.availability,
+                      })),
+                    ]}
+                    size="md"
+                  />
                 </div>
               </div>
 
@@ -1814,8 +1809,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
       {/* CREATE WALK-IN TOKEN MODAL */}
       {showWalkInModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#d6d6d6] space-y-5 my-8 relative z-[10000] text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#d6d6d6] space-y-5 my-8 relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#f0f0f2] pb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-[#0071e3]">
@@ -2011,8 +2006,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
       {/* Add Service Bay Modal */}
       {showAddBayModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f2]">
               <div className="flex items-center space-x-2.5">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3] flex items-center justify-center">
@@ -2050,18 +2045,19 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                 <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
                   Supported Service Specialization
                 </label>
-                <select
+                <SelectDropdown
                   value={newBayService}
-                  onChange={(e) => setNewBayService(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-sm text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
-                >
-                  <option value="General Service">General Service (Multi-purpose)</option>
-                  <option value="Car Wash">Car Wash / Detailing Bay</option>
-                  <option value="Brake Service">Brake & Tyre Service Bay</option>
-                  <option value="Electrical Repair">Electrical & Diagnostic Bay</option>
-                  <option value="Accidental Repair">Accidental / Bodyshop Repair Bay</option>
-                  <option value="Quick Service">Express / Quick Service Lane</option>
-                </select>
+                  onChange={(val) => setNewBayService(val)}
+                  options={[
+                    { value: 'General Service', label: 'General Service (Multi-purpose)' },
+                    { value: 'Car Wash', label: 'Car Wash / Detailing Bay' },
+                    { value: 'Brake Service', label: 'Brake & Tyre Service Bay' },
+                    { value: 'Electrical Repair', label: 'Electrical & Diagnostic Bay' },
+                    { value: 'Accidental Repair', label: 'Accidental / Bodyshop Repair Bay' },
+                    { value: 'Quick Service', label: 'Express / Quick Service Lane' },
+                  ]}
+                  size="md"
+                />
               </div>
 
               <div className="pt-2 flex justify-end space-x-2.5">
@@ -2089,8 +2085,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
       {/* Add Mechanic Modal */}
       {showAddMechModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f2]">
               <div className="flex items-center space-x-2.5">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] text-[#0071e3] flex items-center justify-center">
@@ -2128,17 +2124,18 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                 <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1">
                   Primary Specialization
                 </label>
-                <select
+                <SelectDropdown
                   value={newMechSpec}
-                  onChange={(e) => setNewMechSpec(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-sm text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 font-medium"
-                >
-                  <option value="General Service">General Service & Periodic Maintenance</option>
-                  <option value="Electrical">Electrical, AC & Diagnostics</option>
-                  <option value="Accidental">Accidental, Denting & Painting</option>
-                  <option value="Engine">Engine & Transmission Specialist</option>
-                  <option value="Detailing">Detailing, Washing & Quality Check</option>
-                </select>
+                  onChange={(val) => setNewMechSpec(val)}
+                  options={[
+                    { value: 'General Service', label: 'General Service & Periodic Maintenance' },
+                    { value: 'Electrical', label: 'Electrical, AC & Diagnostics' },
+                    { value: 'Accidental', label: 'Accidental, Denting & Painting' },
+                    { value: 'Engine', label: 'Engine & Transmission Specialist' },
+                    { value: 'Detailing', label: 'Detailing, Washing & Quality Check' },
+                  ]}
+                  size="md"
+                />
               </div>
 
               <div className="pt-2 flex justify-end space-x-2.5">
@@ -2205,8 +2202,8 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
 
       {/* PROVISION FLOOR TECHNICIAN MODAL */}
       {showCreateTechModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-5 relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain">
             <div className="flex items-center justify-between border-b border-[#f0f0f2] pb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-full bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center text-[#0071e3]">
@@ -2292,18 +2289,19 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                 <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
                   Floor Specialization
                 </label>
-                <select
+                <SelectDropdown
                   value={techSpecialization}
-                  onChange={(e) => setTechSpecialization(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20"
-                >
-                  <option value="General Service">General Service & Maintenance</option>
-                  <option value="Engine & Transmission">Engine & Transmission</option>
-                  <option value="Electrical & Battery">Electrical, Battery & EV</option>
-                  <option value="Accidental & Body Repair">Accidental, Denting & Painting</option>
-                  <option value="Brake & Suspension">Brake & Suspension Specialist</option>
-                  <option value="Quick Lane & Washing">Express Lane & Washing</option>
-                </select>
+                  onChange={(val) => setTechSpecialization(val)}
+                  options={[
+                    { value: 'General Service', label: 'General Service & Maintenance' },
+                    { value: 'Engine & Transmission', label: 'Engine & Transmission' },
+                    { value: 'Electrical & Battery', label: 'Electrical, Battery & EV' },
+                    { value: 'Accidental & Body Repair', label: 'Accidental, Denting & Painting' },
+                    { value: 'Brake & Suspension', label: 'Brake & Suspension Specialist' },
+                    { value: 'Quick Lane & Washing', label: 'Express Lane & Washing' },
+                  ]}
+                  size="md"
+                />
               </div>
 
               <div className="pt-2 flex justify-end space-x-2.5">
@@ -2323,6 +2321,177 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Remove Service Bay Modal */}
+      {showRemoveBayModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f2]">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 text-[#b64400] flex items-center justify-center">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[#1d1d1f]">Remove Service Bay</h3>
+                  <p className="text-xs text-[#707070]">De-provision an existing workshop bay</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRemoveBayModal(false)}
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {bays.length === 0 ? (
+              <p className="text-xs text-[#707070] py-4 text-center">No service bays currently registered in this center.</p>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!selectedRemoveBayId) return;
+                  const target = bays.find(b => b.id === Number(selectedRemoveBayId));
+                  if (target) {
+                    await handleDeleteBay(target.id, target.bay_number);
+                    setShowRemoveBayModal(false);
+                    setSelectedRemoveBayId('');
+                  }
+                }}
+                className="space-y-4 pt-2"
+              >
+                <div>
+                  <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
+                    Select Bay to Remove
+                  </label>
+                  <SelectDropdown
+                    value={selectedRemoveBayId}
+                    onChange={(val) => setSelectedRemoveBayId(Number(val))}
+                    options={bays.map(b => ({
+                      value: b.id,
+                      label: `${b.bay_number} (${b.status})`,
+                      badge: b.status,
+                    }))}
+                    placeholder="Choose bay..."
+                    size="md"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end space-x-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowRemoveBayModal(false)}
+                    className="px-4 py-2 border border-[#86868b] rounded-full text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!selectedRemoveBayId}
+                    className="px-5 py-2 bg-[#b64400] hover:bg-[#903600] text-white rounded-full text-xs font-medium shadow-none transition flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Confirm Remove Bay</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Remove Floor Technician Modal */}
+      {showRemoveTechModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-fadeIn">
+          <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] relative z-[10000] text-[#1d1d1f] max-h-[90vh] overflow-y-auto overscroll-contain space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-[#f0f0f2]">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-full bg-red-50 border border-red-200 text-[#b64400] flex items-center justify-center">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[#1d1d1f]">Remove Floor Technician</h3>
+                  <p className="text-xs text-[#707070]">De-provision technician credentials</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRemoveTechModal(false)}
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {technicians.length === 0 && mechanics.length === 0 ? (
+              <p className="text-xs text-[#707070] py-4 text-center">No technicians currently registered in this center.</p>
+            ) : (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!selectedRemoveTechId) return;
+                  const [type, idStr] = selectedRemoveTechId.split(':');
+                  const targetId = Number(idStr);
+                  if (type === 'tech') {
+                    const targetTech = technicians.find(t => t.id === targetId);
+                    if (targetTech) await handleDeactivateTechnician(targetTech.id, targetTech.name);
+                  } else {
+                    const targetMech = mechanics.find(m => m.id === targetId);
+                    if (targetMech) await handleDeleteMechanic(targetMech.id, targetMech.name);
+                  }
+                  setShowRemoveTechModal(false);
+                  setSelectedRemoveTechId('');
+                }}
+                className="space-y-4 pt-2"
+              >
+                <div>
+                  <label className="block text-xs font-medium text-[#707070] uppercase tracking-wider mb-1.5">
+                    Select Technician to Remove
+                  </label>
+                  <SelectDropdown
+                    value={selectedRemoveTechId}
+                    onChange={(val) => setSelectedRemoveTechId(String(val))}
+                    options={[
+                      ...technicians.map(t => ({
+                        value: `tech:${t.id}`,
+                        label: t.name,
+                        sublabel: t.email,
+                        badge: 'Floor Technician',
+                      })),
+                      ...mechanics.filter(m => !technicians.some(t => t.name === m.name)).map(m => ({
+                        value: `mech:${m.id}`,
+                        label: m.name,
+                        badge: m.specialization || 'Mechanic',
+                      })),
+                    ]}
+                    placeholder="Choose technician..."
+                    size="md"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end space-x-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowRemoveTechModal(false)}
+                    className="px-4 py-2 border border-[#86868b] rounded-full text-xs font-medium text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!selectedRemoveTechId}
+                    className="px-5 py-2 bg-[#b64400] hover:bg-[#903600] text-white rounded-full text-xs font-medium shadow-none transition flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Confirm Remove Tech</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>,
         document.body

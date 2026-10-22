@@ -8,10 +8,12 @@ import { RecommendationCard } from '../components/RecommendationCard';
 import { FranchisePlansModal } from '../components/FranchisePlansModal';
 import {
   Car, Clock, Calendar, CheckCircle2, AlertCircle, Plus, Trash2, ArrowRight,
-  ShieldCheck, MapPin, Sparkles, RefreshCw, Building2, Navigation, Compass, ChevronDown, Wrench
+  ShieldCheck, MapPin, Sparkles, RefreshCw, Building2, Navigation, Compass, ChevronDown, Wrench, X
 } from 'lucide-react';
 import { POPULAR_AREAS, findClosestArea, getDistanceBadge } from '../utils/geo';
 import { AreaSelectDropdown } from '../components/AreaSelectDropdown';
+import { SelectDropdown } from '../components/SelectDropdown';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import { cleanDisplayName, calculateTurnTime, calculateCompletionTime } from '../utils/formatters';
 
 const STATUS_STEPS = [
@@ -148,6 +150,9 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
   const [newModel, setNewModel] = useState<string>('');
   const [newYear, setNewYear] = useState<number>(2023);
   const [newFuel, setNewFuel] = useState<string>('Petrol');
+
+  // Prevent background body scrolling when modal is open
+  useLockBodyScroll(Boolean(showAddVehicle || showPlansModal));
 
   // Load customer data
   const loadData = async () => {
@@ -286,7 +291,7 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 sm:pb-4 space-y-6 sm:space-y-8">
       {/* Welcome Banner — Apple 28px White Gallery Card */}
       <div className="bg-white rounded-[28px] p-6 sm:p-8 text-[#1d1d1f] border border-[#d6d6d6] shadow-none relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -634,17 +639,17 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                       No vehicles found. Please add a vehicle first in the My Vehicles tab.
                     </div>
                   ) : (
-                    <select
-                      value={selectedVehicleId}
-                      onChange={(e) => setSelectedVehicleId(Number(e.target.value))}
-                      className="w-full px-4 h-12 bg-white border border-[#d6d6d6] rounded-[980px] text-[14px] font-normal text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
-                    >
-                      {vehicles.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.registration_number} — {v.model} ({v.vehicle_type})
-                        </option>
-                      ))}
-                    </select>
+                    <SelectDropdown
+                      value={selectedVehicleId ? String(selectedVehicleId) : ''}
+                      onChange={(val) => setSelectedVehicleId(val ? Number(val) : '')}
+                      options={vehicles.map((v) => ({
+                        value: String(v.id),
+                        label: `${v.registration_number} — ${v.model}`,
+                        sublabel: v.vehicle_type,
+                      }))}
+                      placeholder="Select a registered vehicle"
+                      buttonClassName="bg-white"
+                    />
                   )}
                 </div>
 
@@ -653,17 +658,13 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                   <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] mb-1.5">
                     Select Service / Repair Type
                   </label>
-                  <select
+                  <SelectDropdown
                     value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
-                    className="w-full px-4 h-12 bg-white border border-[#d6d6d6] rounded-[980px] text-[14px] font-normal text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
-                  >
-                    {AVAILABLE_SERVICES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedService}
+                    options={AVAILABLE_SERVICES}
+                    placeholder="Select service type"
+                    buttonClassName="bg-white"
+                  />
                 </div>
 
                 {/* 3. Customer Required Completion Time */}
@@ -969,12 +970,12 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
 
           {/* Add Vehicle Modal — Apple 28px Dialog */}
           {showAddVehicle && createPortal(
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-              <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-4 relative z-[10000]">
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+              <div className="bg-white rounded-[28px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#d6d6d6] space-y-4 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
                 <div className="flex items-center justify-between border-b border-[#d6d6d6] pb-3">
                   <h3 className="text-[17px] font-semibold text-[#1d1d1f] tracking-tight">Add New Vehicle</h3>
-                  <button onClick={() => setShowAddVehicle(false)} className="text-[#707070] hover:text-[#1d1d1f] cursor-pointer p-1 rounded-full">
-                    ✕
+                  <button onClick={() => setShowAddVehicle(false)} className="text-[#707070] hover:text-[#1d1d1f] cursor-pointer p-1 rounded-full transition">
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
                 <form onSubmit={handleAddVehicleSubmit} className="space-y-3.5">
@@ -992,32 +993,23 @@ export const CustomerPortal: React.FC<{ activeTab?: string }> = ({ activeTab = '
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] mb-1">Vehicle Type</label>
-                      <select
+                      <SelectDropdown
                         value={newType}
-                        onChange={(e) => setNewType(e.target.value)}
-                        className="w-full px-4 h-12 bg-white border border-[#d6d6d6] rounded-[980px] text-[14px] font-normal text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition"
-                      >
-                        <option value="Sedan">Sedan</option>
-                        <option value="SUV">SUV</option>
-                        <option value="Hatchback">Hatchback</option>
-                        <option value="Luxury">Luxury</option>
-                        <option value="Bike">Bike / Two-Wheeler</option>
-                        <option value="EV">Electric Vehicle (EV)</option>
-                      </select>
+                        onChange={setNewType}
+                        options={['Sedan', 'SUV', 'Hatchback', 'Luxury', 'Bike', 'EV']}
+                        placeholder="Select type"
+                        buttonClassName="bg-white"
+                      />
                     </div>
                     <div>
                       <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] mb-1">Fuel Type</label>
-                      <select
+                      <SelectDropdown
                         value={newFuel}
-                        onChange={(e) => setNewFuel(e.target.value)}
-                        className="w-full px-4 h-12 bg-white border border-[#d6d6d6] rounded-[980px] text-[14px] font-normal text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition"
-                      >
-                        <option value="Petrol">Petrol</option>
-                        <option value="Diesel">Diesel</option>
-                        <option value="Electric">Electric</option>
-                        <option value="CNG">CNG</option>
-                        <option value="Hybrid">Hybrid</option>
-                      </select>
+                        onChange={setNewFuel}
+                        options={['Petrol', 'Diesel', 'Electric', 'CNG', 'Hybrid']}
+                        placeholder="Select fuel"
+                        buttonClassName="bg-white"
+                      />
                     </div>
                   </div>
                   <div>

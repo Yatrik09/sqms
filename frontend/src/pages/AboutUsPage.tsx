@@ -16,7 +16,7 @@ export const AboutUsPage: React.FC<AboutUsPageProps> = ({ onNavigateTab }) => {
   const [showPlansModal, setShowPlansModal] = useState(false);
 
   return (
-    <div className="w-full space-y-20 py-6 sm:py-12">
+    <div className="w-full space-y-12 sm:space-y-16 pt-4 sm:pt-6 pb-2 sm:pb-4">
       {/* Hero Section — Pure Gallery White Hero Stage */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
         <div className="flex justify-center mb-2">
