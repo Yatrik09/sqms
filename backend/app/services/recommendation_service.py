@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from app.models.entities import ServiceCenter, Mechanic, ServiceBay, QueueEntry, ServiceRequest
 from app.core.config import settings
-from ml.prediction.predictor import predictor
+from ml.prediction.predictor import predictor, DEFAULT_FALLBACK_BASE_DURATIONS
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0 # Earth radius in km
@@ -118,7 +118,7 @@ def compute_center_recommendations(
 
         # 4. Predict Turnaround & Queue Waiting Time
         # Predict base duration according to service category
-        base_dur = predictor.DEFAULT_FALLBACK_BASE_DURATIONS.get(service_type, 60)
+        base_dur = DEFAULT_FALLBACK_BASE_DURATIONS.get(service_type, 60)
         v_mult = 1.2 if vehicle_type == 'SUV' else 1.45 if vehicle_type == 'Luxury' else 0.85 if vehicle_type == 'Bike' else 1.0
         dur_min = int(round(base_dur * v_mult))
 
