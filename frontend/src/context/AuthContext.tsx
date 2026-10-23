@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
 import type { User } from '../types';
-import { api, invalidateApiCache } from '../services/api';
+import { api, invalidateApiCache, setMemoryToken } from '../services/api';
 import { AuthContext } from './auth-context';
 
 export { useAuth } from './auth-context';
@@ -17,7 +17,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
+      const initial = sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
+      if (initial) setMemoryToken(initial);
+      return initial;
     } catch {
       return null;
     }
@@ -151,13 +153,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setLogoutNotice(null);
     invalidateApiCache();
     const res = await api.login(email, pass);
+    setMemoryToken(res.access_token);
     try {
       sessionStorage.setItem('sqms_token', res.access_token);
       sessionStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+      sessionStorage.setItem(`sqms_token_${res.user.role}`, res.access_token);
+      if (res.user.role === 'technician' || res.user.role === 'branch_manager') {
+        sessionStorage.setItem('sqms_floor_token', res.access_token);
+        localStorage.setItem('sqms_floor_token', res.access_token);
+      }
     } catch {}
     try {
       localStorage.setItem('sqms_token', res.access_token);
       localStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+      localStorage.setItem(`sqms_token_${res.user.role}`, res.access_token);
     } catch {}
     setToken(res.access_token);
     saveUser(res.user);
@@ -257,13 +266,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    setMemoryToken(null);
     try {
       sessionStorage.removeItem('sqms_token');
       sessionStorage.removeItem('sqms_cached_user');
+      sessionStorage.removeItem('sqms_floor_token');
     } catch {}
     try {
       localStorage.removeItem('sqms_token');
       localStorage.removeItem('sqms_cached_user');
+      localStorage.removeItem('sqms_floor_token');
     } catch {}
     invalidateApiCache();
     setToken(null);

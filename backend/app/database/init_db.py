@@ -169,11 +169,20 @@ def init_db():
                 phone="+91 98980 55667",
                 password_hash=get_password_hash("TechPassword123!"),
                 role="technician",
-                status="active"
+                status="active",
+                service_center_id=1
             )
             db.add(tech)
             db.commit()
             print("[InitDB] Technician created: tech@demo.local / TechPassword123!")
+        else:
+            tech.role = "technician"
+            tech.status = "active"
+            if not tech.service_center_id:
+                tech.service_center_id = 1
+            db.commit()
+            print("[InitDB] Technician verified: tech@demo.local / TechPassword123!")
+
 
     except Exception as e:
         print(f"[InitDB Error] {e}")

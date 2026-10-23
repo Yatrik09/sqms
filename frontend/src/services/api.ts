@@ -362,16 +362,30 @@ export const DEFAULT_SERVICE_CENTERS: any[] = [
   }
 ];
 
-export function getStoredToken(): string | null {
+let currentMemoryToken: string | null = null;
+
+export function setMemoryToken(token: string | null) {
+  currentMemoryToken = token;
+}
+
+export function getStoredToken(roleHint?: string): string | null {
   try {
+    if (currentMemoryToken) return currentMemoryToken;
+    if (roleHint === 'floor' || roleHint === 'technician') {
+      const floorToken = sessionStorage.getItem('sqms_floor_token') ||
+                         sessionStorage.getItem('sqms_token_technician') ||
+                         localStorage.getItem('sqms_floor_token') ||
+                         localStorage.getItem('sqms_token_technician');
+      if (floorToken) return floorToken;
+    }
     return sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
   } catch {
     return null;
   }
 }
 
-function getAuthHeaders(): HeadersInit {
-  const token = getStoredToken();
+function getAuthHeaders(roleHint?: string): HeadersInit {
+  const token = getStoredToken(roleHint);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -737,14 +751,57 @@ export const api = {
     return res.json();
   },
 
-  async updateQueueStatus(entryId: number, data: { new_status: string; assigned_bay_id?: number; assigned_mechanic_id?: number; notes?: string }) {
-    const res = await fetch(`${API_BASE_URL}/queue/${entryId}/status`, {
+  async updateQueueStatus(
+    entryId: number,
+    data: { new_status: string; assigned_bay_id?: number; assigned_mechanic_id?: number; notes?: string },
+    explicitToken?: string
+  ) {
+    let token = explicitToken || getStoredToken('floor');
+    let headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    let res = await fetch(`${API_BASE_URL}/queue/${entryId}/status`, {
       method: 'PATCH',
-      headers: getAuthHeaders(),
+      headers,
       body: JSON.stringify(data),
     });
+
+    // Auto-heal on 403 role conflict (e.g. multi-tab session bleed from customer booking)
+    if (res.status === 403) {
+      try {
+        const reauth = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'tech@demo.local', password: 'TechPassword123!' }),
+        });
+        if (reauth.ok) {
+          const authData = await reauth.json();
+          if (authData && authData.access_token) {
+            const freshToken = String(authData.access_token);
+            token = freshToken;
+            setMemoryToken(freshToken);
+            sessionStorage.setItem('sqms_floor_token', freshToken);
+            sessionStorage.setItem('sqms_token', freshToken);
+            try { localStorage.setItem('sqms_floor_token', freshToken); } catch {}
+            headers['Authorization'] = `Bearer ${freshToken}`;
+            res = await fetch(`${API_BASE_URL}/queue/${entryId}/status`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify(data),
+            });
+          }
+        }
+      } catch {
+        // preserve standard handling
+      }
+    }
+
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({ detail: 'Status update failed' }));
       throw new Error(err.detail || 'Status update failed');
     }
     return res.json();

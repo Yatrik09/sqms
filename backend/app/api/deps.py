@@ -63,5 +63,6 @@ def require_roles(allowed_roles: List[str]):
 get_current_super_admin = require_roles(["super_admin"])
 get_current_manager = require_roles(["super_admin", "branch_manager"])
 get_current_owner = require_roles(["super_admin", "franchise_owner"])
-get_current_floor_operator = require_roles(["super_admin", "branch_manager", "technician"])
+get_current_floor_operator = require_roles(["super_admin", "franchise_owner", "branch_manager", "technician"])
 get_current_manager_or_owner = require_roles(["super_admin", "franchise_owner", "branch_manager"])
+

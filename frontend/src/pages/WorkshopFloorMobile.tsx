@@ -102,7 +102,7 @@ function playChime() {
 }
 
 export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwitchToDesktop }) => {
-  const { user, lastWsEvent } = useAuth();
+  const { user, token, lastWsEvent } = useAuth();
 
   const [centerId, setCenterId] = useState<number>(1);
   const [centers, setCenters] = useState<any[]>([]);
@@ -286,12 +286,16 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     }
 
     try {
-      await api.updateQueueStatus(entry.id, {
-        new_status: nextStatus,
-        assigned_bay_id: bayId || undefined,
-        assigned_mechanic_id: mechId || undefined,
-        notes: `Advanced to ${nextStatus} via Workshop Floor Screen`,
-      });
+      await api.updateQueueStatus(
+        entry.id,
+        {
+          new_status: nextStatus,
+          assigned_bay_id: bayId || undefined,
+          assigned_mechanic_id: mechId || undefined,
+          notes: `Advanced to ${nextStatus} via Workshop Floor Screen`,
+        },
+        token || undefined
+      );
 
       showToast(
         `Token ${entry.token_number} Updated!`,
@@ -300,11 +304,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
       await loadFloorData();
     } catch (err: any) {
       const msg = err.message || '';
-      if (msg.includes('Operation not permitted') || msg.includes('Required role') || msg.includes('403')) {
-        alert('Access denied: Active Workshop Technician or Branch Manager role required to advance stages. If you switched accounts in another window, please refresh this tab.');
-      } else {
-        alert(msg || 'Failed to update vehicle status.');
-      }
+      showToast('Status Update Notice', msg || 'Failed to update vehicle status.', 'info');
     } finally {
       setUpdatingEntryId(null);
     }
@@ -317,8 +317,10 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     if (newStatus === 'Service In Progress') {
       const cap = getBayCapacityForService(editEntry.service_type);
       if (cap.isFull && !editEntry.assigned_bay_id && !bayId) {
-        alert(
-          `⚠️ Bay Capacity Limit Reached:\n\nOnly ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${editEntry.service_type || 'General Service'}", and all ${cap.total} are currently occupied.\n\nSystem does not allow adding or starting a 3rd car for "${editEntry.service_type || 'General Service'}" until an active bay is completed and freed.`
+        showToast(
+          'Bay Capacity Limit Reached',
+          `Only ${cap.total} bay${cap.total !== 1 ? 's are' : ' is'} available for "${editEntry.service_type || 'General Service'}", and all ${cap.total} are occupied.`,
+          'info'
         );
         return;
       }
@@ -326,12 +328,16 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
 
     setUpdatingEntryId(editEntry.id);
     try {
-      await api.updateQueueStatus(editEntry.id, {
-        new_status: newStatus,
-        assigned_bay_id: bayId || undefined,
-        assigned_mechanic_id: mechId || undefined,
-        notes: `Manual stage override via Workshop Floor Screen`,
-      });
+      await api.updateQueueStatus(
+        editEntry.id,
+        {
+          new_status: newStatus,
+          assigned_bay_id: bayId || undefined,
+          assigned_mechanic_id: mechId || undefined,
+          notes: `Manual stage override via Workshop Floor Screen`,
+        },
+        token || undefined
+      );
       showToast(
         `Token ${editEntry.token_number} → ${newStatus}`,
         `Stage updated successfully.`
@@ -340,11 +346,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
       await loadFloorData();
     } catch (err: any) {
       const msg = err.message || '';
-      if (msg.includes('Operation not permitted') || msg.includes('Required role') || msg.includes('403')) {
-        alert('Access denied: Active Workshop Technician or Branch Manager role required to advance stages. If you switched accounts in another window, please refresh this tab.');
-      } else {
-        alert(msg || 'Failed to update status.');
-      }
+      showToast('Status Update Notice', msg || 'Failed to update status.', 'info');
     } finally {
       setUpdatingEntryId(null);
     }
@@ -375,7 +377,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
       setWalkinPhone('');
       await loadFloorData();
     } catch (err: any) {
-      alert(err.message || 'Failed to create walk-in token.');
+      showToast('Walk-in Error', err.message || 'Failed to create walk-in token.', 'info');
     } finally {
       setIsSubmittingWalkIn(false);
     }
