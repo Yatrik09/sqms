@@ -195,37 +195,56 @@
   transform: none;
 }
 
-/* Custom scrollbars matching macOS / Apple clean style */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Hide scrollbars across the whole website and all local scrollable containers while maintaining full scrolling functionality */
+*,
+*::before,
+*::after {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
 }
 
-::-webkit-scrollbar-track {
-  background: #f5f5f7;
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari, Edge, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #d6d6d6;
-  border-radius: 9999px;
+/* Local scrollable containers (modals, dropdowns, tables, drawers, cards, lists) */
+[class*="overflow-"],
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto,
+.overflow-scroll,
+.overflow-y-scroll,
+.overflow-x-scroll,
+.no-scrollbar,
+.table-responsive {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #86868b;
+[class*="overflow-"]::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar,
+.overflow-scroll::-webkit-scrollbar,
+.overflow-y-scroll::-webkit-scrollbar,
+.overflow-x-scroll::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 /* Table rules */
 table {
   border-collapse: separate;
   border-spacing: 0;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 .table-responsive {
