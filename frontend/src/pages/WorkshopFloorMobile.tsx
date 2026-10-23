@@ -147,7 +147,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
     }, 4000);
   };
 
-  const isTechnician = user?.role === 'technician';
+  const isTechnician = user?.role === 'technician' || user?.email === 'tech@demo.local';
 
   // 1. Initial Load of Centers
   useEffect(() => {
@@ -456,7 +456,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
                 {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
 
-              {onSwitchToDesktop && (
+              {onSwitchToDesktop && !isTechnician && (
                 <button
                   onClick={onSwitchToDesktop}
                   className="px-3 py-1.5 rounded-full bg-white hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium flex items-center space-x-1.5 border border-[#d6d6d6] transition cursor-pointer"

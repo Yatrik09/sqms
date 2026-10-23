@@ -311,6 +311,11 @@ def purchase_plan(
     invoice_num = f"INV-SQMS-{datetime.utcnow().year}-{random.randint(10000, 99999)}"
 
     # 1. Upgrade user role to franchise_owner with plan specifications
+    if current_user.role in ["super_admin", "technician", "branch_manager"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Staff account with role '{current_user.role}' cannot purchase a franchise plan. Please log in as a Franchise Owner or Customer."
+        )
     current_user.role = "franchise_owner"
     current_user.plan_tier = plan.id
     current_user.plan_name = plan.name

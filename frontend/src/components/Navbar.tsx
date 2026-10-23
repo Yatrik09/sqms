@@ -105,6 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               className="flex items-center space-x-2.5 cursor-pointer select-none mr-6 lg:mr-8 shrink-0"
               onClick={() => {
                 if (user?.role === 'customer') switchTab('active-service');
+                else if (user?.role === 'technician' || user?.email === 'tech@demo.local') switchTab('floor-mobile');
                 else if (user?.role === 'branch_manager') switchTab('manager-queue');
                 else if (user?.role === 'franchise_owner') switchTab('owner-overview');
                 else if (user?.role === 'super_admin') switchTab('admin-dashboard');
@@ -184,7 +185,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </>
               )}
 
-              {user?.role === 'technician' && (
+              {(user?.role === 'technician' || user?.email === 'tech@demo.local') && (
                 <>
                   <button
                     onClick={() => switchTab('floor-mobile')}
@@ -617,7 +618,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               </>
             )}
 
-            {user?.role === 'technician' && (
+            {(user?.role === 'technician' || user?.email === 'tech@demo.local') && (
               <>
                 <button
                   onClick={() => { switchTab('floor-mobile'); setMobileMenuOpen(false); }}

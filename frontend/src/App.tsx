@@ -57,7 +57,7 @@ const MainLayout: React.FC = () => {
     if (!user) return;
     if (user.role === 'customer') {
       setCurrentTab('active-service');
-    } else if (user.role === 'technician') {
+    } else if (user.role === 'technician' || user.email === 'tech@demo.local') {
       setCurrentTab('floor-mobile');
     } else if (user.role === 'branch_manager') {
       setCurrentTab('manager-queue');
@@ -66,7 +66,7 @@ const MainLayout: React.FC = () => {
     } else if (user.role === 'super_admin') {
       setCurrentTab('admin-dashboard');
     }
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, user?.email]);
 
   // Scroll to top whenever active tab changes
   useEffect(() => {
@@ -95,14 +95,24 @@ const MainLayout: React.FC = () => {
     return <AuthPage />;
   }
 
+  const isFloorTechnician = user.role === 'technician' || user.email === 'tech@demo.local';
+
   // Strict Role-Based Content Rendering
   const renderContent = () => {
     if (currentTab === 'about-us') {
       return <AboutUsPage onNavigateTab={setCurrentTab} />;
     }
 
-    if (currentTab === 'floor-mobile' || user.role === 'technician') {
-      return <WorkshopFloorMobile onSwitchToDesktop={() => setCurrentTab(user.role === 'branch_manager' ? 'manager-queue' : 'owner-overview')} />;
+    if (currentTab === 'floor-mobile' || isFloorTechnician) {
+      return (
+        <WorkshopFloorMobile
+          onSwitchToDesktop={
+            isFloorTechnician
+              ? undefined
+              : () => setCurrentTab(user.role === 'branch_manager' ? 'manager-queue' : 'owner-overview')
+          }
+        />
+      );
     }
 
     switch (user.role) {

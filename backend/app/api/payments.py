@@ -226,7 +226,7 @@ def verify_razorpay_payment(
         target_user.max_allowed_centers = max_centers
         target_user.subscription_status = "active"
         target_user.subscription_id = f"sub_rzp_{req.razorpay_payment_id}"
-        if target_user.role != "super_admin":
+        if target_user.role not in ["super_admin", "branch_manager", "technician"]:
             target_user.role = "franchise_owner"
         db.add(target_user)
         db.commit()
