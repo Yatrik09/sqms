@@ -501,15 +501,6 @@ export const AuthPage: React.FC = () => {
 
           {/* Right Column: Apple White Card Form */}
           <div className="w-full lg:col-span-7 bg-white border border-[#d6d6d6] rounded-[24px] p-4 sm:p-6 lg:py-5 lg:px-6 shadow-none max-h-[96vh] overflow-y-auto lg:overflow-visible">
-            {/* Mobile Brand Logo */}
-            <div className="flex justify-center mb-3 lg:hidden">
-              <img
-                src="/logo.png"
-                alt="DriveOps"
-                className="h-8 w-auto object-contain"
-              />
-            </div>
-
             {/* Tabs */}
             <div className="flex border-b border-[#d6d6d6] mb-3">
               <button

@@ -422,8 +422,8 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
         <div className="max-w-7xl mx-auto w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#f5f5f7] border border-[#d6d6d6] flex items-center justify-center p-1">
-                <img src="/logo-icon.png" alt="DriveOps" className="w-6 h-6 object-contain" />
+              <div className="w-9 h-9 rounded-xl bg-[#0071e3]/10 border border-[#0071e3]/20 flex items-center justify-center">
+                <Wrench className="w-4.5 h-4.5 text-[#0071e3]" />
               </div>
               <div>
                 <div className="flex items-center space-x-1.5">
