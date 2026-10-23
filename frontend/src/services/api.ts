@@ -362,8 +362,16 @@ export const DEFAULT_SERVICE_CENTERS: any[] = [
   }
 ];
 
+export function getStoredToken(): string | null {
+  try {
+    return sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
+  } catch {
+    return null;
+  }
+}
+
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('sqms_token');
+  const token = getStoredToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -483,7 +491,7 @@ export const api = {
   },
 
   async getMe() {
-    const cachedUser = localStorage.getItem('sqms_cached_user');
+    const cachedUser = sessionStorage.getItem('sqms_cached_user') || localStorage.getItem('sqms_cached_user');
     let parsedCached: any = null;
     if (cachedUser) {
       try { parsedCached = JSON.parse(cachedUser); } catch {}

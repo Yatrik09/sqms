@@ -39,7 +39,13 @@ async def create_service_booking(
         Vehicle.customer_id == customer.id
     ).first()
     if not vehicle:
-        raise HTTPException(status_code=400, detail="Selected vehicle not found for this account.")
+        # Graceful fallback: check if customer has any registered vehicle
+        vehicle = db.query(Vehicle).filter(Vehicle.customer_id == customer.id).first()
+    if not vehicle:
+        raise HTTPException(
+            status_code=400,
+            detail="Selected vehicle not found for this account. Please add a vehicle first in the My Vehicles tab."
+        )
 
     center = db.query(ServiceCenter).filter(ServiceCenter.id == b_in.service_center_id).first()
     if not center or center.status != "active":

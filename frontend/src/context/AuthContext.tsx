@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
 import type { User } from '../types';
-import { api } from '../services/api';
+import { api, invalidateApiCache } from '../services/api';
 import { AuthContext } from './auth-context';
 
 export { useAuth } from './auth-context';
@@ -9,17 +9,27 @@ export type { AuthContextType } from './auth-context';
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     try {
-      const cached = localStorage.getItem('sqms_cached_user');
+      const cached = sessionStorage.getItem('sqms_cached_user') || localStorage.getItem('sqms_cached_user');
       return cached ? JSON.parse(cached) : null;
     } catch {
       return null;
     }
   });
-  const [token, setToken] = useState<string | null>(localStorage.getItem('sqms_token'));
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
+    } catch {
+      return null;
+    }
+  });
   const [isLoading, setIsLoading] = useState<boolean>(() => {
-    const t = localStorage.getItem('sqms_token');
-    const c = localStorage.getItem('sqms_cached_user');
-    return Boolean(t && !c);
+    try {
+      const t = sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
+      const c = sessionStorage.getItem('sqms_cached_user') || localStorage.getItem('sqms_cached_user');
+      return Boolean(t && !c);
+    } catch {
+      return false;
+    }
   });
   const [wsConnected, setWsConnected] = useState<boolean>(false);
   const [lastWsEvent, setLastWsEvent] = useState<any>(null);
@@ -29,12 +39,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(u);
     if (u) {
       try {
+        sessionStorage.setItem('sqms_cached_user', JSON.stringify(u));
         localStorage.setItem('sqms_cached_user', JSON.stringify(u));
       } catch {
         // ignore
       }
     } else {
-      localStorage.removeItem('sqms_cached_user');
+      try {
+        sessionStorage.removeItem('sqms_cached_user');
+        localStorage.removeItem('sqms_cached_user');
+      } catch {
+        // ignore
+      }
     }
   };
 
@@ -51,7 +67,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     let isMounted = true;
     async function loadUser() {
-      const storedToken = localStorage.getItem('sqms_token');
+      const storedToken = sessionStorage.getItem('sqms_token') || localStorage.getItem('sqms_token');
       if (storedToken) {
         try {
           const profile = await api.getMe();
@@ -59,7 +75,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err: any) {
           // Only reset session if server explicitly returned 401 Unauthorized
           if (err?.status === 401 || err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
-            localStorage.removeItem('sqms_token');
+            try {
+              sessionStorage.removeItem('sqms_token');
+              localStorage.removeItem('sqms_token');
+            } catch {}
             setToken(null);
             saveUser(null);
           }
@@ -130,8 +149,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, pass: string) => {
     setLogoutNotice(null);
+    invalidateApiCache();
     const res = await api.login(email, pass);
-    localStorage.setItem('sqms_token', res.access_token);
+    try {
+      sessionStorage.setItem('sqms_token', res.access_token);
+      sessionStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
+    try {
+      localStorage.setItem('sqms_token', res.access_token);
+      localStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
     setToken(res.access_token);
     saveUser(res.user);
     return res;
@@ -148,8 +175,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     longitude?: number
   ) => {
     setLogoutNotice(null);
+    invalidateApiCache();
     const res = await api.register(name, email, pass, phone, city, area, latitude, longitude);
-    localStorage.setItem('sqms_token', res.access_token);
+    try {
+      sessionStorage.setItem('sqms_token', res.access_token);
+      sessionStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
+    try {
+      localStorage.setItem('sqms_token', res.access_token);
+      localStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
     setToken(res.access_token);
     saveUser(res.user);
     return res;
@@ -157,8 +192,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetPassword = async (email: string, newPassword: string) => {
     setLogoutNotice(null);
+    invalidateApiCache();
     const res = await api.resetPassword(email, newPassword);
-    localStorage.setItem('sqms_token', res.access_token);
+    try {
+      sessionStorage.setItem('sqms_token', res.access_token);
+      sessionStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
+    try {
+      localStorage.setItem('sqms_token', res.access_token);
+      localStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
     setToken(res.access_token);
     saveUser(res.user);
     return res;
@@ -171,8 +214,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const verifyOTPAndResetPassword = async (email: string, otp: string, newPassword: string) => {
     setLogoutNotice(null);
+    invalidateApiCache();
     const res = await api.verifyOTPAndResetPassword(email, otp, newPassword);
-    localStorage.setItem('sqms_token', res.access_token);
+    try {
+      sessionStorage.setItem('sqms_token', res.access_token);
+      sessionStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
+    try {
+      localStorage.setItem('sqms_token', res.access_token);
+      localStorage.setItem('sqms_cached_user', JSON.stringify(res.user));
+    } catch {}
     setToken(res.access_token);
     saveUser(res.user);
     return res;
@@ -206,7 +257,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    localStorage.removeItem('sqms_token');
+    try {
+      sessionStorage.removeItem('sqms_token');
+      sessionStorage.removeItem('sqms_cached_user');
+    } catch {}
+    try {
+      localStorage.removeItem('sqms_token');
+      localStorage.removeItem('sqms_cached_user');
+    } catch {}
+    invalidateApiCache();
     setToken(null);
     saveUser(null);
     setLogoutNotice('You have been logged out successfully. Sign in with your credentials to access the system.');

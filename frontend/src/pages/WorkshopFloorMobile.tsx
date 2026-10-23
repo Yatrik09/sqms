@@ -299,7 +299,12 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
       );
       await loadFloorData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update vehicle status.');
+      const msg = err.message || '';
+      if (msg.includes('Operation not permitted') || msg.includes('Required role') || msg.includes('403')) {
+        alert('Access denied: Active Workshop Technician or Branch Manager role required to advance stages. If you switched accounts in another window, please refresh this tab.');
+      } else {
+        alert(msg || 'Failed to update vehicle status.');
+      }
     } finally {
       setUpdatingEntryId(null);
     }
@@ -334,7 +339,12 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
       setEditEntry(null);
       await loadFloorData();
     } catch (err: any) {
-      alert(err.message || 'Failed to update status.');
+      const msg = err.message || '';
+      if (msg.includes('Operation not permitted') || msg.includes('Required role') || msg.includes('403')) {
+        alert('Access denied: Active Workshop Technician or Branch Manager role required to advance stages. If you switched accounts in another window, please refresh this tab.');
+      } else {
+        alert(msg || 'Failed to update status.');
+      }
     } finally {
       setUpdatingEntryId(null);
     }

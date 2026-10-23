@@ -15,6 +15,16 @@ def get_my_vehicles(
     db: Session = Depends(get_db)
 ):
     customer = db.query(Customer).filter(Customer.user_id == current_user.id).first()
+    if not customer and current_user.role == "customer":
+        customer = Customer(
+            user_id=current_user.id,
+            name=current_user.name,
+            phone=current_user.phone or "N/A",
+            email=current_user.email
+        )
+        db.add(customer)
+        db.commit()
+        db.refresh(customer)
     if not customer:
         return []
     return customer.vehicles

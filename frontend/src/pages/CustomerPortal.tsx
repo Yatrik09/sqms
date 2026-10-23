@@ -177,8 +177,15 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
       ]);
       const safeVehicles = Array.isArray(vList) ? vList : [];
       setVehicles(safeVehicles);
-      if (safeVehicles.length > 0 && selectedVehicleId === '') {
-        setSelectedVehicleId(safeVehicles[0].id);
+      if (safeVehicles.length > 0) {
+        setSelectedVehicleId((prev) => {
+          if (prev === '' || !safeVehicles.some((v) => v.id === prev)) {
+            return safeVehicles[0].id;
+          }
+          return prev;
+        });
+      } else {
+        setSelectedVehicleId('');
       }
       setActiveService(active);
       setHistory(Array.isArray(hist) ? hist : []);
@@ -191,6 +198,8 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
   };
 
   useEffect(() => {
+    setSelectedVehicleId('');
+    setBookingSuccess(null);
     loadData();
     const interval = setInterval(loadData, 20000); // 20s background sync to prevent screen flickering
     return () => clearInterval(interval);
@@ -205,7 +214,7 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     setIsSearching(true);
     try {
       const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
-      const veh = safeVehicles.find((v) => v.id === selectedVehicleId);
+      const veh = safeVehicles.find((v) => v.id === selectedVehicleId) || safeVehicles[0];
       const res = await api.getRecommendations(
         selectedService,
         veh?.vehicle_type || 'Sedan',
@@ -232,10 +241,18 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
 
   // Handle Booking submission
   const handleConfirmBooking = async () => {
-    if (!selectedVehicleId) return;
+    let vehicleIdToUse = selectedVehicleId;
+    if (!vehicleIdToUse && vehicles.length > 0) {
+      vehicleIdToUse = vehicles[0].id;
+      setSelectedVehicleId(vehicles[0].id);
+    }
+    if (!vehicleIdToUse) {
+      alert('Please select or add a vehicle first in the My Vehicles tab.');
+      return;
+    }
     try {
       const res = await api.createBooking({
-        vehicle_id: Number(selectedVehicleId),
+        vehicle_id: Number(vehicleIdToUse),
         service_center_id: selectedCenterId,
         service_type: selectedService,
         requested_date: preferredDate,
