@@ -17,6 +17,8 @@ def get_service_center_recommendations(
         service_type=req.service_type,
         vehicle_type=req.vehicle_type,
         required_completion_time_str=req.required_completion_time,
+        service_date_str=req.service_date,
+        client_current_time_str=req.client_current_time,
         customer_lat=req.customer_latitude or 23.0225,
         customer_lon=req.customer_longitude or 72.5714
     )

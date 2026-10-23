@@ -41,6 +41,15 @@ const AVAILABLE_SERVICES = [
   'Major Accident Repair',
 ];
 
+const QUICK_TIME_SLOTS = [
+  '03:00 PM',
+  '04:00 PM',
+  '05:00 PM',
+  '06:00 PM',
+  '07:00 PM',
+  '08:00 PM',
+];
+
 interface CustomerPortalProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
@@ -209,35 +218,36 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     setTab(activeTab);
   }, [activeTab]);
 
-  // Handle recommendation query
-  const handleFetchRecommendations = async () => {
-    setIsSearching(true);
-    try {
-      const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
-      const veh = safeVehicles.find((v) => v.id === selectedVehicleId) || safeVehicles[0];
-      const res = await api.getRecommendations(
-        selectedService,
-        veh?.vehicle_type || 'Sedan',
-        requiredTime,
-        userLat,
-        userLon
-      );
-      setRecommendations(res);
-      if (res.recommended_center) {
-        setSelectedCenterId(res.recommended_center.service_center_id);
-      }
-    } catch (e) {
-      console.error('Failed to fetch recommendations', e);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
+  // Handle recommendation query with debouncing
   useEffect(() => {
-    if (tab === 'book-service') {
-      handleFetchRecommendations();
-    }
-  }, [tab, selectedService, requiredTime, selectedVehicleId, userLat, userLon]);
+    if (tab !== 'book-service') return;
+
+    setIsSearching(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
+        const veh = safeVehicles.find((v) => v.id === selectedVehicleId) || safeVehicles[0];
+        const res = await api.getRecommendations(
+          selectedService,
+          veh?.vehicle_type || 'Sedan',
+          requiredTime,
+          userLat,
+          userLon,
+          preferredDate
+        );
+        setRecommendations(res);
+        if (res.recommended_center) {
+          setSelectedCenterId(res.recommended_center.service_center_id);
+        }
+      } catch (e) {
+        console.error('Failed to fetch recommendations', e);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 200);
+
+    return () => clearTimeout(timeoutId);
+  }, [tab, selectedService, requiredTime, preferredDate, selectedVehicleId, userLat, userLon]);
 
   // Handle Booking submission
   const handleConfirmBooking = async () => {
@@ -695,21 +705,57 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                 </div>
 
                 {/* 3. Customer Required Completion Time */}
-                <div className="bg-[#f5f5f7] p-4 sm:p-5 rounded-[20px] border border-[#d6d6d6] space-y-1.5">
-                  <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] flex items-center">
-                    <Clock className="w-3.5 h-3.5 mr-1.5 text-[#0071e3]" />
-                    Required Completion Time (Optional)
-                  </label>
+                <div className="bg-[#f5f5f7] p-4 sm:p-5 rounded-[20px] border border-[#d6d6d6] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[12px] font-semibold uppercase tracking-wider text-[#1d1d1f] flex items-center">
+                      <Clock className="w-3.5 h-3.5 mr-1.5 text-[#0071e3]" />
+                      Required Completion Time (Slot)
+                    </label>
+                    <span className="text-[11px] font-medium text-[#0071e3] flex items-center">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Auto-Updates Nearest Workshop
+                    </span>
+                  </div>
                   <p className="text-[12px] text-[#707070]">
-                    Tell us when you need your vehicle back (e.g. "I need it by 5:00 PM"). The system evaluates feasibility across centers.
+                    Select or enter your desired vehicle completion time. SQMS evaluates live capacity across centers and automatically routes to the nearest workshop with an open slot.
                   </p>
-                  <input
-                    type="text"
-                    value={requiredTime}
-                    onChange={(e) => setRequiredTime(e.target.value)}
-                    placeholder="e.g. 05:00 PM or 17:00"
-                    className="w-full px-4 h-12 bg-white border border-[#d6d6d6] rounded-[980px] text-[14px] font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
-                  />
+
+                  {/* 1-Click Quick Time Slot Chips */}
+                  <div className="pt-1">
+                    <span className="text-[10px] uppercase font-semibold text-[#86868b] tracking-wider block mb-1.5">
+                      Quick Select Target Slot:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {QUICK_TIME_SLOTS.map((slot) => {
+                        const isSelected = requiredTime.trim().toUpperCase() === slot.toUpperCase();
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setRequiredTime(slot)}
+                            className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#0071e3] text-white ring-2 ring-[#0071e3] shadow-none'
+                                : 'bg-white border border-[#d6d6d6] text-[#1d1d1f] hover:border-[#86868b] hover:bg-[#fbfbfd]'
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Custom Time Input */}
+                  <div className="pt-1">
+                    <input
+                      type="text"
+                      value={requiredTime}
+                      onChange={(e) => setRequiredTime(e.target.value)}
+                      placeholder="e.g. 05:00 PM, 06:00 PM or 17:00"
+                      className="w-full px-4 h-11 bg-white border border-[#d6d6d6] rounded-[980px] text-[13px] font-medium text-[#1d1d1f] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3]"
+                    />
+                  </div>
                 </div>
 
                 {/* 4. Preferred Date */}

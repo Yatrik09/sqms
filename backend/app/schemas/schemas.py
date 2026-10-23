@@ -366,6 +366,8 @@ class RecommendationRequest(BaseModel):
     service_type: str
     vehicle_type: str = "Sedan"
     required_completion_time: Optional[str] = None # e.g. "05:00 PM"
+    service_date: Optional[str] = None # e.g. "2026-10-24"
+    client_current_time: Optional[str] = None # Client ISO timestamp or local time string
     customer_latitude: Optional[float] = 23.0225 # Default Demo City Center (Ahmedabad)
     customer_longitude: Optional[float] = 72.5714
 
@@ -387,6 +389,7 @@ class CenterRecommendationItem(BaseModel):
     required_completion_time: Optional[str] = None
     is_time_feasible: bool
     feasibility_status: str
+    slot_availability_status: Optional[str] = None
     recommendation_score: float
     recommendation_reasons: List[str]
     is_recommended: bool

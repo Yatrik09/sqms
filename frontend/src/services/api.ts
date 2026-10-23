@@ -765,7 +765,8 @@ export const api = {
     vehicle_type: string = 'Sedan',
     required_completion_time?: string,
     customer_latitude?: number,
-    customer_longitude?: number
+    customer_longitude?: number,
+    service_date?: string
   ) {
     const res = await fetch(`${API_BASE_URL}/recommendations/service-centers`, {
       method: 'POST',
@@ -774,6 +775,8 @@ export const api = {
         service_type,
         vehicle_type,
         required_completion_time,
+        service_date,
+        client_current_time: new Date().toISOString(),
         customer_latitude,
         customer_longitude,
       }),

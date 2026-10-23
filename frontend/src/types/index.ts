@@ -135,6 +135,7 @@ export interface CenterRecommendationItem {
   required_completion_time?: string;
   is_time_feasible: boolean;
   feasibility_status: string;
+  slot_availability_status?: string;
   recommendation_score: number;
   recommendation_reasons: string[];
   is_recommended: boolean;
