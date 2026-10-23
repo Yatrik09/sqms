@@ -241,7 +241,7 @@ export const DEFAULT_OWNER_ANALYTICS: any = {
 export const DEFAULT_FRANCHISE_DATA: any = {
   franchise_id: 1,
   franchise_name: "Apex Auto Mobility Group",
-  owner_name: "Amitabh Patel",
+  owner_name: "Vikramaditya Singhania",
   owner_email: "owner@demo.local",
   total_centers: 2,
   active_plan: {
@@ -1046,6 +1046,37 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: 'Failed to add branch' }));
       throw new Error(err.detail || 'Failed to add branch');
     }
+    invalidateApiCache('my_franchise');
+    invalidateApiCache('owner_analytics_1');
+    return res.json();
+  },
+
+  async updateFranchiseBranch(branchId: number, data: any) {
+    const res = await fetch(`${API_BASE_URL}/subscription/branch/${branchId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to update branch' }));
+      throw new Error(err.detail || 'Failed to update branch');
+    }
+    invalidateApiCache('my_franchise');
+    invalidateApiCache('owner_analytics_1');
+    return res.json();
+  },
+
+  async deleteFranchiseBranch(branchId: number) {
+    const res = await fetch(`${API_BASE_URL}/subscription/branch/${branchId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to delete branch' }));
+      throw new Error(err.detail || 'Failed to delete branch');
+    }
+    invalidateApiCache('my_franchise');
+    invalidateApiCache('owner_analytics_1');
     return res.json();
   },
 

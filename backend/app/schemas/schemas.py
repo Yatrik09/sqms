@@ -167,6 +167,19 @@ class BranchCreateRequest(BaseModel):
     latitude: Optional[float] = 23.03
     longitude: Optional[float] = 72.55
 
+class BranchUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    city: Optional[str] = None
+    area: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    total_bays: Optional[int] = None
+    total_mechanics: Optional[int] = None
+    operating_hours_start: Optional[str] = None
+    operating_hours_end: Optional[str] = None
+    manager_id: Optional[int] = None
+
+
 class BranchManagerCreate(BaseModel):
     name: str
     email: str

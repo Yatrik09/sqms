@@ -8,7 +8,7 @@ import {
   Building2, TrendingUp, Users, Clock, ArrowRight, BarChart2, Shield,
   RefreshCw, CheckCircle2, Plus, UserPlus, AlertCircle, Copy,
   Check, MapPin, Phone, Sparkles, Activity, Wrench, ShieldCheck, ChevronRight,
-  Zap, ArrowRightLeft, DollarSign, Star, AlertTriangle, Layers, Filter, X
+  Zap, ArrowRightLeft, DollarSign, Star, AlertTriangle, Layers, Filter, X, Edit2, Trash2
 } from 'lucide-react';
 import { POPULAR_AREAS } from '../utils/geo';
 import { SelectDropdown } from '../components/SelectDropdown';
@@ -53,6 +53,7 @@ export const OwnerPortal: React.FC<{
   // Modal States
   const [showPlansModal, setShowPlansModal] = useState<boolean>(false);
   const [showAddBranchModal, setShowAddBranchModal] = useState<boolean>(false);
+  const [showEditBranchModal, setShowEditBranchModal] = useState<boolean>(false);
   const [showLimitAlertModal, setShowLimitAlertModal] = useState<boolean>(false);
   const [showCreateManagerModal, setShowCreateManagerModal] = useState<boolean>(false);
 
@@ -63,6 +64,7 @@ export const OwnerPortal: React.FC<{
   const isAnyModalOpen = Boolean(
     showPlansModal ||
     showAddBranchModal ||
+    showEditBranchModal ||
     showLimitAlertModal ||
     showCreateManagerModal ||
     showReallocateModal
@@ -159,6 +161,21 @@ export const OwnerPortal: React.FC<{
   const [submittingBranch, setSubmittingBranch] = useState(false);
   const [branchError, setBranchError] = useState<string | null>(null);
 
+  // Edit Branch Form State
+  const [editingBranch, setEditingBranch] = useState<any | null>(null);
+  const [editBranchName, setEditBranchName] = useState('');
+  const [editBranchCity, setEditBranchCity] = useState('');
+  const [editBranchArea, setEditBranchArea] = useState('');
+  const [editBranchAddress, setEditBranchAddress] = useState('');
+  const [editBranchPhone, setEditBranchPhone] = useState('');
+  const [editBranchBays, setEditBranchBays] = useState(6);
+  const [editBranchMechanics, setEditBranchMechanics] = useState(6);
+  const [editBranchHoursStart, setEditBranchHoursStart] = useState('08:00');
+  const [editBranchHoursEnd, setEditBranchHoursEnd] = useState('20:00');
+  const [editBranchManagerId, setEditBranchManagerId] = useState<string>('');
+  const [submittingEditBranch, setSubmittingEditBranch] = useState(false);
+  const [editBranchError, setEditBranchError] = useState<string | null>(null);
+
   // Create Manager Form State
   const [mgrName, setMgrName] = useState('');
   const [mgrEmail, setMgrEmail] = useState('');
@@ -239,6 +256,64 @@ export const OwnerPortal: React.FC<{
       setBranchError(err.message || 'Failed to add branch.');
     } finally {
       setSubmittingBranch(false);
+    }
+  };
+
+  const handleOpenEditBranch = (branch: any) => {
+    setEditingBranch(branch);
+    setEditBranchName(branch.name || '');
+    setEditBranchCity(branch.city || '');
+    setEditBranchArea(branch.area || '');
+    setEditBranchAddress(branch.address || '');
+    setEditBranchPhone(branch.phone || '');
+    setEditBranchBays(branch.total_bays || 6);
+    setEditBranchMechanics(branch.total_mechanics || 6);
+    setEditBranchHoursStart(branch.operating_hours_start || '08:00');
+    setEditBranchHoursEnd(branch.operating_hours_end || '20:00');
+    setEditBranchManagerId(branch.manager_id ? String(branch.manager_id) : '');
+    setEditBranchError(null);
+    setShowEditBranchModal(true);
+  };
+
+  const handleEditBranchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBranch) return;
+    setSubmittingEditBranch(true);
+    setEditBranchError(null);
+
+    try {
+      await api.updateFranchiseBranch(editingBranch.id, {
+        name: editBranchName.trim(),
+        city: editBranchCity.trim(),
+        area: editBranchArea.trim(),
+        address: editBranchAddress.trim(),
+        phone: editBranchPhone.trim(),
+        total_bays: Number(editBranchBays),
+        total_mechanics: Number(editBranchMechanics),
+        operating_hours_start: editBranchHoursStart.trim(),
+        operating_hours_end: editBranchHoursEnd.trim(),
+        manager_id: editBranchManagerId ? Number(editBranchManagerId) : -1,
+      });
+
+      setShowEditBranchModal(false);
+      setEditingBranch(null);
+      await loadOwnerData();
+    } catch (err: any) {
+      setEditBranchError(err.message || 'Failed to update branch.');
+    } finally {
+      setSubmittingEditBranch(false);
+    }
+  };
+
+  const handleDeleteBranch = async (branchId: number, branchName: string) => {
+    if (!confirm(`Are you sure you want to delete branch "${branchName}" (Branch #${branchId})?\n\nThis will remove its active bays, mechanics, and remove it from your franchise network.`)) {
+      return;
+    }
+    try {
+      await api.deleteFranchiseBranch(branchId);
+      await loadOwnerData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete branch.');
     }
   };
 
@@ -938,6 +1013,17 @@ export const OwnerPortal: React.FC<{
                             <span>Deploy Staff Here</span>
                           </button>
                           <button
+                            onClick={() => {
+                              const foundCenter = franchiseData?.centers.find((c) => c.id === bId) || { id: bId, name: bName, city: branch.city, address: branch.address, phone: branch.phone, total_bays: totalBays, total_mechanics: totalMechs };
+                              handleOpenEditBranch(foundCenter);
+                            }}
+                            className="px-3.5 py-2 rounded-full bg-[#f5f5f7] hover:bg-[#e6e6e8] border border-[#d6d6d6] text-[#1d1d1f] text-xs font-medium transition flex items-center space-x-1 cursor-pointer"
+                            title="Edit branch details"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-[#0071e3]" />
+                            <span>Edit</span>
+                          </button>
+                          <button
                             onClick={() => onInspectBranch && onInspectBranch(bId)}
                             className="px-3.5 py-2 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] text-xs font-medium transition flex items-center space-x-1 cursor-pointer"
                           >
@@ -1238,13 +1324,29 @@ export const OwnerPortal: React.FC<{
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
                   <button
                     onClick={() => onInspectBranch && onInspectBranch(c.id)}
-                    className="w-full py-2.5 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] font-medium text-xs transition flex items-center justify-center space-x-2 cursor-pointer shadow-none"
+                    className="flex-1 w-full py-2.5 px-3 rounded-full border border-[#86868b] hover:bg-[#f5f5f7] text-[#1d1d1f] font-medium text-xs transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-none"
+                    title="Inspect live operations & queue"
                   >
-                    <span>Inspect Branch Queue</span>
+                    <span>Inspect</span>
                     <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleOpenEditBranch(c)}
+                    className="flex-1 w-full py-2.5 px-3 rounded-full bg-[#f5f5f7] hover:bg-[#e6e6e8] text-[#1d1d1f] font-medium text-xs transition flex items-center justify-center space-x-1.5 border border-[#d6d6d6] cursor-pointer"
+                    title="Edit branch details, bays, or manager"
+                  >
+                    <Edit2 className="w-3.5 h-3.5 text-[#0071e3]" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBranch(c.id, c.name)}
+                    className="py-2.5 px-3 rounded-full bg-white hover:bg-red-50 text-[#b64400] font-medium text-xs transition flex items-center justify-center border border-[#d6d6d6] hover:border-red-300 cursor-pointer"
+                    title="Delete this branch from franchise"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -1852,6 +1954,189 @@ export const OwnerPortal: React.FC<{
                       <Zap className="w-3.5 h-3.5 fill-current" />
                       <span>Confirm Staff Deployment</span>
                     </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* MODAL: EDIT WORKSHOP BRANCH */}
+      {showEditBranchModal && editingBranch && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-sm overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+          <div className="bg-white border border-[#d6d6d6] rounded-[28px] w-full max-w-xl shadow-2xl text-[#1d1d1f] p-6 sm:p-8 space-y-6 relative z-[10000] max-h-[90vh] overflow-y-auto overscroll-contain">
+            <div className="flex items-center justify-between border-b border-[#e6e6e8] pb-4">
+              <div>
+                <h3 className="text-xl font-semibold text-[#1d1d1f]">Edit Service Center Branch</h3>
+                <p className="text-xs text-[#707070] mt-0.5">
+                  Update location details, capacity limits, and manager assignment for Branch #{editingBranch.id}.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditBranchModal(false);
+                  setEditingBranch(null);
+                }}
+                className="p-1.5 rounded-full text-[#707070] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {editBranchError && (
+              <div className="p-3.5 rounded-2xl bg-[#f5f5f7] border border-[#b64400] text-[#b64400] text-xs flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{editBranchError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleEditBranchSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">
+                  Workshop Center Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editBranchName}
+                  onChange={(e) => setEditBranchName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">City *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editBranchCity}
+                    onChange={(e) => setEditBranchCity(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Area / Landmark *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editBranchArea}
+                    onChange={(e) => setEditBranchArea(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Full Street Address *</label>
+                <input
+                  type="text"
+                  required
+                  value={editBranchAddress}
+                  onChange={(e) => setEditBranchAddress(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Contact Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editBranchPhone}
+                    onChange={(e) => setEditBranchPhone(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Assigned Branch Manager</label>
+                  <select
+                    value={editBranchManagerId}
+                    onChange={(e) => setEditBranchManagerId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  >
+                    <option value="">-- No Manager Assigned --</option>
+                    {managers.map((m) => (
+                      <option key={m.id} value={String(m.id)}>
+                        {m.name} ({m.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Total Service Bays</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={editBranchBays}
+                    onChange={(e) => setEditBranchBays(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Total Duty Technicians</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={editBranchMechanics}
+                    onChange={(e) => setEditBranchMechanics(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Operating Hours Start</label>
+                  <input
+                    type="time"
+                    value={editBranchHoursStart}
+                    onChange={(e) => setEditBranchHoursStart(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Operating Hours End</label>
+                  <input
+                    type="time"
+                    value={editBranchHoursEnd}
+                    onChange={(e) => setEditBranchHoursEnd(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-[#d6d6d6] rounded-xl text-xs text-[#1d1d1f] focus:outline-none focus:border-[#0071e3]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-[#e6e6e8]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditBranchModal(false);
+                    setEditingBranch(null);
+                  }}
+                  className="px-4 py-2 rounded-full text-xs text-[#707070] hover:text-[#1d1d1f] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingEditBranch}
+                  className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] disabled:opacity-50 text-white font-medium text-xs shadow-none transition flex items-center space-x-2 cursor-pointer"
+                >
+                  {submittingEditBranch ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Saving Changes...</span>
+                    </>
+                  ) : (
+                    <span>Save Branch Changes</span>
                   )}
                 </button>
               </div>

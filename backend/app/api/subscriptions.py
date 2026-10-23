@@ -11,7 +11,7 @@ from app.models.entities import (
 )
 from app.schemas.schemas import (
     SubscriptionPlan, SubscriptionPlanCreate, SubscriptionPlanUpdate,
-    SubscriptionPurchaseRequest, BranchCreateRequest, BranchManagerCreate,
+    SubscriptionPurchaseRequest, BranchCreateRequest, BranchUpdateRequest, BranchManagerCreate,
     BranchManagerResponse, UserResponse
 )
 from app.core.security import get_password_hash
@@ -711,6 +711,149 @@ def add_branch(
             "total_bays": center.total_bays,
             "total_mechanics": center.total_mechanics
         }
+    }
+
+@router.put("/branch/{branch_id}")
+def update_franchise_branch(
+    branch_id: int,
+    req: BranchUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.role not in ["franchise_owner", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Franchise Owner or Admin role required.")
+
+    center = db.query(ServiceCenter).filter(ServiceCenter.id == branch_id).first()
+    if not center:
+        raise HTTPException(status_code=404, detail="Service center branch not found.")
+
+    if current_user.role == "franchise_owner":
+        franchise = db.query(Franchise).filter(Franchise.owner_id == current_user.id).first()
+        if not franchise or center.franchise_id != franchise.id:
+            raise HTTPException(status_code=403, detail="Unauthorized to modify branches outside your franchise.")
+
+    if req.name is not None and req.name.strip():
+        center.name = req.name.strip()
+    if req.city is not None and req.city.strip():
+        center.city = req.city.strip()
+    if req.area is not None and req.area.strip():
+        center.area = req.area.strip()
+    if req.address is not None and req.address.strip():
+        center.address = req.address.strip()
+    if req.phone is not None and req.phone.strip():
+        center.phone = req.phone.strip()
+    if req.total_bays is not None and req.total_bays > 0:
+        center.total_bays = req.total_bays
+        center.capacity = req.total_bays * 8
+    if req.total_mechanics is not None and req.total_mechanics > 0:
+        center.total_mechanics = req.total_mechanics
+    if req.operating_hours_start is not None and req.operating_hours_start.strip():
+        center.operating_hours_start = req.operating_hours_start.strip()
+    if req.operating_hours_end is not None and req.operating_hours_end.strip():
+        center.operating_hours_end = req.operating_hours_end.strip()
+
+    if req.manager_id is not None:
+        if req.manager_id == 0 or req.manager_id == -1:
+            if center.manager_id:
+                old_mgr = db.query(User).filter(User.id == center.manager_id).first()
+                if old_mgr and old_mgr.service_center_id == center.id:
+                    old_mgr.service_center_id = None
+                    db.add(old_mgr)
+            center.manager_id = None
+        else:
+            mgr = db.query(User).filter(User.id == req.manager_id, User.role == "branch_manager").first()
+            if mgr:
+                center.manager_id = mgr.id
+                mgr.service_center_id = center.id
+                db.add(mgr)
+
+    db.add(center)
+    audit = AuditLog(
+        user_id=current_user.id,
+        action="FRANCHISE_BRANCH_UPDATED",
+        entity="ServiceCenter",
+        entity_id=str(center.id),
+        details=f"Franchise Owner {current_user.email} updated branch '{center.name}'"
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(center)
+
+    return {
+        "success": True,
+        "message": f"Branch '{center.name}' updated successfully!",
+        "center": {
+            "id": center.id,
+            "name": center.name,
+            "city": center.city,
+            "area": center.area,
+            "address": center.address,
+            "phone": center.phone,
+            "total_bays": center.total_bays,
+            "total_mechanics": center.total_mechanics,
+            "operating_hours_start": center.operating_hours_start,
+            "operating_hours_end": center.operating_hours_end,
+            "manager_id": center.manager_id,
+            "manager_name": center.manager.name if center.manager else "Unassigned",
+            "manager_email": center.manager.email if center.manager else None
+        }
+    }
+
+@router.delete("/branch/{branch_id}")
+def delete_franchise_branch(
+    branch_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.role not in ["franchise_owner", "super_admin"]:
+        raise HTTPException(status_code=403, detail="Franchise Owner or Admin role required.")
+
+    center = db.query(ServiceCenter).filter(ServiceCenter.id == branch_id).first()
+    if not center:
+        raise HTTPException(status_code=404, detail="Service center branch not found.")
+
+    if current_user.role == "franchise_owner":
+        franchise = db.query(Franchise).filter(Franchise.owner_id == current_user.id).first()
+        if not franchise or center.franchise_id != franchise.id:
+            raise HTTPException(status_code=403, detail="Unauthorized to delete branches outside your franchise.")
+
+        branch_count = db.query(ServiceCenter).filter(ServiceCenter.franchise_id == franchise.id).count()
+        if branch_count <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot delete the primary/only branch of your franchise. Each franchise must maintain at least one active workshop."
+            )
+
+    branch_name = center.name
+
+    if center.manager_id:
+        mgr = db.query(User).filter(User.id == center.manager_id).first()
+        if mgr and mgr.service_center_id == center.id:
+            mgr.service_center_id = None
+            db.add(mgr)
+
+    for tech_user in db.query(User).filter(User.service_center_id == center.id).all():
+        tech_user.service_center_id = None
+        db.add(tech_user)
+
+    db.query(Mechanic).filter(Mechanic.service_center_id == center.id).delete()
+    db.query(ServiceBay).filter(ServiceBay.service_center_id == center.id).delete()
+    db.delete(center)
+
+    audit = AuditLog(
+        user_id=current_user.id,
+        action="FRANCHISE_BRANCH_DELETED",
+        entity="ServiceCenter",
+        entity_id=str(branch_id),
+        details=f"Franchise Owner {current_user.email} deleted branch '{branch_name}' (ID: {branch_id})"
+    )
+    db.add(audit)
+    db.commit()
+
+    return {
+        "success": True,
+        "message": f"Branch '{branch_name}' (ID: {branch_id}) successfully deleted.",
+        "deleted_branch_id": branch_id
     }
 
 @router.get("/my-plan")

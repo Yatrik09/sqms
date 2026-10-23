@@ -470,7 +470,7 @@ export const WorkshopFloorMobile: React.FC<WorkshopFloorMobileProps> = ({ onSwit
 
           {/* Center Switcher + Quick Search Bar */}
           <div className="mt-3 flex items-center space-x-2">
-            {!isTechnician && centers.length > 1 && (
+            {!isTechnician && user?.role !== 'branch_manager' && centers.length > 1 && (
               <div className="w-[140px] sm:w-[200px] shrink-0">
                 <SelectDropdown
                   value={String(centerId)}

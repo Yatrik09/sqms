@@ -108,15 +108,19 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
             api.getMyManagedCenter().catch(() => null),
             api.getServiceCenters().catch(() => [])
           ]);
-          const cList = (allC && allC.length > 0) ? allC : (managed ? [managed] : []);
-          setAvailableCenters(cList);
-          if (inspectedCenterId) {
-            setCenterId(inspectedCenterId);
-          } else if (managed && managed.has_center && managed.center_id) {
-            setCenterId((prev) => (prev ? prev : managed.center_id));
-          } else if (cList.length > 0) {
-            setCenterId((prev) => (prev ? prev : cList[0].id));
+          // Strictly lock manager to their single assigned workshop
+          let myCenter: any = null;
+          if (managed && managed.has_center && managed.center_id) {
+            myCenter = (allC && allC.length > 0) ? allC.find((c: any) => c.id === managed.center_id) : managed;
+          } else if (user?.service_center_id) {
+            myCenter = (allC && allC.length > 0) ? allC.find((c: any) => c.id === Number(user.service_center_id)) : null;
+          } else if (allC && allC.length > 0) {
+            myCenter = allC.find((c: any) => c.manager_id === user.id) || allC[0];
           }
+
+          const targetId = myCenter ? myCenter.id : (user.service_center_id ? Number(user.service_center_id) : 1);
+          setAvailableCenters(myCenter ? [myCenter] : []);
+          setCenterId(targetId);
           return;
         }
 
@@ -1547,7 +1551,7 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
             <span className="text-xs font-medium uppercase tracking-wider px-3 py-1 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#d6d6d6]">
               Branch Operations
             </span>
-            {availableCenters.length > 1 && (
+            {user?.role !== 'branch_manager' && availableCenters.length > 1 && (
               <div className="min-w-[220px]">
                 <SelectDropdown
                   value={centerId || ''}
@@ -1564,6 +1568,11 @@ export const ManagerPortal: React.FC<ManagerPortalProps> = ({ activeTab = 'manag
                   size="sm"
                 />
               </div>
+            )}
+            {user?.role === 'branch_manager' && (
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#f5f5f7] text-[#0071e3] border border-[#d6d6d6]">
+                Assigned Hub: Branch #{centerInfo?.id || centerId} ({centerInfo?.name || 'Primary Center'})
+              </span>
             )}
           </div>
 
