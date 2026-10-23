@@ -474,9 +474,12 @@ def get_my_franchise(
                 "manager_email": mgr.email if mgr else None,
             })
 
+    owner = franchise.owner if (franchise and franchise.owner) else current_user
     return {
         "franchise_id": franchise.id if franchise else None,
         "franchise_name": franchise.name if franchise else "My Franchise",
+        "owner_name": owner.name if owner else current_user.name,
+        "owner_email": owner.email if owner else current_user.email,
         "centers": centers
     }
 
