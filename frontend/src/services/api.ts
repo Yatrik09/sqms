@@ -733,6 +733,33 @@ export const api = {
     return res.json();
   },
 
+  async clearMyBookings(customerEmail?: string) {
+    const qs = customerEmail ? `?customer_email=${encodeURIComponent(customerEmail)}` : '';
+    const res = await fetch(`${API_BASE_URL}/bookings/clear-my${qs}`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to clear bookings' }));
+      throw new Error(err.detail || 'Failed to clear bookings');
+    }
+    invalidateApiCache();
+    return res.json();
+  },
+
+  async cancelBooking(serviceRequestId: number) {
+    const res = await fetch(`${API_BASE_URL}/bookings/${serviceRequestId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to cancel booking' }));
+      throw new Error(err.detail || 'Failed to cancel booking');
+    }
+    invalidateApiCache();
+    return res.json();
+  },
+
   async getCenterQueue(centerId: number) {
     const res = await fetch(`${API_BASE_URL}/queue/center/${centerId}`);
     return res.json();

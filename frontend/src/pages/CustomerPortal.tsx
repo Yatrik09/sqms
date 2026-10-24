@@ -307,6 +307,34 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
     }
   };
 
+  const [cancellingBooking, setCancellingBooking] = useState<boolean>(false);
+
+  const handleCancelBooking = async (serviceRequestId: number) => {
+    if (!confirm('Are you sure you want to cancel and remove this service booking?')) return;
+    setCancellingBooking(true);
+    try {
+      await api.cancelBooking(serviceRequestId);
+      await loadData();
+    } catch (e: any) {
+      alert(e.message || 'Failed to cancel booking');
+    } finally {
+      setCancellingBooking(false);
+    }
+  };
+
+  const handleClearAllBookings = async () => {
+    if (!confirm('Are you sure you want to remove ALL your booked services and history? This cannot be undone.')) return;
+    setCancellingBooking(true);
+    try {
+      await api.clearMyBookings();
+      await loadData();
+    } catch (e: any) {
+      alert(e.message || 'Failed to clear booked services');
+    } finally {
+      setCancellingBooking(false);
+    }
+  };
+
   const getStepStatus = (stepName: string, currentStatus: string) => {
     const stepIdx = STATUS_STEPS.indexOf(stepName);
     const currIdx = STATUS_STEPS.indexOf(currentStatus);
@@ -578,6 +606,19 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                       <p className="text-[14px] font-semibold text-[#1d1d1f]">{activeService.assigned_mechanic}</p>
                     </div>
                   </div>
+                </div>
+
+                {/* Cancel Booking Action */}
+                <div className="pt-4 border-t border-[#d6d6d6] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <span className="text-[12px] text-[#707070]">Need to cancel or reschedule this active service?</span>
+                  <button
+                    onClick={() => handleCancelBooking(activeService.service_request_id)}
+                    disabled={cancellingBooking}
+                    className="px-4 py-2 rounded-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium text-[12px] transition cursor-pointer flex items-center space-x-1.5 shadow-none"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{cancellingBooking ? 'Cancelling...' : 'Cancel Service Booking'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -1171,13 +1212,25 @@ export const CustomerPortal: React.FC<CustomerPortalProps> = ({
                 <h3 className="text-[18px] font-semibold text-[#1d1d1f] tracking-tight">Service Records & Past Bookings</h3>
                 <p className="text-[13px] text-[#707070] mt-0.5">Comprehensive audit logs of all your service appointments and completions.</p>
               </div>
-              <button
-                onClick={() => handleTabSwitch('book-service')}
-                className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] transition flex items-center space-x-1.5 cursor-pointer shadow-none self-start sm:self-center"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Book New Service</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center">
+                {history.length > 0 && (
+                  <button
+                    onClick={handleClearAllBookings}
+                    disabled={cancellingBooking}
+                    className="px-4 py-2.5 rounded-full border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-medium text-[13px] transition flex items-center space-x-1.5 cursor-pointer shadow-none"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{cancellingBooking ? 'Clearing...' : 'Clear All Records'}</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => handleTabSwitch('book-service')}
+                  className="px-5 py-2.5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-normal text-[13px] transition flex items-center space-x-1.5 cursor-pointer shadow-none"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Book New Service</span>
+                </button>
+              </div>
             </div>
 
             {history.length === 0 ? (

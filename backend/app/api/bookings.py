@@ -10,7 +10,7 @@ from app.models.entities import (
 )
 from app.schemas.schemas import BookingCreate
 from app.api.deps import get_current_user, get_current_manager
-from app.services.queue_service import generate_next_token, recalculate_center_workload
+from app.services.queue_service import generate_next_token, recalculate_center_workload, recalculate_queue_predictions
 from ml.prediction.predictor import predictor
 from app.api.websockets import ws_manager
 
@@ -252,3 +252,141 @@ def list_all_bookings(
             "created_at": r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "N/A"
         })
     return items
+
+@router.delete("/my")
+@router.post("/clear-my")
+async def clear_my_bookings(
+    customer_email: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    target_user = current_user
+    if customer_email:
+        clean_email = customer_email.strip().lower()
+        if current_user.role in ["super_admin", "branch_manager", "franchise_owner"] or current_user.email == clean_email:
+            target_user = db.query(User).filter(User.email == clean_email).first()
+            if not target_user:
+                raise HTTPException(status_code=404, detail=f"No account found with email {clean_email}")
+        else:
+            raise HTTPException(status_code=403, detail="Not authorized to clear other customer's bookings")
+
+    customer = db.query(Customer).filter(Customer.user_id == target_user.id).first()
+    if not customer:
+        return {"success": True, "message": "No customer profile found, 0 bookings cleared", "deleted_count": 0}
+
+    reqs = db.query(ServiceRequest).filter(ServiceRequest.customer_id == customer.id).all()
+    if not reqs:
+        return {"success": True, "message": "No booked services found for this customer", "deleted_count": 0}
+
+    req_ids = [r.id for r in reqs]
+    center_ids = list(set([r.service_center_id for r in reqs if r.service_center_id]))
+
+    # 1. Free any occupied service bays & mechanics
+    bays = db.query(ServiceBay).filter(ServiceBay.current_service_id.in_(req_ids)).all()
+    for b in bays:
+        b.current_service_id = None
+        b.status = "Available"
+
+    mechs = db.query(Mechanic).filter(Mechanic.current_service_id.in_(req_ids)).all()
+    for m in mechs:
+        m.current_service_id = None
+        m.availability = "Available"
+
+    # 2. Delete Queue Entries
+    db.query(QueueEntry).filter(QueueEntry.service_request_id.in_(req_ids)).delete(synchronize_session=False)
+
+    # 3. Delete Bookings
+    db.query(Booking).filter(Booking.service_request_id.in_(req_ids)).delete(synchronize_session=False)
+
+    # 4. Delete ServiceStatusHistory
+    db.query(ServiceStatusHistory).filter(ServiceStatusHistory.service_request_id.in_(req_ids)).delete(synchronize_session=False)
+
+    # 5. Delete Predictions
+    db.query(Prediction).filter(Prediction.service_request_id.in_(req_ids)).delete(synchronize_session=False)
+
+    # 6. Delete ServiceRequests
+    deleted_count = db.query(ServiceRequest).filter(ServiceRequest.id.in_(req_ids)).delete(synchronize_session=False)
+    db.commit()
+
+    # 7. Recalculate workloads and predictions for affected centers
+    for cid in center_ids:
+        try:
+            recalculate_center_workload(db, cid)
+            await recalculate_queue_predictions(db, cid)
+        except Exception:
+            pass
+
+    # 8. Broadcast live websocket event
+    try:
+        await ws_manager.broadcast({
+            "event": "BOOKINGS_CLEARED",
+            "customer_id": customer.id,
+            "user_id": target_user.id
+        })
+    except Exception:
+        pass
+
+    return {
+        "success": True,
+        "message": f"Successfully removed all {deleted_count} booked service(s) for {target_user.email}",
+        "deleted_count": deleted_count
+    }
+
+@router.delete("/{service_request_id}")
+async def delete_single_booking(
+    service_request_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    customer = db.query(Customer).filter(Customer.user_id == current_user.id).first()
+    query = db.query(ServiceRequest).filter(ServiceRequest.id == service_request_id)
+    if current_user.role not in ["super_admin", "branch_manager", "franchise_owner"]:
+        if not customer:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        query = query.filter(ServiceRequest.customer_id == customer.id)
+
+    sreq = query.first()
+    if not sreq:
+        raise HTTPException(status_code=404, detail="Service booking not found")
+
+    cid = sreq.service_center_id
+
+    # Free bays & mechanics if associated
+    bays = db.query(ServiceBay).filter(ServiceBay.current_service_id == sreq.id).all()
+    for b in bays:
+        b.current_service_id = None
+        b.status = "Available"
+
+    mechs = db.query(Mechanic).filter(Mechanic.current_service_id == sreq.id).all()
+    for m in mechs:
+        m.current_service_id = None
+        m.availability = "Available"
+
+    # Delete related records
+    db.query(QueueEntry).filter(QueueEntry.service_request_id == sreq.id).delete(synchronize_session=False)
+    db.query(Booking).filter(Booking.service_request_id == sreq.id).delete(synchronize_session=False)
+    db.query(ServiceStatusHistory).filter(ServiceStatusHistory.service_request_id == sreq.id).delete(synchronize_session=False)
+    db.query(Prediction).filter(Prediction.service_request_id == sreq.id).delete(synchronize_session=False)
+    db.delete(sreq)
+    db.commit()
+
+    if cid:
+        try:
+            recalculate_center_workload(db, cid)
+            await recalculate_queue_predictions(db, cid)
+        except Exception:
+            pass
+
+    try:
+        await ws_manager.broadcast({
+            "event": "BOOKING_CANCELLED",
+            "service_request_id": service_request_id
+        })
+    except Exception:
+        pass
+
+    return {
+        "success": True,
+        "message": f"Successfully cancelled booking #{service_request_id}"
+    }
+
